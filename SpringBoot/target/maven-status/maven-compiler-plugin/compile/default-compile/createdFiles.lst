@@ -1,0 +1,3 @@
+com\blooddonation\backend\BloodDonationBackendApplication.class
+com\blooddonation\backend\controller\TestController.class
+com\blooddonation\backend\config\CorsConfig.class
