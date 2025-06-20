@@ -22,12 +22,12 @@ import ContactPage from './Pages/Contact/ContactPage';
 import EmergencyButton from './components/EmergencyButton';
 
 // Thêm lại các import cho các trang mới
-import RegisterPage from './pages/RegisterPage';
-import LoginPage from './pages/Loginpage';
-import EmergencyRequest from './pages/EmergencyRequest';
-import FindDonors from './pages/FindDonors';
-import UserInfoForm from './pages/UserInfoForm';
-import ProfilePage from './pages/Profile';
+import RegisterPage from './Pages/RegisterPage';
+import LoginPage from './Pages/Loginpage';
+import EmergencyRequest from './Pages/EmergencyRequest';
+
+import UserInfoForm from './Pages/UserInfoForm';
+import ProfilePage from './Pages/Profile';
 import BloodDonationEligibility from './pages/BloodDonationEligibility';
 
 function App() {
@@ -69,7 +69,7 @@ function App() {
         <Route path="/registerpage" element={<RegisterPage />} />
         <Route path="/loginpage" element={<LoginPage />} />
         <Route path="/emergency" element={<EmergencyRequest />} />
-        <Route path="/find-donors" element={<FindDonors />} />
+
         <Route path="/user-info-form" element={<UserInfoForm />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/blood-donation-eligibility" element={<BloodDonationEligibility />} />

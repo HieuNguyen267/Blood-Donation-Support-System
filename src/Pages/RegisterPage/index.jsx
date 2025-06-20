@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Form, Input, Button, DatePicker, Select, Typography, message, Modal } from "antd";
+import { Form, Input, Button, DatePicker, Select, Typography, message, Modal, Row, Col } from "antd";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import "./index.css";
@@ -51,17 +51,21 @@ export default function RegisterPage() {
           </Title>
      
           <Form form={form} layout="vertical" onFinish={onFinish}>
-            <div className="name-row">
-              <Form.Item name="lastName" className="half-input" rules={[{ required: true, message: "Vui lòng nhập Họ" }]}>
-                <Input placeholder="Họ" />
-              </Form.Item>
-              <Form.Item name="firstName" className="half-input" rules={[{ required: true, message: "Vui lòng nhập Tên" }]}>
-                <Input placeholder="Tên" />
-              </Form.Item>
-            </div>
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item name="lastName" label="Họ" rules={[{ required: true, message: "Vui lòng nhập Họ" }]}>
+                  <Input placeholder="Họ" />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item name="firstName" label="Tên" rules={[{ required: true, message: "Vui lòng nhập Tên" }]}>
+                  <Input placeholder="Tên" />
+                </Form.Item>
+              </Col>
+            </Row>
 
             <Form.Item name="dob" label="Ngày sinh" rules={[{ required: true, message: "Vui lòng chọn ngày sinh" }]}>
-              <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
+              <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" placeholder="Ngày sinh" />
             </Form.Item>
 
             <Form.Item name="gender" label="Giới tính" rules={[{ required: true, message: "Vui lòng chọn giới tính" }]}>
@@ -74,6 +78,7 @@ export default function RegisterPage() {
 
             <Form.Item
               name="email"
+              label="Số di động hoặc email"
               rules={[
                 { required: true, message: "Vui lòng nhập email hoặc số điện thoại" },
                 {
@@ -87,6 +92,7 @@ export default function RegisterPage() {
 
             <Form.Item
               name="password"
+              label="Mật khẩu mới"
               rules={[
                 { required: true, message: "Vui lòng nhập mật khẩu" },
                 { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự" },

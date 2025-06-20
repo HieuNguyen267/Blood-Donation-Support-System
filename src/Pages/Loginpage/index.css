@@ -1,46 +1,50 @@
-.login-layout {
-  background-color: #ffffff;
-  min-height: 100vh;
-}
-
-.login-content {
+.login-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 48px 16px;
+  padding: 40px 20px;
+  background-color: #f0f2f5;
+  min-height: calc(100vh - 120px); /* Adjust if header/footer height is different */
 }
 
-.login-form {
+.login-form-box {
+  background-color: white;
+  padding: 24px 32px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 400px;
-  background-color: white;
-  padding: 24px;
+}
+
+.login-form-content {
+  width: 100%;
 }
 
 .login-title {
-  color: #229E42 !important;
   text-align: center;
+  margin-bottom: 24px !important;
+  color: #1c1e21 !important; /* Match register page title color */
   font-weight: bold;
-  margin-bottom: 24px;
-}
-
-.login-extra {
-  text-align: right;
-  margin-bottom: 12px;
 }
 
 .login-button {
   width: 100%;
-  background-color: #229E42;
-  border-color: #229E42;
+  background-color: #42b72a;
+  border-color: #42b72a;
+  margin-top: 12px;
 }
 
 .login-button:hover {
-  background-color: #1c8538 !important;
-  border-color: #1c8538 !important;
+  background-color: #36a420 !important;
+  border-color: #36a420 !important;
 }
 
-.login-register {
+.forgot-password {
+  text-align: right;
+  margin-bottom: 12px;
+}
+
+.register-link {
   text-align: center;
   margin-top: 12px;
 }

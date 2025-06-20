@@ -103,26 +103,14 @@ const questions = [
 
 export default function BloodDonationEligibility() {
   const [form] = Form.useForm();
-  const [result, setResult] = useState("");
   const navigate = useNavigate();
 
   const onFinish = (values) => {
-    // Nếu chọn bất kỳ đáp án nào không an toàn (safe: false) thì không đủ điều kiện
-    let notEligible = false;
-    for (let i = 0; i < questions.length; i++) {
-      const q = questions[i];
-      const checked = values[q.name] || [];
-      const unsafe = q.options.filter(opt => !opt.safe).map(opt => opt.value);
-      if (checked.some(val => unsafe.includes(val))) {
-        notEligible = true;
-        break;
-      }
-    }
-    if (notEligible) {
-      setResult("Bạn không đủ điều kiện hiến máu.");
-    } else {
-      setResult("Chúc mừng! Bạn đủ điều kiện hiến máu.");
-    }
+    // 1. Lưu các câu trả lời vào localStorage
+    localStorage.setItem('healthCheckAnswers', JSON.stringify(values));
+
+    // 2. Chuyển hướng về trang thông tin đăng ký
+    navigate('/registerdonate');
   };
 
   return (
@@ -174,7 +162,6 @@ export default function BloodDonationEligibility() {
               </div>
             </Form.Item>
           </Form>
-          {result && <div className="result-message">{result}</div>}
         </Card>
       </div>
       <Footer />

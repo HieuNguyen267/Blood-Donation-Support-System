@@ -3,21 +3,72 @@ import { Link } from "react-router-dom";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import StepProgress from "../../components/StepProgress";
+import moment from "moment";
 import "./RegisterDonatePage.css";
+
+// Lấy cấu trúc câu hỏi từ trang kiểm tra sức khỏe
+const healthQuestions = [
+  { label: "Bạn có đang bị cảm, sốt hoặc ho không?", name: "camSotHo", options: [ { label: "Không có triệu chứng", value: "none" }, { label: "Sốt nhẹ", value: "sotnhe" }, { label: "Ho khan", value: "hokhan" }, { label: "Sốt cao, ho nhiều", value: "sotcao" }, ], },
+  { label: "Bạn có đang bị đau họng hoặc viêm họng không?", name: "dauHong", options: [ { label: "Không có", value: "none" }, { label: "Đau nhẹ", value: "daunhe" }, { label: "Viêm họng nặng", value: "viemhong" }, ], },
+  { label: "Bạn có đang bị tiêu chảy hoặc rối loạn tiêu hóa không?", name: "tieuChay", options: [ { label: "Không có", value: "none" }, { label: "Tiêu chảy nhẹ", value: "tieuchay" }, { label: "Rối loạn tiêu hóa kéo dài", value: "roiloan" }, ], },
+  { label: "Bạn có đang bị đau đầu, chóng mặt hoặc mệt mỏi bất thường không?", name: "dauDau", options: [ { label: "Không có", value: "none" }, { label: "Đau đầu nhẹ", value: "daudau" }, { label: "Chóng mặt, mệt mỏi nhiều", value: "chongmat" }, ], },
+  { label: "Bạn có đang bị dị ứng nghiêm trọng hoặc phát ban không?", name: "diUng", options: [ { label: "Không có", value: "none" }, { label: "Dị ứng nhẹ", value: "nhe" }, { label: "Dị ứng nặng/phát ban", value: "nang" }, ], },
+  { label: "Bạn có đang bị nhiễm trùng hoặc vết thương hở không?", name: "nhiemTrung", options: [ { label: "Không có", value: "none" }, { label: "Vết thương nhỏ đã lành", value: "lanh" }, { label: "Nhiễm trùng/vết thương hở", value: "nhiemtrung" }, ], },
+  { label: "Bạn có đang sử dụng thuốc kháng sinh hoặc thuốc điều trị bệnh không?", name: "thuoc", options: [ { label: "Không sử dụng thuốc", value: "none" }, { label: "Thuốc cảm cúm thông thường", value: "camcum" }, { label: "Kháng sinh/điều trị bệnh mãn tính", value: "khangsinh" }, ], },
+  { label: "Bạn có tiền sử mắc các bệnh truyền nhiễm như viêm gan B, C, HIV không?", name: "truyenNhiem", options: [ { label: "Không có", value: "none" }, { label: "Đã điều trị ổn định", value: "onDinh" }, { label: "Đang điều trị", value: "dangDieuTri" }, ], },
+  { label: "Bạn có đang bị cao huyết áp hoặc bệnh tim mạch không?", name: "huyetAp", options: [ { label: "Không có", value: "none" }, { label: "Huyết áp cao đã kiểm soát", value: "kiemsoat" }, { label: "Huyết áp cao chưa kiểm soát/bệnh tim", value: "caochua" }, ], },
+  { label: "Bạn có đang bị bệnh tiểu đường hoặc các bệnh mãn tính khác không?", name: "tieuDuong", options: [ { label: "Không có", value: "none" }, { label: "Tiểu đường kiểm soát tốt", value: "kiemsoat" }, { label: "Tiểu đường không kiểm soát/bệnh mãn tính khác", value: "khongkiemsoat" }, ], },
+];
 
 export default function RegisterDonatePage() {
   const [info, setInfo] = useState(null);
+  const [userInfo, setUserInfo] = useState({});
+  const [healthAnswers, setHealthAnswers] = useState(null);
+  const [latestAppointment, setLatestAppointment] = useState(null);
 
   useEffect(() => {
+    // Load thông tin phiếu đăng ký (đã bị xóa, có thể phục hồi nếu cần)
     const formData = localStorage.getItem("donationFormData");
     if (formData) {
-      const parsedData = JSON.parse(formData);
-      setInfo(parsedData);
-
-      // ✅ Xoá sau khi load để không hiển thị nữa khi vào lại
+      setInfo(JSON.parse(formData));
       localStorage.removeItem("donationFormData");
     }
+
+    // Load thông tin người dùng
+    const storedUserInfo = localStorage.getItem("userInfo");
+    if (storedUserInfo) {
+      setUserInfo(JSON.parse(storedUserInfo));
+    }
+    
+    // Load câu trả lời sức khỏe
+    const storedHealthAnswers = localStorage.getItem("healthCheckAnswers");
+    if (storedHealthAnswers) {
+      setHealthAnswers(JSON.parse(storedHealthAnswers));
+    }
+
+    // Load lịch hẹn gần nhất
+    const history = localStorage.getItem("appointmentHistory");
+    if (history) {
+      const arr = JSON.parse(history);
+      if (arr && arr.length > 0) {
+        setLatestAppointment(arr[0]);
+      }
+    }
   }, []);
+
+  const renderItem = (value) => value || '-';
+  const renderDate = (date) => date ? moment(date).format('DD/MM/YYYY') : '-';
+  
+  const handleDelete = () => {
+    // Xóa dữ liệu khảo sát sức khỏe
+    localStorage.removeItem("healthCheckAnswers");
+    // Xóa lịch hẹn gần nhất
+    localStorage.removeItem("appointmentHistory");
+    // Xóa phiếu đăng ký tạm (nếu có)
+    localStorage.removeItem("donationFormData");
+    setHealthAnswers(null);
+    setLatestAppointment(null);
+  }
 
   return (
     <div className="donate-bg">
@@ -27,7 +78,7 @@ export default function RegisterDonatePage() {
         <div className="donate-title-main">Thông tin đăng ký hiến máu</div>
 
         <div className="step-progress-wrapper" style={{ marginBottom: "40px" }}>
-          <StepProgress currentStep={0} />
+          <StepProgress currentStep={healthAnswers ? 1 : 0} />
         </div>
 
         <div className="donate-mainbox">
@@ -35,22 +86,19 @@ export default function RegisterDonatePage() {
           <div className="donate-formbox">
             <div className="donate-infocard">
               <div className="donate-infotitle green">Thông tin cá nhân</div>
-              {["Họ và tên", "Số CMND", "Số hộ chiếu", "Ngày sinh", "Giới tính", "Nghề nghiệp", "Đơn vị", "Nhóm máu"].map((label, index) => (
-                <div className="donate-inforow" key={index}>
-                  <label>{label}:</label>
-                  <div className="donate-placeholder" />
-                </div>
-              ))}
+              <div className="donate-inforow"><label>Họ và tên:</label> <span>{renderItem(userInfo.fullName)}</span></div>
+              <div className="donate-inforow"><label>Số CCCD:</label> <span>{renderItem(userInfo.cccd)}</span></div>
+              <div className="donate-inforow"><label>Ngày sinh:</label> <span>{renderDate(userInfo.dob)}</span></div>
+              <div className="donate-inforow"><label>Giới tính:</label> <span>{renderItem(userInfo.gender)}</span></div>
+              <div className="donate-inforow"><label>Nghề nghiệp:</label> <span>{renderItem(userInfo.occupation)}</span></div>
+              <div className="donate-inforow"><label>Nhóm máu:</label> <span>{renderItem(userInfo.bloodType)}</span></div>
             </div>
 
             <div className="donate-infocard">
               <div className="donate-infotitle green">Thông tin liên hệ</div>
-              {["Địa chỉ liên hệ", "Điện thoại di động", "Điện thoại bàn", "Email"].map((label, index) => (
-                <div className="donate-inforow" key={index}>
-                  <label>{label}:</label>
-                  <div className="donate-placeholder" />
-                </div>
-              ))}
+              <div className="donate-inforow"><label>Địa chỉ liên hệ:</label> <span>{renderItem(userInfo.address)}</span></div>
+              <div className="donate-inforow"><label>Điện thoại di động:</label> <span>{renderItem(userInfo.phone)}</span></div>
+              <div className="donate-inforow"><label>Email:</label> <span>{renderItem(userInfo.email)}</span></div>
             </div>
           </div>
 
@@ -58,39 +106,55 @@ export default function RegisterDonatePage() {
           <div className="donate-phieubox">
             <div className="donate-phieutitle">Phiếu đăng ký hiến máu</div>
             <div className="donate-phieucontent">
-              {info ? (
-                <div className="donate-phieuinfo">
-                  <p><strong>Họ tên:</strong> {info.fullName}</p>
-                  <p><strong>SĐT:</strong> {info.phone}</p>
-                  <p><strong>Email:</strong> {info.email}</p>
-                  <p><strong>Nhóm máu:</strong> {info.sampleGroup}</p>
-                  <p><strong>Lượng máu muốn hiến:</strong> {info.sampleQuantity} ml</p>
-                  <p><strong>Lần hiến máu gần nhất:</strong> {info.donateLast}</p>
-                  <p><strong>Thời điểm sẵn sàng:</strong> {info.sendTime}</p>
-                  <p><strong>Tình trạng sức khỏe:</strong> {info.status}</p>
+              {/* Thông tin địa điểm, ngày, giờ */}
+              {latestAppointment && (
+                <div className="donate-appointment-info" style={{marginBottom: 16}}>
+                  <div><b>Địa điểm hiến máu:</b> {latestAppointment.address || '-'}</div>
+                  <div><b>Ngày hiến máu:</b> {latestAppointment.sendDate || '-'}</div>
+                  <div><b>Khung giờ:</b> {latestAppointment.donationTimeSlot || '-'}</div>
+                </div>
+              )}
+              {healthAnswers ? (
+                <div className="health-answers-list">
+                  {healthQuestions.map((q, index) => {
+                    const answerValues = healthAnswers[q.name];
+                    const answerLabel = answerValues && answerValues.length > 0
+                      ? answerValues.map(val => q.options.find(opt => opt.value === val)?.label || val).join(', ')
+                      : "Chưa trả lời";
+
+                    return (
+                      <div className="health-answer-item" key={q.name}>
+                        <div className="health-question-text">{index + 1}. {q.label}</div>
+                        <div className="health-answer-text">▸ {answerLabel}</div>
+                      </div>
+                    );
+                  })}
+                  <button onClick={handleDelete} className="donate-btn delete-btn">Xóa đơn đăng ký</button>
                 </div>
               ) : (
-                <>
+                <div className="no-content-placeholder">
                   <img
                     src="https://cdn-icons-png.flaticon.com/512/685/685352.png"
                     alt="Empty"
                     style={{ width: "80px", marginTop: "10px" }}
                   />
                   <div style={{ marginTop: "10px", fontWeight: "bold" }}>
-                    Chưa có phiếu đăng ký hiến máu
+                    Chưa có thông tin khảo sát sức khỏe
                   </div>
-                </>
+                </div>
               )}
             </div>
           </div>
         </div>
 
         {/* Nút đăng ký */}
-        <div className="donate-btn-wrap">
-          <Link to="/registerdonateform">
-            <button className="donate-btn">Đăng ký hiến máu</button>
-          </Link>
-        </div>
+        {!healthAnswers && (
+          <div className="donate-btn-wrap">
+            <Link to="/registerdonateform">
+              <button className="donate-btn">Đăng ký hiến máu</button>
+            </Link>
+          </div>
+        )}
       </div>
 
       <Footer />

@@ -4,35 +4,39 @@ import {
   Input,
   Button,
   Typography,
-  Layout,
 } from "antd";
 import {
   EyeInvisibleOutlined,
   EyeTwoTone,
 } from "@ant-design/icons";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import "./index.css";
 
-const { Content } = Layout;
-const { Title, Text, Link } = Typography;
+const { Title } = Typography;
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+
   const onFinish = (values) => {
     console.log("Login info:", values);
+    localStorage.setItem('userEmailForProfile', values.emailOrPhone);
+    localStorage.setItem('isLoggedIn', 'true');
+    navigate('/user-info-form');
   };
 
   return (
-    <Layout className="login-layout">
+    <>
       <Header />
-      <Content className="login-content">
-        <div className="login-form-wrapper">
-         <Title level={4} className="login-title">Đăng Nhập</Title>
+      <div className="login-container">
+        <div className="login-form-box">
+          <Title level={3} className="login-title">Đăng Nhập</Title>
           <Form
             name="login-form"
             layout="vertical"
             onFinish={onFinish}
-            className="login-form"
+            className="login-form-content"
           >
             <Form.Item
               label="Nhập địa chỉ Email hoặc số điện thoại"
@@ -54,7 +58,7 @@ export default function LoginPage() {
             </Form.Item>
 
             <div className="forgot-password">
-              <Link href="#">Bạn quên mật khẩu?</Link>
+              <RouterLink to="/forgot-password">Bạn quên mật khẩu?</RouterLink>
             </div>
 
             <Form.Item>
@@ -64,12 +68,12 @@ export default function LoginPage() {
             </Form.Item>
 
             <div className="register-link">
-              Chưa có tài khoản? <Link href="/registerpage">Đăng ký</Link>
+              Chưa có tài khoản? <RouterLink to="/registerpage">Đăng ký</RouterLink>
             </div>
           </Form>
         </div>
-      </Content>
+      </div>
       <Footer />
-    </Layout>
+    </>
   );
 }

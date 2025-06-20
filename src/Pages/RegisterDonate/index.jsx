@@ -64,8 +64,8 @@ export default function RegisterDonate() {
     // Lưu lại vào localStorage
     localStorage.setItem("appointmentHistory", JSON.stringify(updatedHistory));
 
-    // Chuyển hướng đến trang lịch sử
-    navigate("/appointmenthistory");
+    // Chuyển hướng đến trang kiểm tra điều kiện sức khỏe
+    navigate("/blood-donation-eligibility");
   };
 
   return (

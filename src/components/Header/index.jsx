@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "./index.css";
 import {
   Dropdown,
@@ -23,12 +23,6 @@ export default function Header() {
     navigate('/'); 
   };
 
-  const handleLogin = () => {
-    localStorage.setItem('isLoggedIn', 'true');
-    setIsLoggedIn(true);
-    navigate('/');
-  };
-
   useEffect(() => {
     const checkLoginStatus = () => {
       setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true');
@@ -47,7 +41,7 @@ export default function Header() {
   const menu = (
     <Menu>
       <Menu.Item key="1" icon={<User2 size={16} />}>
-        <a href="/profile">Thông tin cá nhân</a>
+        <Link to="/profile">Thông tin cá nhân</Link>
       </Menu.Item>
 
       <Menu.Item key="3" icon={<Settings size={16} />}>
@@ -75,10 +69,10 @@ export default function Header() {
               </div>
             </Dropdown>
           ) : (
-            <div className="login-link" onClick={handleLogin} style={{cursor: 'pointer'}}>
+            <Link to="/loginpage" className="login-link">
               <UserCircle size={20} />
               <span>Đăng nhập</span>
-            </div>
+            </Link>
           )}
         </div>
       </div>

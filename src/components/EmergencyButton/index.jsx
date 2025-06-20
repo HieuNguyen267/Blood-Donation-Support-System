@@ -6,7 +6,7 @@ import './index.css';
 export default function EmergencyButton() {
   return (
     <div className="emergency-call-container">
-      <Link to="/receiveblood" className="emergency-call-button">
+      <Link to="/emergency" className="emergency-call-button">
         NHẬN MÁU KHẨN CẤP
         <span className="emergency-icon-wrapper">
           <PhoneOutlined />
