@@ -1,0 +1,38 @@
+/* Floating button */
+.emergency-call-container {
+  position: fixed;
+  right: 40px;
+  bottom: 120px;
+  z-index: 1000;
+}
+
+.emergency-call-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  text-decoration: none;
+}
+.emergency-call-button:hover {
+    color: white;
+}
+
+.emergency-icon-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    color: #dc3545;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 16px;
+} 

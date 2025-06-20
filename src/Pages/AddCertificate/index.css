@@ -1,0 +1,83 @@
+.add-cert-container {
+  max-width: 100%;
+  width: 40%;
+  margin: 40px auto;
+  padding: 32px;
+  background: #ffffff;
+  /* border ngoài giữ nguyên */
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.add-cert-form .ant-form-item {
+  margin-bottom: 20px;
+}
+
+/* Chỉ style cho khung ảnh giấy chứng nhận */
+.add-cert-form .ant-form-item-image .ant-upload {
+  width: 100%;
+  border: 2px solid #d9d9d9;
+  background-color: #f5f5f5;
+  padding: 40px 20px;
+  border-radius: 8px;
+  text-align: center;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-cert-form .ant-form-item-image .ant-upload:hover {
+  background-color: #e6f7ff;
+  border-color: #40a9ff;
+}
+
+.add-cert-form .ant-upload .upload-icon {
+  font-size: 48px;
+  color: #1890ff;
+  margin-bottom: 12px;
+}
+
+.add-cert-form .ant-upload-text {
+  font-size: 16px;
+  color: #1890ff;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.add-cert-form .ant-upload-hint {
+  font-size: 14px;
+  color: #888;
+}
+
+.add-cert-form .ant-upload-list {
+  margin-top: 12px;
+}
+
+.add-cert-form .ant-btn {
+  min-width: 140px;
+}
+
+.add-cert-form button + button {
+  margin-left: 12px;
+}
+
+/* Căn giữa và tô xanh lá cho tiêu đề khi nằm bên ngoài form */
+.form-title {
+  text-align: center;
+  margin-top: 32px;
+  font-weight: 600;
+}
+
+/* Nút lưu màu xanh lá */
+.add-cert-form .ant-btn-primary {
+  background-color: #52c41a !important;
+  border-color: #52c41a !important;
+}
+
+.add-cert-form .ant-btn-primary:hover,
+.add-cert-form .ant-btn-primary:focus {
+  background-color: #389e0d !important;
+  border-color: #389e0d !important;
+}
