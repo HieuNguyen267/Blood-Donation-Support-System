@@ -40,3 +40,79 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Custom Stat Card Styles for Medical Dashboard */
+.stat-card {
+  height: 100%; /* Make cards equal height */
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+.stat-card .stat-icon {
+  font-size: 40px; /* Reduced from 48px */
+  opacity: 0.8;
+}
+
+.stat-card .stat-info h6 {
+  font-weight: 500;
+  margin-bottom: 4px;
+  font-size: 0.875rem; /* 14px */
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-card .stat-info h4 {
+  font-weight: 700;
+  font-size: 2rem; /* 32px */
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.stat-card .stat-info h4 small {
+  font-size: 1.25rem; /* 20px for units */
+  font-weight: 500;
+}
+
+.stat-card.bg-primary-soft { background-color: #4A90E2; } /* Blue */
+.stat-card.bg-success-soft { background-color: #27AE60; } /* Green */
+.stat-card.bg-warning-soft { background-color: #F5A623; } /* Orange */
+.stat-card.bg-info-soft { background-color: #4BCAD8; } /* Teal */
+
+/* Action Button Styles */
+.btn-modern {
+  border-radius: 8px;
+  font-weight: 600;
+  padding: 10px 20px;
+  border: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.btn-modern:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.btn-modern.btn-warning {
+  background-color: #F5A623;
+  color: #fff;
+}
+.btn-modern.btn-success {
+  background-color: #27AE60;
+  color: #fff;
+}
+.btn-modern.btn-secondary {
+  background-color: #6c757d;
+  color: #fff;
+}

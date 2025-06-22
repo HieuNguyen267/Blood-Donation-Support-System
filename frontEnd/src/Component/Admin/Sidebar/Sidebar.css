@@ -1,0 +1,315 @@
+/* General Sidebar Styling */
+.sidebar {
+  width: 280px;
+  height: calc(100vh - 56px); /* Adjusted to account for header height */
+  position: fixed;
+  top: 56px; /* Start below the header */
+  left: 0;
+  background-color: #eaf7ed;
+  padding: 20px 10px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  z-index: 99; /* Lower z-index so header appears on top */
+}
+
+/* Sidebar Header */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 20px;
+}
+
+.sidebar-header .avatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  margin-right: 15px;
+  object-fit: cover;
+  border: 2px solid #4CAF50;
+}
+
+.sidebar-user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-name {
+  font-weight: 600;
+  font-size: 16px;
+  color: #333;
+}
+
+.sidebar-role {
+  font-size: 12px;
+  color: #555;
+  background-color: #d4edda;
+  padding: 2px 6px;
+  border-radius: 4px;
+  align-self: flex-start; /* Make the background only wrap the text */
+}
+
+/* Main Menu List */
+.sidebar-menu {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  flex-grow: 1; /* Allow the menu to take available space */
+}
+
+/* Base styles for all menu items */
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  margin-bottom: 5px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #333;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  cursor: pointer;
+  font-size: 14px;
+  width: 100%;
+}
+
+.sidebar-icon-container {
+  width: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding-left: 15px;
+}
+
+.sidebar-icon-container > svg {
+  font-size: 18px;
+}
+
+.sidebar-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 15px;
+  text-align: left;
+  font-weight: 500;
+}
+
+/* Remove underline from all links inside sidebar */
+.sidebar a {
+  text-decoration: none;
+  color: inherit; /* Ensure links inherit color */
+}
+
+/* Hover effect for all items */
+.sidebar-item:hover {
+  background-color: #d1e7dd;
+}
+
+/* Active state for non-dropdown items */
+.sidebar-item.active {
+  background-color: #4CAF50;
+  color: white;
+  font-weight: 500;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Đảm bảo phần nội dung không bị sidebar đè lên */
+.dashboard-main {
+  margin-left: 280px;
+}
+
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  position: relative; /* Parent must be relative for absolute child */
+}
+
+/* Remove special alignment rules that are no longer needed */
+.sidebar-menu-item-with-submenu .sidebar-item {
+  justify-content: flex-start;
+}
+
+.sidebar-link-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.sidebar-arrow {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  padding: 5px; /* Increase clickable area */
+  transition: transform 0.2s ease-in-out;
+}
+
+.sidebar-arrow.open {
+  transform: translateY(-50%) rotate(90deg);
+}
+
+.sidebar-submenu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background-color: #e0f0e5; /* Slightly darker to distinguish */
+  overflow: hidden;
+  max-height: 500px; /* Set a max-height for transition */
+  transition: max-height 0.3s ease-in-out;
+}
+
+.sidebar-submenu li {
+  padding: 10px 20px 10px 40px; /* Indent submenu item */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #333;
+  transition: background-color 0.2s;
+  font-size: 14px;
+}
+
+.sidebar-submenu li:hover {
+  background-color: #d2f3db;
+}
+
+.sidebar-submenu li.active-submenu {
+  background-color: #c1e8c9;
+  font-weight: 600;
+  color: #1a7f3c;
+}
+
+.submenu-icon {
+  font-size: 1rem !important; /* Override parent icon size if needed */
+}
+
+.sidebar a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* --- Submenu Styles --- */
+
+.sidebar-item .sidebar-arrow {
+  margin-left: auto; /* Push arrow to the end */
+  font-size: 12px;
+  transition: transform 0.3s ease;
+  z-index: 5; /* Keep it on top */
+}
+
+.sidebar-item .sidebar-arrow.open {
+  transform: rotate(90deg);
+}
+
+.sidebar-submenu {
+  list-style-type: none;
+  padding: 5px 0 0 15px; /* Top padding and left indent */
+  margin: 0;
+  background-color: #e4f3e7; /* Slightly different background for the sub-menu container */
+}
+
+.sidebar-submenu .sub-item {
+  font-size: 13px;
+  padding-left: 20px; /* Deeper indent for sub-items */
+}
+
+/* Make the active sub-item visually distinct */
+.sidebar-submenu .sub-item.active {
+    background-color: #3e8e41;
+    color: white;
+    margin-left: auto;
+}
+
+/* --- Dropdown Specific Styles --- */
+
+/* Wrapper for the link part of a dropdown item */
+.sidebar-item-link {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  text-decoration: none;
+  color: inherit;
+  background-color: transparent; /* No background */
+  padding: 0;
+  margin: 0;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.sidebar-item-link:hover {
+  background-color: #d1e7dd;
+}
+
+/* Arrow styling */
+.dropdown-arrow {
+  margin-left: auto;
+  padding: 5px;
+  padding-right: 15px;
+  font-size: 12px;
+  transition: transform 0.3s ease;
+}
+
+/* Submenu container */
+.sidebar-submenu {
+  list-style-type: none;
+  padding: 5px 0 5px 0; /* Top and bottom padding, no left padding */
+  margin: 0;
+  background-color: rgba(76, 175, 80, 0.05); /* Subtle green tint */
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out;
+  border-left: 3px solid #4CAF50; /* Left border to show hierarchy */
+  margin-left: 15px;
+}
+
+/* Submenu items */
+.sidebar-submenu .sub-item {
+  padding: 10px 5px 10px 5px; /* Adjust padding to align icon properly */
+  font-size: 13px;
+  background-color: transparent;
+  margin: 2px 0px; /* Small margin for better spacing */
+  border-radius: 6px; /* Rounded corners */
+}
+
+.sidebar-submenu .sub-item:hover {
+  background-color: #c8e6c9;
+  transform: translateX(2px); /* Subtle slide effect */
+  transition: all 0.2s ease;
+}
+
+/* Active state for sub-items */
+.sidebar-submenu .sub-item.active {
+  background-color: #4CAF50;
+  color: white !important;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Icon styling for submenu items */
+.sidebar-submenu .sub-item .sidebar-icon-container {
+  width: 30px; /* Smaller width for submenu icons */
+  padding-left: 0;
+}
+
+.sidebar-submenu .sub-item .sidebar-icon-container > svg {
+  font-size: 14px; /* Smaller icon size for submenu */
+}
+
+/* Active state for parent dropdown item */
+.sidebar-menu > li.active > .sidebar-item {
+  background-color: #4CAF50;
+  color: white;
+  font-weight: 500;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-menu > li.active > .sidebar-item .sidebar-icon-container > svg,
+.sidebar-menu > li.active > .sidebar-item .dropdown-arrow {
+  color: white;
+} 

@@ -1,0 +1,53 @@
+.dashboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+.dashboard-table th, .dashboard-table td {
+  padding: 10px 8px;
+  text-align: left;
+}
+.dashboard-table thead th {
+  background: #f5f5f5;
+  color: #333;
+  font-weight: 600;
+}
+.dashboard-table tbody tr {
+  border-bottom: 1px solid #eee;
+}
+.dashboard-table tbody tr:last-child {
+  border-bottom: none;
+}
+.status-ok {
+  color: #22c55e;
+  font-weight: 600;
+}
+.status-pending {
+  color: #fb923c;
+  font-weight: 600;
+}
+.status-fail {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.donor-table-card {
+  width: 95%;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.dashboard-row-table {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  padding: 0;
+}
+
+.table {
+  width: 100% !important;
+  max-width: 100%;
+  table-layout: auto;
+} 
