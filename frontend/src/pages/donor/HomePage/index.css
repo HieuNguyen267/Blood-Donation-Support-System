@@ -20,7 +20,7 @@ main {
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 16px;
+  padding: 0;
   background: none;
   box-shadow: none;
 }
@@ -227,11 +227,11 @@ main {
 /* Lời khuyên trước/sau khi hiến máu */
 .tips-section {
   background: #f3fff3;
-  border-radius: 12px;
+  border-radius: 8px;
   box-shadow: 0 2px 12px 0 rgba(0,0,0,0.06);
-  padding: 28px 32px 24px 32px;
+  padding: 0;
   margin: 0 auto 32px auto;
-  max-width: 1200px;
+  width: 100%;
 }
 
 
@@ -245,23 +245,23 @@ main {
 }
 
 .tips-grid {
-  display: flex;
-  gap: 24px;
-  flex-wrap: wrap;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: 100%;
 }
 
 .tips-box {
   flex: 1;
   min-width: 240px;
   background: #fff;
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1.5px solid #c6e6c6;
   box-shadow: 0 2px 8px #0001;
   padding: 18px 18px 12px 18px;
   display: flex;
   flex-direction: column;
-  margin-bottom: 0;
+  margin: 0;
 }
 
 .tips-box.should {
@@ -416,21 +416,26 @@ main {
 }
 
 .important-list-row {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
   margin-top: 20px;
+  margin-bottom: 32px;
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .important-card {
   flex: 1;
   background: #fff3e0;
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 20px;
-  min-width: 280px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  min-width: 220px;
+  box-shadow: 0 2px 8px #0001;
   position: relative;
+  margin: 0;
 }
 
 .important-card-header {

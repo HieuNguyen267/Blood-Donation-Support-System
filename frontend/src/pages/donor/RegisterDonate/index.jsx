@@ -64,8 +64,8 @@ export default function RegisterDonate() {
     // Lưu lại vào localStorage
     localStorage.setItem("appointmentHistory", JSON.stringify(updatedHistory));
 
-    // Chuyển hướng đến trang lịch sử đặt hẹn
-    navigate("/appointmenthistory");
+    // Chuyển hướng đến trang thông tin đăng ký
+    navigate("/registerdonate");
   };
 
   return (
@@ -75,6 +75,15 @@ export default function RegisterDonate() {
         <Title level={2} className="form-title">
           Đăng ký hiến máu
         </Title>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginBottom: 32 }}>
+          <Button type="primary" style={{ minWidth: 200, fontWeight: 600, fontSize: 16, boxShadow: '0 2px 6px #0001' }}>
+            Đăng ký thời điểm sẵn sàng hiến máu
+          </Button>
+          <Button style={{ minWidth: 200, fontWeight: 600, fontSize: 16, background: '#fff', color: '#222', border: '1.5px solid #888', boxShadow: '0 2px 6px #0001' }}
+            onClick={() => navigate('/booking-antd')}>
+            Đăng kí hiến máu theo thời gian
+          </Button>
+        </div>
         <div className="step-progress-wrapper">
           <StepProgress />
         </div>

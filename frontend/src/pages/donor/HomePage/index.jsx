@@ -82,7 +82,7 @@ export default function HomePage() {
           style={{
             color: '#219653',
             textAlign: 'left',
-            margin: '18px 0 30px 300px',
+            margin: '18px 0 30px 500px',
             fontWeight: 700,
             fontSize: 16,
             textDecoration: 'underline',

@@ -27,6 +27,7 @@ export default function RegisterDonatePage() {
   const [userInfo, setUserInfo] = useState({});
   const [healthAnswers, setHealthAnswers] = useState(null);
   const [latestAppointment, setLatestAppointment] = useState(null);
+  const [bookingData, setBookingData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -50,6 +51,11 @@ export default function RegisterDonatePage() {
     const storedHealthAnswers = localStorage.getItem("healthCheckAnswers");
     if (storedHealthAnswers) {
       setHealthAnswers(JSON.parse(storedHealthAnswers));
+    }
+
+    const booking = localStorage.getItem('bookingFormData');
+    if (booking) {
+      setBookingData(JSON.parse(booking));
     }
 
     setLoading(false);
@@ -128,7 +134,15 @@ export default function RegisterDonatePage() {
             <div className="donate-phieutitle">Phiếu đăng ký hiến máu</div>
             <div className="donate-phieucontent">
               {/* Thông tin địa điểm, ngày, giờ */}
-              {latestAppointment && (
+              {bookingData ? (
+                <div className="donate-appointment-info" style={{marginBottom: 16}}>
+                  <div><b>Địa điểm hiến máu:</b> {bookingData.location || '-'}</div>
+                  <div><b>Ngày hiến máu:</b> {bookingData.date ? moment(bookingData.date).format('DD/MM/YYYY') : '-'}</div>
+                  <div><b>Nhóm máu:</b> {bookingData.bloodGroup || '-'}</div>
+                  <div><b>Khung giờ:</b> {bookingData.timeSlot || '-'}</div>
+                  {bookingData.note && <div><b>Ghi chú:</b> {bookingData.note}</div>}
+                </div>
+              ) : latestAppointment && (
                 <div className="donate-appointment-info" style={{marginBottom: 16}}>
                   <div><b>Địa điểm hiến máu:</b> {latestAppointment.address || '-'}</div>
                   <div><b>Ngày hiến máu:</b> {latestAppointment.sendDate || '-'}</div>
@@ -150,19 +164,24 @@ export default function RegisterDonatePage() {
                       </div>
                     );
                   })}
-                  <button onClick={handleDelete} className="donate-btn delete-btn">Xóa đơn đăng ký</button>
                 </div>
               ) : (
-                <div className="no-content-placeholder">
-                  <img
-                    src="https://cdn-icons-png.flaticon.com/512/685/685352.png"
-                    alt="Empty"
-                    style={{ width: "80px", marginTop: "10px" }}
-                  />
-                  <div style={{ marginTop: "10px", fontWeight: "bold" }}>
-                    Chưa có thông tin khảo sát sức khỏe
+                !latestAppointment && (
+                  <div className="no-content-placeholder">
+                    <img
+                      src="https://cdn-icons-png.flaticon.com/512/685/685352.png"
+                      alt="Empty"
+                      style={{ width: "80px", marginTop: "10px" }}
+                    />
+                    <div style={{ marginTop: "10px", fontWeight: "bold" }}>
+                      Chưa có thông tin khảo sát sức khỏe
+                    </div>
                   </div>
-                </div>
+                )
+              )}
+              {/* Nút xóa đơn đăng ký luôn hiển thị nếu có latestAppointment */}
+              {latestAppointment && (
+                <button onClick={handleDelete} className="donate-btn delete-btn" style={{marginTop: 16}}>Xóa đơn đăng ký</button>
               )}
             </div>
           </div>

@@ -1,0 +1,118 @@
+import React, { useState } from 'react';
+import { Form, DatePicker, Select, Button, Card, Typography, Row, Col, message, Input } from 'antd';
+import { CalendarOutlined, EnvironmentOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import Header from '../../../components/user/Header';
+import Footer from '../../../components/user/Footer';
+import './index.css';
+
+const { Option } = Select;
+const { Title } = Typography;
+
+const locations = [
+  '466 Nguyễn Thị Minh Khai Phường 02, Quận 3, Tp Hồ Chí Minh',
+  '105 Trần Hưng Đạo, Phường 6, Quận 5, Tp Hồ Chí Minh',
+  '595 Sư Vạn Hạnh, Phường 13, Quận 10, Tp Hồ Chí Minh',
+];
+const bloodGroups = [
+  { label: 'A+', value: 'A+' },
+  { label: 'A-', value: 'A-' },
+  { label: 'B+', value: 'B+' },
+  { label: 'B-', value: 'B-' },
+  { label: 'O+', value: 'O+' },
+  { label: 'O-', value: 'O-' },
+  { label: 'AB+', value: 'AB+' },
+  { label: 'AB-', value: 'AB-' },
+  { label: 'Rh null', value: 'Rh null' },
+  { label: 'Bombay (hh)', value: 'Bombay(hh)' },
+];
+const timeSlots = [
+  { label: '07:00 - 11:00', value: '07:00-11:00' },
+  { label: '13:00 - 16:00', value: '13:00-16:00' },
+];
+
+export default function BookingAntdForm() {
+  const [form] = Form.useForm();
+
+  const onFinish = (values) => {
+    // Lưu dữ liệu booking vào localStorage
+    localStorage.setItem('bookingFormData', JSON.stringify(values));
+    // Chuyển hướng sang trang khảo sát sức khỏe
+    window.location.href = '/blood-donation-eligibility';
+  };
+
+  return (
+    <>
+      <Header />
+      <Row justify="center" style={{ marginTop: 40 }}>
+        <Col xs={24} sm={20} md={16} lg={12} xl={10}>
+          <Card className="booking-antd-card">
+            <Title level={3} className="booking-antd-title">Đặt lịch hiến máu</Title>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginBottom: 32 }}>
+              <Button style={{ minWidth: 200, fontWeight: 600, fontSize: 16, background: '#fff', color: '#222', border: '1.5px solid #888', boxShadow: '0 2px 6px #0001' }}
+                onClick={() => window.location.href = '/registerdonateform'}>
+                Đăng ký thời điểm sẵn sàng hiến máu
+              </Button>
+              <Button type="primary" style={{ minWidth: 200, fontWeight: 600, fontSize: 16, boxShadow: '0 2px 6px #0001' }}>
+                Đăng kí hiến máu theo thời gian
+              </Button>
+            </div>
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={onFinish}
+              requiredMark={false}
+              className="booking-antd-form"
+            >
+              <Form.Item
+                label={<span><CalendarOutlined style={{ color: '#43a047' }} /> Ngày hiến máu</span>}
+                name="date"
+                rules={[{ required: true, message: 'Vui lòng chọn ngày hiến máu!' }]}
+              >
+                <DatePicker style={{ width: '100%' }} placeholder="Chọn ngày" />
+              </Form.Item>
+              <Form.Item
+                label={<span><EnvironmentOutlined style={{ color: '#43a047' }} /> Địa điểm</span>}
+                name="location"
+                rules={[{ required: true, message: 'Vui lòng chọn địa điểm!' }]}
+                initialValue={locations[0]}
+              >
+                <Input value={locations[0]} disabled style={{ background: '#f5f5f5', color: '#222', fontWeight: 500 }} />
+              </Form.Item>
+              <Form.Item
+                label={<span><EnvironmentOutlined style={{ color: '#43a047' }} /> Nhóm máu cần hiến</span>}
+                name="bloodGroup"
+                rules={[{ required: true, message: 'Vui lòng chọn nhóm máu!' }]}
+              >
+                <Select placeholder="Chọn nhóm máu">
+                  {bloodGroups.map(bg => (
+                    <Option key={bg.value} value={bg.value}>{bg.label}</Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <Form.Item
+                label={<span><ClockCircleOutlined style={{ color: '#43a047' }} /> Khung giờ hiến máu</span>}
+                name="timeSlot"
+                rules={[{ required: true, message: 'Vui lòng chọn khung giờ!' }]}
+              >
+                <Select placeholder="Chọn khung giờ hiến máu">
+                  {timeSlots.map(slot => (
+                    <Option key={slot.value} value={slot.value}>{slot.label}</Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <Form.Item label="Ghi chú thêm" name="note">
+                <Input.TextArea rows={3} placeholder="Nhập ghi chú nếu có..." />
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" htmlType="submit" block style={{ fontWeight: 600, fontSize: 18, height: 48, marginTop: 8 }}>
+                  Đăng ký
+                </Button>
+              </Form.Item>
+            </Form>
+          </Card>
+        </Col>
+      </Row>
+      <Footer />
+    </>
+  );
+} 
