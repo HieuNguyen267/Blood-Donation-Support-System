@@ -54,7 +54,10 @@ import MedicalFacilityManagement from './pages/Admin/MedicalFacilityManagement';
 import AccountManagement from './pages/Admin/AccountManagement';
 import AccountProfile from './pages/Admin/AccountProfile';
 import MatchingManagement from './pages/Admin/MatchingManagement';
+<<<<<<< HEAD
 import BookingAntdForm from './pages/donor/BookingAntdForm';
+=======
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
 
 function AppContent() {
   const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') === 'true');
@@ -130,7 +133,10 @@ function AppContent() {
         <Route path="/admin/profile" element={<AccountProfile />} />
         <Route path="/admin/settings" element={<Settings />} />
         <Route path="/admin/matching" element={<MatchingManagement />} />
+<<<<<<< HEAD
         <Route path="/booking-antd" element={<BookingAntdForm />} />
+=======
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
       </Routes>
     </>
   );

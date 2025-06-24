@@ -20,7 +20,11 @@ main {
 .container {
   max-width: 1200px;
   margin: 0 auto;
+<<<<<<< HEAD
   padding: 0;
+=======
+  padding: 0 16px;
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
   background: none;
   box-shadow: none;
 }
@@ -227,11 +231,19 @@ main {
 /* Lời khuyên trước/sau khi hiến máu */
 .tips-section {
   background: #f3fff3;
+<<<<<<< HEAD
   border-radius: 8px;
   box-shadow: 0 2px 12px 0 rgba(0,0,0,0.06);
   padding: 0;
   margin: 0 auto 32px auto;
   width: 100%;
+=======
+  border-radius: 12px;
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.06);
+  padding: 28px 32px 24px 32px;
+  margin: 0 auto 32px auto;
+  max-width: 1200px;
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
 }
 
 
@@ -245,23 +257,38 @@ main {
 }
 
 .tips-grid {
+<<<<<<< HEAD
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   width: 100%;
+=======
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
 }
 
 .tips-box {
   flex: 1;
   min-width: 240px;
   background: #fff;
+<<<<<<< HEAD
   border-radius: 8px;
+=======
+  border-radius: 10px;
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
   border: 1.5px solid #c6e6c6;
   box-shadow: 0 2px 8px #0001;
   padding: 18px 18px 12px 18px;
   display: flex;
   flex-direction: column;
+<<<<<<< HEAD
   margin: 0;
+=======
+  margin-bottom: 0;
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
 }
 
 .tips-box.should {
@@ -416,6 +443,7 @@ main {
 }
 
 .important-list-row {
+<<<<<<< HEAD
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
@@ -425,17 +453,32 @@ main {
   max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
+=======
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 20px;
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
 }
 
 .important-card {
   flex: 1;
   background: #fff3e0;
+<<<<<<< HEAD
   border-radius: 8px;
   padding: 20px;
   min-width: 220px;
   box-shadow: 0 2px 8px #0001;
   position: relative;
   margin: 0;
+=======
+  border-radius: 12px;
+  padding: 20px;
+  min-width: 280px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  position: relative;
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
 }
 
 .important-card-header {

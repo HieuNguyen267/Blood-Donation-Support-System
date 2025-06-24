@@ -6,7 +6,10 @@ import StepProgress from "../../../components/user/StepProgress";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import moment from "moment";
+<<<<<<< HEAD
 import { donorAPI } from '../../../services/api';
+=======
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
 
 import "./index.css";
 const { Content } = Layout;
@@ -19,7 +22,10 @@ export default function RegisterDonate() {
   const navigate = useNavigate();
   const defaultAddress = "466 Nguyễn Thị Minh Khai Phường 02, Quận 3, Tp Hồ Chí Minh";
   const [isDateSelected, setIsDateSelected] = useState(false);
+<<<<<<< HEAD
   const [profile, setProfile] = useState({});
+=======
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
 
   useEffect(() => {
     const preselectedDate = location.state?.date;
@@ -30,6 +36,7 @@ export default function RegisterDonate() {
       initialValues.sendTime = moment(preselectedDate, "YYYY-MM-DD");
       setIsDateSelected(true); // Enable time slots if date is pre-selected
     }
+<<<<<<< HEAD
     // Lấy profile
     donorAPI.getProfile().then((data) => {
       setProfile(data);
@@ -42,6 +49,8 @@ export default function RegisterDonate() {
         ...initialValues
       });
     });
+=======
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
     form.setFieldsValue(initialValues);
   }, [location.state, form]);
 
@@ -78,8 +87,13 @@ export default function RegisterDonate() {
     // Lưu lại vào localStorage
     localStorage.setItem("appointmentHistory", JSON.stringify(updatedHistory));
 
+<<<<<<< HEAD
     // Chuyển hướng đến trang thông tin đăng ký
     navigate("/registerdonate");
+=======
+    // Chuyển hướng đến trang lịch sử đặt hẹn
+    navigate("/appointmenthistory");
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
   };
 
   return (
@@ -89,6 +103,7 @@ export default function RegisterDonate() {
         <Title level={2} className="form-title">
           Đăng ký hiến máu
         </Title>
+<<<<<<< HEAD
         <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginBottom: 32 }}>
           <Button type="primary" style={{ minWidth: 200, fontWeight: 600, fontSize: 16, boxShadow: '0 2px 6px #0001', background: '#52c41a', borderColor: '#52c41a', color: '#fff' }}>
             Đăng ký thời điểm sẵn sàng hiến máu
@@ -98,6 +113,8 @@ export default function RegisterDonate() {
             Đăng kí hiến máu theo thời gian
           </Button>
         </div>
+=======
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
         <div className="step-progress-wrapper">
           <StepProgress />
         </div>
@@ -111,6 +128,7 @@ export default function RegisterDonate() {
             onFinish={handleSubmit}
             onValuesChange={handleFormChange}
           >
+<<<<<<< HEAD
             <Form.Item label="Họ và tên" name="fullName" rules={[{ required: true }]}>
               <Input prefix={<UserOutlined />} placeholder="Nhập họ tên" disabled />
             </Form.Item>
@@ -121,6 +139,18 @@ export default function RegisterDonate() {
 
             <Form.Item label="Email" name="email" rules={[{ required: true, type: "email" }]}>
               <Input prefix={<MailOutlined />} placeholder="abc@gmail.com" disabled />
+=======
+            <Form.Item label="Họ và tên *" name="fullName" rules={[{ required: true }]}>
+              <Input prefix={<UserOutlined />} placeholder="Nhập họ tên" />
+            </Form.Item>
+
+            <Form.Item label="Số điện thoại *" name="phone" rules={[{ required: true }]}>
+              <Input prefix={<PhoneOutlined />} placeholder="Nhập SĐT" />
+            </Form.Item>
+
+            <Form.Item label="Email *" name="email" rules={[{ required: true, type: "email" }]}>
+              <Input prefix={<MailOutlined />} placeholder="abc@gmail.com" />
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
             </Form.Item>
 
             <Form.Item label="Địa chỉ hiến máu" name="address">
@@ -128,7 +158,11 @@ export default function RegisterDonate() {
             </Form.Item>
 
             <Form.Item
+<<<<<<< HEAD
               label="Cân nặng (kg)"
+=======
+              label="Cân nặng (kg) *"
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
               name="weight"
               rules={[
                 { required: true, message: "Vui lòng nhập cân nặng" },
@@ -142,11 +176,19 @@ export default function RegisterDonate() {
             </Form.Item>
 
             <Form.Item
+<<<<<<< HEAD
               label="Nhóm máu"
               name="sampleGroup"
               rules={[{ required: true, message: "Vui lòng chọn nhóm máu" }]}
             >
               <Select placeholder="Chọn nhóm máu" disabled>
+=======
+              label="Nhóm máu *"
+              name="sampleGroup"
+              rules={[{ required: true, message: "Vui lòng chọn nhóm máu" }]}
+            >
+              <Select placeholder="Chọn nhóm máu">
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
                 <Select.Option value="A+">A+</Select.Option>
                 <Select.Option value="A-">A-</Select.Option>
                 <Select.Option value="B+">B+</Select.Option>
@@ -160,16 +202,39 @@ export default function RegisterDonate() {
               </Select>
             </Form.Item>
 
+<<<<<<< HEAD
             <Form.Item label="Lần hiến máu gần nhất" name="donateLast" rules={[{ required: true }]}>
               <DatePicker style={{ width: "100%" }} suffixIcon={<CalendarOutlined />} disabled />
             </Form.Item>
 
             <Form.Item label="Thời điểm sẵn sàng hiến máu" name="sendTime" rules={[{ required: true }]}>
+=======
+            <Form.Item
+              label="Số lượng máu muốn hiến (ml) *"
+              name="sampleQuantity"
+              rules={[{ required: true, message: "Vui lòng chọn số lượng máu" }]}
+            >
+              <Select placeholder="Chọn số lượng máu">
+                <Select.Option value="350">350 ml</Select.Option>
+                <Select.Option value="450">450 ml</Select.Option>
+              </Select>
+            </Form.Item>
+
+            <Form.Item label="Lần hiến máu gần nhất *" name="donateLast" rules={[{ required: true }]}>
+              <DatePicker style={{ width: "100%" }} suffixIcon={<CalendarOutlined />} />
+            </Form.Item>
+
+            <Form.Item label="Thời điểm sẵn sàng hiến máu *" name="sendTime" rules={[{ required: true }]}>
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
               <DatePicker style={{ width: "100%" }} suffixIcon={<CalendarOutlined />} />
             </Form.Item>
 
             <Form.Item
+<<<<<<< HEAD
               label="Khung giờ có thể hiến máu"
+=======
+              label="Khung giờ có thể hiến máu *"
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
               name="donationTimeSlot"
               rules={[{ required: true, message: "Vui lòng chọn khung giờ" }]}
             >
@@ -179,7 +244,11 @@ export default function RegisterDonate() {
               </Select>
             </Form.Item>
 
+<<<<<<< HEAD
             <Form.Item label="Tình trạng sức khỏe" name="status">
+=======
+            <Form.Item label="Tình trạng sức khỏe *" name="status" rules={[{ required: true }]}>
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
               <Input.TextArea rows={4} />
             </Form.Item>
 

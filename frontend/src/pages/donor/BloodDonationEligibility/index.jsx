@@ -109,6 +109,7 @@ export default function BloodDonationEligibility() {
     // 1. Lưu các câu trả lời vào localStorage
     localStorage.setItem('healthCheckAnswers', JSON.stringify(values));
 
+<<<<<<< HEAD
     // 2. Nếu có dữ liệu bookingFormData thì tạo lịch hẹn mới trong appointmentHistory
     const booking = localStorage.getItem('bookingFormData');
     if (booking) {
@@ -131,6 +132,9 @@ export default function BloodDonationEligibility() {
     }
 
     // 3. Chuyển hướng về trang thông tin đăng ký
+=======
+    // 2. Chuyển hướng về trang thông tin đăng ký
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
     navigate('/registerdonate');
   };
 

@@ -94,7 +94,11 @@ export default function Header() {
         <a href="/">TRANG CHỦ</a>
         {isLoggedIn ? (
           <>
+<<<<<<< HEAD
             <a href="/registerdonate">ĐĂNG KÝ HIẾN MÁU</a>
+=======
+            <a href="/registerdonate">LỊCH HẸN CỦA BẠN</a>
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
             <a href="/appointmenthistory">LỊCH SỬ ĐẶT HẸN</a>
             <a href="/addcertificate">CHỨNG NHẬN</a>
             <a href="/faq">HỎI ĐÁP</a>

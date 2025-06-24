@@ -6,7 +6,10 @@ import StepProgress from '../../../components/user/StepProgress';
 import { donorAPI } from '../../../services/api';
 import { Typography, Tag, Button } from 'antd';
 import './AppointmentDetail.css';
+<<<<<<< HEAD
 import moment from 'moment';
+=======
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
 
 const { Title, Text } = Typography;
 
@@ -37,7 +40,13 @@ export default function AppointmentDetail() {
         </Title>
         <Text className="detail-status">Trạng thái: {statusTag}</Text>
         
+<<<<<<< HEAD
 
+=======
+        <div className="step-progress-container">
+          <StepProgress current={1} />
+        </div>
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
 
         <div className="info-card">
           <Title level={4} className="info-card-title">Thông tin hiến máu</Title>
@@ -56,7 +65,11 @@ export default function AppointmentDetail() {
             </div>
             <div className="info-row">
               <Text className="info-label">Ngày hiến:</Text>
+<<<<<<< HEAD
               <Text className="info-value">{appointment.sendDate ? moment(appointment.sendDate).format('DD/MM/YYYY') : '-'}</Text>
+=======
+              <Text className="info-value">{appointment.sendDate}</Text>
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
             </div>
              <div className="info-row">
               <Text className="info-label">Khung giờ:</Text>

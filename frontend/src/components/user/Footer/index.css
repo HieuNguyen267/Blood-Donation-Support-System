@@ -1,8 +1,13 @@
 .footer {
   background-color: #76c26a !important;
   color: white !important;
+<<<<<<< HEAD
   padding: 20px 0;
   margin-top: 100px;
+=======
+  padding: 40px 0;
+  margin-top: 40px;
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
   border-top: 1px solid #5aa752;
   box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.05);
   width: 100%;

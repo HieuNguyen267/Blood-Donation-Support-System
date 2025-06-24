@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 E:\New folder\Blood-Donation-Support-System-main\backend\src\main\java\com\blooddonation\backend\entity\DonationRegister.java
 E:\New folder\Blood-Donation-Support-System-main\backend\src\main\java\com\blooddonation\backend\service\EventService.java
 E:\New folder\Blood-Donation-Support-System-main\backend\src\main\java\com\blooddonation\backend\service\EmailService.java
@@ -70,3 +71,77 @@ E:\New folder\Blood-Donation-Support-System-main\backend\src\main\java\com\blood
 E:\New folder\Blood-Donation-Support-System-main\backend\src\main\java\com\blooddonation\backend\service\impl\AccountServiceImpl.java
 E:\New folder\Blood-Donation-Support-System-main\backend\src\main\java\com\blooddonation\backend\service\ReminderService.java
 E:\New folder\Blood-Donation-Support-System-main\backend\src\main\java\com\blooddonation\backend\entity\Event.java
+=======
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\controller\BloodStockController.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\controller\ReminderController.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\controller\BloodRequestController.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\dto\auth\ResetPasswordRequest.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\entity\MatchingBlood.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\dto\DonationRegisterDTO.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\entity\BloodStock.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\entity\DonationRegister.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\service\AuthService.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\BloodDonationApplication.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\controller\AuthController.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\repository\StaffRepository.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\service\AnalyticsService.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\entity\BloodGroup.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\controller\TestController.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\service\BloodStockService.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\repository\MedicalFacilitiesRepository.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\service\impl\EmailServiceImpl.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\controller\AnalyticsController.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\repository\MatchingBloodRepository.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\service\DonorService.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\controller\CertificatesController.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\controller\MedicalFacilitiesController.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\repository\BloodRequestRepository.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\entity\Certificates.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\repository\AccountRepository.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\service\impl\AnalyticsServiceImpl.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\dto\MedicalFacilitiesDTO.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\entity\Staff.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\controller\DonorController.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\security\jwt\JwtBlacklistService.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\service\DonationRegisterService.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\config\ModelMapperConfig.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\repository\DonationRegisterRepository.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\repository\BloodGroupRepository.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\service\impl\AccountServiceImpl.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\entity\MedicalFacilities.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\service\BloodRequestService.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\service\MedicalFacilitiesService.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\service\EventService.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\service\EmailService.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\repository\BloodStockRepository.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\repository\CertificatesRepository.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\dto\auth\SignupRequest.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\dto\auth\LoginRequest.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\entity\Event.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\service\impl\ReminderServiceImpl.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\dto\CertificatesDTO.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\dto\EventDTO.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\security\jwt\JwtTokenProvider.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\config\SecurityConfig.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\entity\BloodRequest.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\service\AccountService.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\entity\Donor.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\controller\DonationRegisterController.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\dto\BloodRequestDTO.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\dto\auth\JwtResponse.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\security\jwt\JwtAuthenticationFilter.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\security\CustomAccountDetailsService.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\controller\StaffController.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\dto\BloodStockDTO.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\service\StaffService.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\entity\Role.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\dto\auth\VerifyCodeRequest.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\repository\DonorRepository.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\service\ReminderService.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\dto\auth\ForgotPasswordRequest.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\dto\MatchingBloodDTO.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\dto\StaffDTO.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\repository\EventRepository.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\entity\Account.java
+E:\SWP-project\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\controller\BloodGroupController.java
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983

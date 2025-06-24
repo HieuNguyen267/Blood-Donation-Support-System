@@ -66,4 +66,19 @@
   width: 75%;
 }
 
+<<<<<<< HEAD
+=======
+.step-progress::before {
+  content: '';
+  position: absolute;
+  top: 15px;
+  left: 12.5%;
+  right: 12.5%;
+  height: 2px;
+  background-color: #ccc;
+  z-index: -1;
+  width: 75%;
+}
+
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
 

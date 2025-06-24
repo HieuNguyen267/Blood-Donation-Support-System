@@ -27,7 +27,10 @@ export default function RegisterDonatePage() {
   const [userInfo, setUserInfo] = useState({});
   const [healthAnswers, setHealthAnswers] = useState(null);
   const [latestAppointment, setLatestAppointment] = useState(null);
+<<<<<<< HEAD
   const [bookingData, setBookingData] = useState(null);
+=======
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -53,11 +56,14 @@ export default function RegisterDonatePage() {
       setHealthAnswers(JSON.parse(storedHealthAnswers));
     }
 
+<<<<<<< HEAD
     const booking = localStorage.getItem('bookingFormData');
     if (booking) {
       setBookingData(JSON.parse(booking));
     }
 
+=======
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
     setLoading(false);
   }, []);
 
@@ -72,6 +78,7 @@ export default function RegisterDonatePage() {
     localStorage.removeItem("appointmentHistory");
     // Xóa phiếu đăng ký tạm (nếu có)
     localStorage.removeItem("donationFormData");
+<<<<<<< HEAD
     localStorage.removeItem("bookingFormData");
       
     setHealthAnswers(null);
@@ -80,6 +87,13 @@ export default function RegisterDonatePage() {
       
       message.success('Đã xóa đơn đăng ký thành công');
       window.location.href = '/registerdonate';
+=======
+      
+    setHealthAnswers(null);
+    setLatestAppointment(null);
+      
+      message.success('Đã xóa đơn đăng ký thành công');
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
     } catch (error) {
       console.error('Delete error:', error);
       message.error('Xóa đơn đăng ký thất bại');
@@ -137,6 +151,7 @@ export default function RegisterDonatePage() {
             <div className="donate-phieutitle">Phiếu đăng ký hiến máu</div>
             <div className="donate-phieucontent">
               {/* Thông tin địa điểm, ngày, giờ */}
+<<<<<<< HEAD
               {bookingData ? (
                 <div className="donate-appointment-info" style={{marginBottom: 16}}>
                   <div><b>Địa điểm hiến máu:</b> {bookingData.location || '-'}</div>
@@ -146,6 +161,9 @@ export default function RegisterDonatePage() {
                   {bookingData.note && <div><b>Ghi chú:</b> {bookingData.note}</div>}
                 </div>
               ) : latestAppointment && (
+=======
+              {latestAppointment && (
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
                 <div className="donate-appointment-info" style={{marginBottom: 16}}>
                   <div><b>Địa điểm hiến máu:</b> {latestAppointment.address || '-'}</div>
                   <div><b>Ngày hiến máu:</b> {latestAppointment.sendDate || '-'}</div>
@@ -167,6 +185,7 @@ export default function RegisterDonatePage() {
                       </div>
                     );
                   })}
+<<<<<<< HEAD
                 </div>
               ) : (
                 !latestAppointment && (
@@ -185,12 +204,28 @@ export default function RegisterDonatePage() {
               {/* Nút xóa đơn đăng ký luôn hiển thị nếu có latestAppointment hoặc healthAnswers */}
               {(latestAppointment || healthAnswers) && (
                 <button onClick={handleDelete} className="donate-btn delete-btn" style={{marginTop: 16}}>Xóa đơn đăng ký</button>
+=======
+                  <button onClick={handleDelete} className="donate-btn delete-btn">Xóa đơn đăng ký</button>
+                </div>
+              ) : (
+                <div className="no-content-placeholder">
+                  <img
+                    src="https://cdn-icons-png.flaticon.com/512/685/685352.png"
+                    alt="Empty"
+                    style={{ width: "80px", marginTop: "10px" }}
+                  />
+                  <div style={{ marginTop: "10px", fontWeight: "bold" }}>
+                    Chưa có thông tin khảo sát sức khỏe
+                  </div>
+                </div>
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
               )}
             </div>
           </div>
         </div>
 
         {/* Nút đăng ký */}
+<<<<<<< HEAD
         {!(bookingData || latestAppointment || healthAnswers) && (
           <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginBottom: 32 }}>
             <button
@@ -199,6 +234,13 @@ export default function RegisterDonatePage() {
             >
               Đăng ký hiến máu
             </button>
+=======
+        {!healthAnswers && (
+          <div className="donate-btn-wrap">
+            <Link to="/registerdonateform">
+              <button className="donate-btn">Đăng ký hiến máu</button>
+            </Link>
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
           </div>
         )}
       </div>

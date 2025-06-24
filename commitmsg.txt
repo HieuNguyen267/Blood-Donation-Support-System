@@ -1,0 +1,5 @@
+N?i các api liên quan ð?n thông tin tài kho?n 
+ 
+*C?n c?i thi?n: 
+-Ngh? nghi?p chýa s?a xong 
+-B?o m?t ðang m? ð? l?y thông tin chi ti?t theo ID (s? s?a) 

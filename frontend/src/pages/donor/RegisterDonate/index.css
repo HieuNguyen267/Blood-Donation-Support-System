@@ -61,3 +61,12 @@
 .form-title {
   margin-bottom: 16px;
 }
+<<<<<<< HEAD
+=======
+
+.step-progress-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+>>>>>>> 073bd8776b9e662f3d0df0a5cb949ba04fad2983
