@@ -1,0 +1,54 @@
+.user-info-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f7fa;
+  padding: 48px 16px;
+  min-height: calc(100vh - 120px);
+}
+
+.user-info-card {
+  max-width: 500px;
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+}
+
+.user-info-card-large {
+  max-width: 800px;
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 32px 40px;
+}
+
+.form-section-title {
+  margin-top: 16px !important;
+  margin-bottom: 20px !important;
+  padding-bottom: 10px !important;
+  border-bottom: 1px solid #f0f0f0;
+  color: #229E42 !important;
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+}
+
+.user-info-card-large .ant-form .form-section-title:first-of-type {
+  margin-top: 0 !important;
+}
+
+/* Style the primary button to be green */
+.user-info-card-large .ant-btn-primary {
+  background-color: #42b72a !important;
+  border-color: #42b72a !important;
+}
+
+.user-info-card-large .ant-btn-primary:hover,
+.user-info-card-large .ant-btn-primary:focus {
+  background-color: #36a420 !important;
+  border-color: #36a420 !important;
+}
+
+.ant-form-item-label > label {
+    font-weight: 500;
+} 

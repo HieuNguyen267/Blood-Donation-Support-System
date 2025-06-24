@@ -1,0 +1,67 @@
+body, .booking-antd-layout {
+  background: #f7f7f7;
+  font-family: Arial, sans-serif;
+  margin: 0;
+}
+.booking-antd-card {
+  border-radius: 16px !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  border: 1.5px solid #b2dfdb !important;
+  background: #fff !important;
+  padding: 32px 32px 24px 32px !important;
+}
+.booking-antd-title {
+  color: #43a047 !important;
+  text-align: center;
+  margin-bottom: 2rem !important;
+}
+.booking-antd-form .ant-form-item {
+  margin-bottom: 24px;
+}
+.booking-antd-form .ant-form-item-label > label {
+  font-weight: bold;
+  color: #222;
+}
+.booking-antd-form .ant-picker, .booking-antd-form .ant-select-selector, .booking-antd-form textarea {
+  border-radius: 6px !important;
+  border: 1px solid #e0e0e0 !important;
+  background: #fff !important;
+  font-size: 1rem;
+  transition: border 0.2s;
+}
+.booking-antd-form .ant-picker-focused, .booking-antd-form .ant-select-focused .ant-select-selector, .booking-antd-form textarea:focus {
+  border-color: #43a047 !important;
+  box-shadow: 0 0 0 2px #b2dfdb33;
+}
+.booking-antd-form .ant-select-selector {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}
+.booking-antd-form .ant-input, .booking-antd-form textarea {
+  font-size: 1rem;
+}
+.booking-antd-form .ant-btn-primary {
+  background: #388e3c !important;
+  color: #fff !important;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem 1.75rem;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+.booking-antd-form .ant-btn-primary:hover {
+  background: #2e7031 !important;
+}
+@media (max-width: 900px) {
+  .booking-antd-card {
+    max-width: 100%;
+    padding: 0 1rem;
+  }
+}
+@media (max-width: 600px) {
+  .booking-antd-card {
+    padding: 0 0.5rem 2.5rem;
+  }
+} 
