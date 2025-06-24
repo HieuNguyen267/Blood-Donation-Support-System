@@ -21,8 +21,20 @@
 }
 
 .logo {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+}
+
+.system-title {
+  display: flex;
+  align-items: center;
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 1;
 }
 
 .title {

@@ -3,6 +3,7 @@ import { Form, DatePicker, Select, Button, Card, Typography, Row, Col, message, 
 import { CalendarOutlined, EnvironmentOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import Header from '../../../components/user/Header';
 import Footer from '../../../components/user/Footer';
+import StepProgress from '../../../components/user/StepProgress';
 import './index.css';
 
 const { Option } = Select;
@@ -43,19 +44,26 @@ export default function BookingAntdForm() {
   return (
     <>
       <Header />
-      <Row justify="center" style={{ marginTop: 40 }}>
+      <div className="form-header">
+        <Title level={2} className="form-title">
+          Đặt lịch hiến máu
+        </Title>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginBottom: 32 }}>
+          <Button style={{ minWidth: 200, fontWeight: 600, fontSize: 16, background: '#fff', color: '#222', border: '1.5px solid #888', boxShadow: '0 2px 6px #0001' }}
+            onClick={() => window.location.href = '/registerdonateform'}>
+            Đăng ký thời điểm sẵn sàng hiến máu
+          </Button>
+          <Button type="primary" style={{ minWidth: 200, fontWeight: 600, fontSize: 16, boxShadow: '0 2px 6px #0001', background: '#52c41a', borderColor: '#52c41a', color: '#fff' }}>
+            Đăng kí hiến máu theo thời gian
+          </Button>
+        </div>
+        <div className="step-progress-wrapper">
+          <StepProgress />
+        </div>
+      </div>
+      <Row justify="center">
         <Col xs={24} sm={20} md={16} lg={12} xl={10}>
           <Card className="booking-antd-card">
-            <Title level={3} className="booking-antd-title">Đặt lịch hiến máu</Title>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginBottom: 32 }}>
-              <Button style={{ minWidth: 200, fontWeight: 600, fontSize: 16, background: '#fff', color: '#222', border: '1.5px solid #888', boxShadow: '0 2px 6px #0001' }}
-                onClick={() => window.location.href = '/registerdonateform'}>
-                Đăng ký thời điểm sẵn sàng hiến máu
-              </Button>
-              <Button type="primary" style={{ minWidth: 200, fontWeight: 600, fontSize: 16, boxShadow: '0 2px 6px #0001' }}>
-                Đăng kí hiến máu theo thời gian
-              </Button>
-            </div>
             <Form
               form={form}
               layout="vertical"

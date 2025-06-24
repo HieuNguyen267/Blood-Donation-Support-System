@@ -72,11 +72,14 @@ export default function RegisterDonatePage() {
     localStorage.removeItem("appointmentHistory");
     // Xóa phiếu đăng ký tạm (nếu có)
     localStorage.removeItem("donationFormData");
+    localStorage.removeItem("bookingFormData");
       
     setHealthAnswers(null);
     setLatestAppointment(null);
+    setBookingData(null);
       
       message.success('Đã xóa đơn đăng ký thành công');
+      window.location.href = '/registerdonate';
     } catch (error) {
       console.error('Delete error:', error);
       message.error('Xóa đơn đăng ký thất bại');
@@ -179,8 +182,8 @@ export default function RegisterDonatePage() {
                   </div>
                 )
               )}
-              {/* Nút xóa đơn đăng ký luôn hiển thị nếu có latestAppointment */}
-              {latestAppointment && (
+              {/* Nút xóa đơn đăng ký luôn hiển thị nếu có latestAppointment hoặc healthAnswers */}
+              {(latestAppointment || healthAnswers) && (
                 <button onClick={handleDelete} className="donate-btn delete-btn" style={{marginTop: 16}}>Xóa đơn đăng ký</button>
               )}
             </div>
@@ -188,18 +191,13 @@ export default function RegisterDonatePage() {
         </div>
 
         {/* Nút đăng ký */}
-        {!healthAnswers && (
+        {!(bookingData || latestAppointment || healthAnswers) && (
           <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginBottom: 32 }}>
             <button
-              style={{ minWidth: 200, fontWeight: 600, fontSize: 16, background: '#fff', color: '#222', border: '1.5px solid #888', boxShadow: '0 2px 6px #0001' }}
+              style={{ minWidth: 200, fontWeight: 600, fontSize: 16, background: '#52c41a', borderColor: '#52c41a', color: '#fff', boxShadow: '0 2px 6px #0001' }}
               onClick={() => window.location.href = '/registerdonateform'}
             >
-              Đăng ký thời điểm sẵn sàng hiến máu
-            </button>
-            <button
-              style={{ minWidth: 200, fontWeight: 600, fontSize: 16, background: '#52c41a', borderColor: '#52c41a', color: '#fff', boxShadow: '0 2px 6px #0001' }}
-            >
-              Đăng kí hiến máu theo thời gian
+              Đăng ký hiến máu
             </button>
           </div>
         )}

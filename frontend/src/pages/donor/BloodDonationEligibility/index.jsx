@@ -109,7 +109,28 @@ export default function BloodDonationEligibility() {
     // 1. Lưu các câu trả lời vào localStorage
     localStorage.setItem('healthCheckAnswers', JSON.stringify(values));
 
-    // 2. Chuyển hướng về trang thông tin đăng ký
+    // 2. Nếu có dữ liệu bookingFormData thì tạo lịch hẹn mới trong appointmentHistory
+    const booking = localStorage.getItem('bookingFormData');
+    if (booking) {
+      const bookingData = JSON.parse(booking);
+      const existingHistory = JSON.parse(localStorage.getItem('appointmentHistory')) || [];
+      const newAppointment = {
+        id: Date.now(),
+        status: 'active',
+        address: bookingData.location,
+        sendDate: bookingData.date ? bookingData.date : null,
+        donationTimeSlot: bookingData.timeSlot,
+        bloodGroup: bookingData.bloodGroup,
+        note: bookingData.note,
+        healthAnswers: values,
+      };
+      const updatedHistory = [newAppointment, ...existingHistory];
+      localStorage.setItem('appointmentHistory', JSON.stringify(updatedHistory));
+      // Xóa bookingFormData sau khi lưu vào lịch sử
+      localStorage.removeItem('bookingFormData');
+    }
+
+    // 3. Chuyển hướng về trang thông tin đăng ký
     navigate('/registerdonate');
   };
 

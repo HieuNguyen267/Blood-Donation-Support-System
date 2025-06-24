@@ -53,15 +53,6 @@ const UserInfoForm = () => {
             onFinish={onFinish}
             autoComplete="off"
           >
-            <Title level={5} className="form-section-title">Thông tin định danh</Title>
-            <Row gutter={24}>
-              <Col span={12}>
-                <Form.Item label="Số CCCD" name="cccd" rules={[{ required: true, message: 'Vui lòng nhập CCCD!' }]}>
-                  <Input placeholder="Nhập số Căn cước công dân" />
-                </Form.Item>
-              </Col>
-            </Row>
-
             <Title level={5} className="form-section-title">Thông tin cá nhân & sức khỏe</Title>
             <Row gutter={24}>
               <Col span={12}>
@@ -100,6 +91,11 @@ const UserInfoForm = () => {
               <Col span={12}>
                 <Form.Item label="Nghề nghiệp" name="occupation">
                     <Input placeholder="Nhập nghề nghiệp hiện tại"/>
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label="Lần hiến máu gần nhất" name="lastDonationDate">
+                  <DatePicker style={{ width: '100%' }} placeholder="Chọn ngày" />
                 </Form.Item>
               </Col>
             </Row>

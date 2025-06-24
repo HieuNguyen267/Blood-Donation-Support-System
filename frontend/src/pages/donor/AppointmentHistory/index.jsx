@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { EnvironmentOutlined, ClockCircleOutlined, FileTextOutlined } from "@ant-design/icons";
 import { donorAPI } from "../../../services/api";
 import "./index.css";
+import moment from 'moment';
 
 const { Title, Text } = Typography;
 
@@ -52,9 +53,7 @@ export default function AppointmentHistory() {
         <Title level={2} className="history-title">
           Lịch sử đặt hẹn
         </Title>
-        <div className="step-progress-container">
-          <StepProgress currentStep={hasAppointments ? 1 : 0} />
-        </div>
+
 
         <div className="appointment-list">
           {appointments.length > 0 ? (
@@ -72,7 +71,7 @@ export default function AppointmentHistory() {
                     <EnvironmentOutlined /> {app.address}
                   </Text>
                   <Text className="appointment-details">
-                    <ClockCircleOutlined /> {app.donationTimeSlot} - {app.sendDate}
+                    <ClockCircleOutlined /> {app.donationTimeSlot} - {app.sendDate ? moment(app.sendDate).format('DD/MM/YYYY') : '-'}
                   </Text>
                 </div>
                 <div className="card-right">
