@@ -118,9 +118,55 @@ export default function BookingAntdForm() {
               <Form.Item label="Ghi chú thêm" name="note">
                 <Input.TextArea rows={3} placeholder="Nhập ghi chú nếu có..." />
               </Form.Item>
+              <Form.Item
+                label="Họ và tên"
+                name="fullName"
+                initialValue={profile.fullName || ''}
+                rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }]}
+              >
+                <Input disabled value={profile.fullName || ''} placeholder="Họ và tên" />
+              </Form.Item>
+              <Form.Item
+                label="Giới tính"
+                name="gender"
+                initialValue={profile.gender || ''}
+                rules={[{ required: true, message: 'Vui lòng nhập giới tính!' }]}
+              >
+                <Input disabled value={profile.gender || ''} placeholder="Giới tính" />
+              </Form.Item>
+              <Form.Item
+                label="Số điện thoại"
+                name="phone"
+                initialValue={profile.phone || ''}
+                rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }]}
+              >
+                <Input disabled value={profile.phone || ''} placeholder="Số điện thoại" />
+              </Form.Item>
+              <Form.Item
+                label="Email"
+                name="email"
+                initialValue={profile.email || ''}
+                rules={[{ required: true, message: 'Vui lòng nhập email!' }]}
+              >
+                <Input disabled value={profile.email || ''} placeholder="Email" />
+              </Form.Item>
+              <Form.Item
+                label="Lần hiến máu gần nhất"
+                name="lastDonationDate"
+                initialValue={profile.lastDonationDate || ''}
+              >
+                <Input disabled value={profile.lastDonationDate || ''} placeholder="Lần hiến máu gần nhất" />
+              </Form.Item>
+              <Form.Item
+                label="Cân nặng (kg)"
+                name="weight"
+                rules={[{ required: true, message: 'Vui lòng nhập cân nặng!' }]}
+              >
+                <Input placeholder="Nhập cân nặng của bạn" type="number" min={1} max={300} />
+              </Form.Item>
               <Form.Item>
                 <Button type="primary" htmlType="submit" block style={{ fontWeight: 600, fontSize: 18, height: 48, marginTop: 8 }}>
-                  Đăng ký
+                  Tiếp tục
                 </Button>
               </Form.Item>
             </Form>

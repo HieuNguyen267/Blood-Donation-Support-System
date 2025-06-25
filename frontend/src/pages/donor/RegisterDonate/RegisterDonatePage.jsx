@@ -22,7 +22,7 @@ const healthQuestions = [
   { label: "Bạn có đang bị bệnh tiểu đường hoặc các bệnh mãn tính khác không?", name: "tieuDuong", options: [ { label: "Không có", value: "none" }, { label: "Tiểu đường kiểm soát tốt", value: "kiemsoat" }, { label: "Tiểu đường không kiểm soát/bệnh mãn tính khác", value: "khongkiemsoat" }, ], },
 ];
 
-export default function RegisterDonatePage  () {
+export default function RegisterDonatePage () {
   const [info, setInfo] = useState(null);
   const [userInfo, setUserInfo] = useState({});
   const [healthAnswers, setHealthAnswers] = useState(null);
