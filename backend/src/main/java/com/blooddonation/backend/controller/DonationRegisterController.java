@@ -20,6 +20,12 @@ public class DonationRegisterController {
         return ResponseEntity.ok(donationRegisterService.createDonationRegister(dto));
     }
 
+    @PostMapping("/registerdonate")
+    public ResponseEntity<DonationRegisterDTO> createAppointment(@RequestBody DonationRegisterDTO dto) {
+        DonationRegisterDTO created = donationRegisterService.createDonationRegister(dto);
+        return ResponseEntity.ok(created);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<DonationRegisterDTO> updateDonationRegister(
             @PathVariable Integer id,

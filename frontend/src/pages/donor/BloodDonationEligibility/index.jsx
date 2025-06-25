@@ -109,34 +109,38 @@ export default function BloodDonationEligibility() {
     // 1. Lưu các câu trả lời vào localStorage
     localStorage.setItem('healthCheckAnswers', JSON.stringify(values));
 
-    // 2. Nếu có dữ liệu bookingFormData thì tạo lịch hẹn mới trong appointmentHistory
-    const booking = localStorage.getItem('bookingFormData');
-    if (booking) {
-      const bookingData = JSON.parse(booking);
-      const existingHistory = JSON.parse(localStorage.getItem('appointmentHistory')) || [];
-      const newAppointment = {
-        id: Date.now(),
-        status: 'active',
-        address: bookingData.location,
-        sendDate: bookingData.date ? bookingData.date : null,
-        donationTimeSlot: bookingData.timeSlot,
-        bloodGroup: bookingData.bloodGroup,
-        note: bookingData.note,
-        healthAnswers: values,
-      };
-      const updatedHistory = [newAppointment, ...existingHistory];
-      localStorage.setItem('appointmentHistory', JSON.stringify(updatedHistory));
-      // Xóa bookingFormData sau khi lưu vào lịch sử
-      localStorage.removeItem('bookingFormData');
-    }
-
-    // 3. Chuyển hướng về trang thông tin đăng ký
+    // 2. Chuyển hướng về trang thông tin đăng ký
     navigate('/registerdonate');
   };
 
   return (
     <div className="page-container">
       <Header />
+      <div className="step-progress-wrapper" style={{ marginTop: 32, marginBottom: 32 }}>
+        <div className="step-progress-wrapper">
+          <div className="step-progress">
+            {[1,2,3,4].map((num, idx) => {
+              const isActive = num < 2+1; // currentStep=2
+              const isCurrent = num === 2;
+              return (
+                <React.Fragment key={num}>
+                  <div className={`step-item${isActive ? ' active' : ''}${isCurrent ? ' current active' : ''}`}>
+                    <div className="step-circle">{isActive && num !== 2 ? '✓' : num}</div>
+                    <p className="step-title">{['Đăng ký','Kiểm tra sàng lọc','Hiến máu','Nghỉ ngơi'][num-1]}</p>
+                    <p className="step-desc">{[
+                      'Điền thông tin và kiểm tra điều kiện',
+                      'Kiểm tra sức khỏe và xét nghiệm',
+                      'Quá trình hiến máu (15–20 phút)',
+                      'Nghỉ ngơi và chờ giấy chứng nhận',
+                    ][num-1]}</p>
+                  </div>
+                  {idx < 3 && <div className="step-connector"></div>}
+                </React.Fragment>
+              );
+            })}
+          </div>
+        </div>
+      </div>
       <div className="eligibility-form-wrapper">
         <Title level={3} style={{ textAlign: "center", marginBottom: 24 }}>
           Kiểm tra điều kiện hiến máu (Sức khỏe)

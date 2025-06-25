@@ -14,7 +14,7 @@ import {
 import { Link as RouterLink, useNavigate, useLocation } from "react-router-dom";
 import Header from "../../../components/user/Header";
 import Footer from "../../../components/user/Footer";
-import { authAPI, setAuthToken } from "../../../services/api";
+import { authAPI, setAuthToken, donorAPI } from "../../../services/api";
 import "./index.css";
 
 const { Title } = Typography;
@@ -33,12 +33,34 @@ export default function LoginPage() {
       });
       
       // Lưu token và thông tin user
-      setAuthToken(response.token);
-      localStorage.setItem('userEmailForProfile', values.email);
-      if (response.role) {
-        localStorage.setItem('userRole', response.role);
-      }
+      setAuthToken(response.token, response.email, response.role);
       
+      // Đợi setAuthToken xong, rồi mới gọi getProfile
+      setTimeout(async () => {
+        const profile = await donorAPI.getProfile();
+        
+        // Luôn cố gắng lấy profile, nếu có thì lưu fullName, nếu không thì fallback
+        try {
+          if (profile && profile.fullName) {
+            localStorage.setItem('userInfo', JSON.stringify(profile));
+          } else {
+            localStorage.setItem('userInfo', JSON.stringify({
+              email: response.email,
+              role: response.role,
+              fullName: 'Người dùng'
+            }));
+          }
+          window.dispatchEvent(new Event('storage'));
+        } catch (e) {
+          // Nếu không lấy được profile, fallback
+          localStorage.setItem('userInfo', JSON.stringify({
+            email: response.email,
+            role: response.role,
+            fullName: 'Người dùng'
+          }));
+          window.dispatchEvent(new Event('storage'));
+        }
+      }, 100);
       message.success('Đăng nhập thành công!');
       
       // Chuyển hướng dựa trên role
@@ -70,6 +92,9 @@ export default function LoginPage() {
       navigate(location.pathname, { replace: true, state: {} });
     }
   }, [location.state, location.pathname, navigate]);
+
+  const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+  const userName = userInfo?.fullName || "Người dùng";
 
   return (
     <>

@@ -15,41 +15,48 @@ import {
 
 export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') === 'true');
+  const [userName, setUserName] = useState('Đăng nhập');
   const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('userInfo');
     setIsLoggedIn(false);
+    setUserName('Đăng nhập');
     navigate('/'); 
   };
 
   useEffect(() => {
     const checkLoginStatus = () => {
-      setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true');
+      const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
+      setIsLoggedIn(loggedIn);
+      if (loggedIn) {
+        try {
+          const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+          if (userInfo && userInfo.fullName) {
+            setUserName(userInfo.fullName);
+          } else {
+            setUserName('Người dùng');
+          }
+        } catch {
+          setUserName('Người dùng');
+        }
+      } else {
+        setUserName('Đăng nhập');
+      }
     };
 
     window.addEventListener('storage', checkLoginStatus);
-    
     // Initial check
     checkLoginStatus();
-
     return () => {
       window.removeEventListener('storage', checkLoginStatus);
     };
   }, []);
 
-  // Lấy họ tên từ localStorage nếu đã đăng nhập
-  let userName = 'Đăng nhập';
   let showDropdown = false;
-  if (isLoggedIn) {
-    try {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      if (userInfo && userInfo.fullName) {
-        userName = userInfo.fullName;
-        showDropdown = true;
-      }
-    } catch {}
+  if (isLoggedIn && userName !== 'Đăng nhập') {
+    showDropdown = true;
   }
 
   const menu = (
@@ -66,6 +73,8 @@ export default function Header() {
       </Menu.Item>
     </Menu>
   );
+
+  const email = localStorage.getItem('email');
 
   return (
     <div className="header-wrapper">
@@ -94,7 +103,7 @@ export default function Header() {
         <a href="/">TRANG CHỦ</a>
         {isLoggedIn ? (
           <>
-            <a href="/registerdonate">ĐĂNG KÝ HIẾN MÁU</a>
+            <a href="/registerdonate">LỊCH HẸN CỦA BẠN</a>
             <a href="/appointmenthistory">LỊCH SỬ ĐẶT HẸN</a>
             <a href="/addcertificate">CHỨNG NHẬN</a>
             <a href="/faq">HỎI ĐÁP</a>

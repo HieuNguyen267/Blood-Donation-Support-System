@@ -37,6 +37,7 @@
   background-color: #4CAF50 !important;
   border-color: #4CAF50 !important;
   color: white !important;
+  margin-top: 24px;
 }
 
 .green-button:hover,
@@ -60,4 +61,10 @@
 
 .form-title {
   margin-bottom: 16px;
+}
+
+.step-progress-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
 }

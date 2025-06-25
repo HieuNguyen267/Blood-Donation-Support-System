@@ -65,6 +65,9 @@ public class Donor {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "job", length = 100)
+    private String job;
+
     public Integer getDonorId() { return donorId; }
     public void setDonorId(Integer donorId) { this.donorId = donorId; }
 
@@ -115,4 +118,7 @@ public class Donor {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public String getJob() { return job; }
+    public void setJob(String job) { this.job = job; }
 } 

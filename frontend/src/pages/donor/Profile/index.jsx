@@ -11,7 +11,6 @@ import './index.css';
 const { Title, Text } = Typography;
 const { Option } = Select;
 
-
 const mockExperience = [
   {
     title: 'Tham gia hiến máu nhân đạo',
@@ -27,12 +26,6 @@ const mockExperience = [
   }
 ];
 
-const mockStats = [
-  { label: 'Lần hiến máu', value: 5 },
-  { label: 'Số lượt đăng ký', value: 8 },
-  { label: 'Điểm tích lũy', value: 120 },
-];
-
 const ProfilePage = () => {
   const [userInfo, setUserInfo] = useState({});
   const [isEditMode, setIsEditMode] = useState(false);
@@ -40,26 +33,23 @@ const ProfilePage = () => {
   const [saving, setSaving] = useState(false);
   const [form] = Form.useForm();
   const navigate = useNavigate();
-  const [occupationEdit, setOccupationEdit] = useState('');
-  const [occupationSaving, setOccupationSaving] = useState(false);
 
   useEffect(() => {
     loadProfile();
   }, []);
 
-  useEffect(() => {
-    setOccupationEdit(userInfo.occupation || '');
-  }, [userInfo.occupation]);
-
   const loadProfile = async () => {
     setLoading(true);
     try {
       const profile = await donorAPI.getProfile();
-      if (profile.dob) {
-        profile.dob = moment(profile.dob);
-      }
-      setUserInfo(profile);
-      form.setFieldsValue(profile);
+      form.setFieldsValue({
+        ...profile,
+        dateOfBirth: profile.dateOfBirth ? moment(profile.dateOfBirth) : null,
+      });
+      setUserInfo({
+        ...profile,
+        dateOfBirth: profile.dateOfBirth ? moment(profile.dateOfBirth) : null,
+      });
     } catch (error) {
       console.error('Load profile error:', error);
       message.error('Không thể tải thông tin hồ sơ. Vui lòng thử lại.');
@@ -76,15 +66,24 @@ const ProfilePage = () => {
   const handleSave = async (values) => {
     setSaving(true);
     try {
-      const updatedInfo = { ...values };
-      if (updatedInfo.dob) {
-        updatedInfo.dob = moment(updatedInfo.dob).format('YYYY-MM-DD');
-      }
-      await donorAPI.updateProfile(updatedInfo);
-      const newProfile = { ...updatedInfo };
-      if (newProfile.dob) {
-        newProfile.dob = moment(newProfile.dob);
-      }
+      await donorAPI.updateProfile({
+        fullName: values.fullName,
+        dateOfBirth: values.dateOfBirth ? moment(values.dateOfBirth).format('YYYY-MM-DD') : undefined,
+        identityNumber: values.identityNumber,
+        gender: values.gender,
+        address: values.address,
+        bloodGroup: values.bloodGroup,
+        job: values.job,
+        phone: values.phone,
+        email: values.email,
+      });
+      const newProfile = {
+        ...values,
+        dateOfBirth: values.dateOfBirth ? moment(values.dateOfBirth) : undefined,
+        identityNumber: values.identityNumber,
+        bloodGroup: values.bloodGroup,
+        job: values.job,
+      };
       setUserInfo(newProfile);
       setIsEditMode(false);
       message.success('Cập nhật thông tin thành công!');
@@ -102,52 +101,6 @@ const ProfilePage = () => {
   };
 
   const renderItem = (value) => value || '-';
-
-  // Handler for direct occupation edit
-  const handleOccupationChange = (e) => {
-    setOccupationEdit(e.target.value);
-  };
-  const handleOccupationBlur = async () => {
-    if (occupationEdit !== userInfo.occupation) {
-      setOccupationSaving(true);
-      try {
-        await donorAPI.updateProfile({ ...userInfo, occupation: occupationEdit });
-        setUserInfo((prev) => ({ ...prev, occupation: occupationEdit }));
-        message.success('Cập nhật nghề nghiệp thành công!');
-      } catch (error) {
-        message.error('Cập nhật nghề nghiệp thất bại.');
-        setOccupationEdit(userInfo.occupation || '');
-      } finally {
-        setOccupationSaving(false);
-      }
-    }
-  };
-
-  // Handler for delete registration
-  const handleDeleteRegistration = () => {
-    Modal.confirm({
-      title: 'Xác nhận xóa đơn đăng ký hiến máu',
-      content: 'Bạn có chắc chắn muốn xóa đơn đăng ký hiến máu này không?',
-      okText: 'Xóa',
-      okType: 'danger',
-      cancelText: 'Hủy',
-      onOk: async () => {
-        try {
-          await donorAPI.deleteRegistration(); // Giả sử API này tồn tại
-          message.success('Đã xóa đơn đăng ký hiến máu!');
-          // Cập nhật lại state để ẩn nút xóa, hiện nút đăng ký
-          setUserInfo((prev) => ({ ...prev, hasActiveRegistration: false, lastDonationId: null }));
-        } catch (error) {
-          message.error('Xóa đơn đăng ký thất bại!');
-        }
-      },
-    });
-  };
-
-  // Handler for register button
-  const handleRegister = () => {
-    navigate('/donor/register-donate');
-  };
 
   if (loading) {
     return (
@@ -174,7 +127,7 @@ const ProfilePage = () => {
             <Avatar size={96} icon={<User size={48} />} style={{ background: '#222' }} />
             <div>
               <Title level={3} style={{ marginBottom: 0 }}>{renderItem(userInfo.fullName)}</Title>
-              <Text type="secondary">@{userInfo.cccd || 'user'}</Text>
+              <Text type="secondary">@{userInfo.identityNumber || 'user'}</Text>
               <div style={{ marginTop: 8 }}>
                 <Button icon={<Edit size={16} />} onClick={handleEdit} type="primary" size="small" style={{ background: '#52c41a', borderColor: '#52c41a' }}>Chỉnh sửa hồ sơ</Button>
               </div>
@@ -183,17 +136,15 @@ const ProfilePage = () => {
           <Divider />
           <Title level={5}>Giới thiệu</Title>
           <Text>
-            {userInfo.occupation ? `Nghề nghiệp: ${userInfo.occupation}. ` : ''}
+            {userInfo.job ? `Nghề nghiệp: ${userInfo.job}. ` : ''}
             {userInfo.address ? `Địa chỉ: ${userInfo.address}. ` : ''}
             {userInfo.email ? `Email: ${userInfo.email}.` : 'Chưa cập nhật email.'}
           </Text>
           <Divider />
-        
-          
           <Title level={5}>Kinh nghiệm</Title>
           <List
             itemLayout="vertical"
-            dataSource={userInfo.experience || mockExperience}
+            dataSource={mockExperience}
             renderItem={item => (
               <List.Item>
                 <List.Item.Meta
@@ -210,34 +161,15 @@ const ProfilePage = () => {
       <Col xs={24} md={10}>
         <Card className="profile-card" title="Thông tin liên hệ" style={{ marginBottom: 24 }}>
           <Descriptions layout="vertical" column={1} bordered size="small">
-            <Descriptions.Item label="Ngày sinh">{userInfo.dob ? userInfo.dob.format('DD/MM/YYYY') : '-'}</Descriptions.Item>
+            <Descriptions.Item label="Ngày sinh">{userInfo.dateOfBirth ? moment(userInfo.dateOfBirth).format('DD/MM/YYYY') : '-'}</Descriptions.Item>
             <Descriptions.Item label="Giới tính">{renderItem(userInfo.gender)}</Descriptions.Item>
-            <Descriptions.Item label="Nhóm máu">{renderItem(userInfo.bloodType)}</Descriptions.Item>
+            <Descriptions.Item label="Nhóm máu">{renderItem(userInfo.bloodGroup)}</Descriptions.Item>
             <Descriptions.Item label="Điện thoại di động">{renderItem(userInfo.phone)}</Descriptions.Item>
             <Descriptions.Item label="Email">{renderItem(userInfo.email)}</Descriptions.Item>
             <Descriptions.Item label="Địa chỉ liên hệ">{renderItem(userInfo.address)}</Descriptions.Item>
-            <Descriptions.Item label="Nghề nghiệp">{renderItem(userInfo.occupation)}</Descriptions.Item>
-            <Descriptions.Item label="Ngày hiến máu gần nhất">{userInfo.lastDonationDate ? moment(userInfo.lastDonationDate).format('DD/MM/YYYY') : '-'}</Descriptions.Item>
+            <Descriptions.Item label="Nghề nghiệp">{renderItem(userInfo.job)}</Descriptions.Item>
           </Descriptions>
         </Card>
-        {/* Button for blood donation registration or delete registration */}
-        <div style={{ marginBottom: 24, textAlign: 'center' }}>
-          {userInfo.hasActiveRegistration || userInfo.lastDonationId ? (
-            <Button
-              type="primary"
-              danger
-              icon={<Trash2 size={16} />}
-              style={{ background: '#52c41a', borderColor: '#52c41a' }}
-              onClick={handleDeleteRegistration}
-            >
-              Xóa đơn đăng ký hiến máu
-            </Button>
-          ) : (
-            <Button type="primary" onClick={handleRegister}>
-              Đăng ký hiến máu
-            </Button>
-          )}
-        </div>
       </Col>
     </Row>
   );
@@ -251,14 +183,16 @@ const ProfilePage = () => {
           {/* Cột trái */}
           <Col span={12}>
             <Form.Item label="Họ và Tên" name="fullName" rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }]}> <Input /> </Form.Item>
-            <Form.Item label="Ngày sinh" name="dob" rules={[{ required: true, message: 'Vui lòng chọn ngày sinh!' }]}> <DatePicker style={{ width: '100%' }} /> </Form.Item>
+            <Form.Item label="Ngày sinh" name="dateOfBirth" rules={[{ required: true, message: 'Vui lòng chọn ngày sinh!' }]}> <DatePicker style={{ width: '100%' }} /> </Form.Item>
+            <Form.Item label="Số CCCD" name="identityNumber" rules={[{ required: true, message: 'Vui lòng nhập CCCD!' }]}> <Input /> </Form.Item>
             <Form.Item label="Giới tính" name="gender" rules={[{ required: true, message: 'Vui lòng chọn giới tính!' }]}> <Radio.Group> <Radio value="Nam">Nam</Radio> <Radio value="Nữ">Nữ</Radio> <Radio value="Khác">Khác</Radio> </Radio.Group> </Form.Item>
-            <Form.Item label="Nhóm máu" name="bloodType" rules={[{ required: true, message: 'Vui lòng chọn nhóm máu!' }]}> <Select> <Option value="A+">A+</Option> <Option value="A-">A-</Option> <Option value="B+">B+</Option> <Option value="B-">B-</Option> <Option value="AB+">AB+</Option> <Option value="AB-">AB-</Option> <Option value="O+">O+</Option> <Option value="O-">O-</Option> </Select> </Form.Item>
+            <Form.Item label="Nhóm máu" name="bloodGroup" rules={[{ required: true, message: 'Vui lòng chọn nhóm máu!' }]}> <Select> <Option value="A+">A+</Option> <Option value="A-">A-</Option> <Option value="B+">B+</Option> <Option value="B-">B-</Option> <Option value="AB+">AB+</Option> <Option value="AB-">AB-</Option> <Option value="O+">O+</Option> <Option value="O-">O-</Option> </Select> </Form.Item>
           </Col>
           {/* Cột phải */}
           <Col span={12}>
             <Form.Item label="Email" name="email"> <Input readOnly /> </Form.Item>
             <Form.Item label="Điện thoại di động" name="phone" rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }]}> <Input /> </Form.Item>
+            <Form.Item label="Nghề nghiệp" name="job"> <Input /> </Form.Item>
             <Form.Item label="Địa chỉ liên hệ" name="address" rules={[{ required: true, message: 'Vui lòng nhập địa chỉ!' }]}> <Input.TextArea rows={5} /> </Form.Item>
           </Col>
         </Row>

@@ -52,6 +52,9 @@ export default function RegisterDonate() {
   };
 
   const handleSubmit = (values) => {
+    // Lưu dữ liệu form vào localStorage
+    localStorage.setItem('donationFormData', JSON.stringify(values));
+
     // Lấy lịch sử cũ từ localStorage
     const existingHistory = JSON.parse(localStorage.getItem("appointmentHistory")) || [];
 
@@ -78,7 +81,7 @@ export default function RegisterDonate() {
     // Lưu lại vào localStorage
     localStorage.setItem("appointmentHistory", JSON.stringify(updatedHistory));
 
-    // Chuyển hướng đến trang thông tin đăng ký
+    // Chuyển hướng thẳng đến trang thông tin đăng ký
     navigate("/registerdonate");
   };
 
@@ -87,7 +90,7 @@ export default function RegisterDonate() {
       <Header />
       <div className="form-header">
         <Title level={2} className="form-title">
-          Đăng ký hiến máu
+          Đăng ký sẵn sàng hiến máu
         </Title>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginBottom: 32 }}>
           <Button type="primary" style={{ minWidth: 200, fontWeight: 600, fontSize: 16, boxShadow: '0 2px 6px #0001', background: '#52c41a', borderColor: '#52c41a', color: '#fff' }}>
@@ -99,34 +102,26 @@ export default function RegisterDonate() {
           </Button>
         </div>
         <div className="step-progress-wrapper">
-          <StepProgress />
+          <StepProgress currentStep={1} />
         </div>
       </div>
 
       <Content className="content">
         <div className="form-container">
+          {/* Hiển thị số lần hiến máu gần nhất */}
+          <div style={{ marginBottom: 16, fontWeight: 500, fontSize: 16 }}>
+            Lần hiến máu gần nhất: {profile.lastDonationCount ?? profile.donationCount ?? profile.lastDonationTimes ?? '-'}
+          </div>
           <Form
             form={form}
             layout="vertical"
             onFinish={handleSubmit}
             onValuesChange={handleFormChange}
           >
-            <Form.Item label="Họ và tên" name="fullName" rules={[{ required: true }]}>
-              <Input prefix={<UserOutlined />} placeholder="Nhập họ tên" disabled />
-            </Form.Item>
-
-            <Form.Item label="Số điện thoại" name="phone" rules={[{ required: true }]}>
-              <Input prefix={<PhoneOutlined />} placeholder="Nhập SĐT" disabled />
-            </Form.Item>
-
-            <Form.Item label="Email" name="email" rules={[{ required: true, type: "email" }]}>
-              <Input prefix={<MailOutlined />} placeholder="abc@gmail.com" disabled />
-            </Form.Item>
-
-            <Form.Item label="Địa chỉ hiến máu" name="address">
-              <Input prefix={<EnvironmentOutlined />} disabled />
-            </Form.Item>
-
+            <Form.Item label="Họ và tên" name="fullName" rules={[{ required: true }]}> <Input prefix={<UserOutlined />} placeholder="Nhập họ tên" disabled /> </Form.Item>
+            <Form.Item label="Số điện thoại" name="phone" rules={[{ required: true }]}> <Input prefix={<PhoneOutlined />} placeholder="Nhập SĐT" disabled /> </Form.Item>
+            <Form.Item label="Email" name="email" rules={[{ required: true, type: "email" }]}> <Input prefix={<MailOutlined />} placeholder="abc@gmail.com" disabled /> </Form.Item>
+            <Form.Item label="Địa chỉ hiến máu" name="address"> <Input prefix={<EnvironmentOutlined />} disabled /> </Form.Item>
             <Form.Item
               label="Cân nặng (kg)"
               name="weight"
@@ -140,7 +135,6 @@ export default function RegisterDonate() {
             >
               <Input placeholder="Nhập cân nặng của bạn" />
             </Form.Item>
-
             <Form.Item
               label="Nhóm máu"
               name="sampleGroup"
@@ -159,15 +153,8 @@ export default function RegisterDonate() {
                 <Select.Option value="Bombay(hh)">Bombay (hh)</Select.Option>
               </Select>
             </Form.Item>
-
-            <Form.Item label="Lần hiến máu gần nhất" name="donateLast" rules={[{ required: true }]}>
-              <DatePicker style={{ width: "100%" }} suffixIcon={<CalendarOutlined />} disabled />
-            </Form.Item>
-
-            <Form.Item label="Thời điểm sẵn sàng hiến máu" name="sendTime" rules={[{ required: true }]}>
-              <DatePicker style={{ width: "100%" }} suffixIcon={<CalendarOutlined />} />
-            </Form.Item>
-
+            <Form.Item label="Lần hiến máu gần nhất" name="donateLast" rules={[{ required: true }]}> <DatePicker style={{ width: "100%" }} suffixIcon={<CalendarOutlined />} disabled /> </Form.Item>
+            <Form.Item label="Thời điểm sẵn sàng hiến máu" name="sendTime" rules={[{ required: true }]}> <DatePicker style={{ width: "100%" }} suffixIcon={<CalendarOutlined />} /> </Form.Item>
             <Form.Item
               label="Khung giờ có thể hiến máu"
               name="donationTimeSlot"
@@ -178,11 +165,7 @@ export default function RegisterDonate() {
                 <Option value="13:00-16:00">Chiều (13:00 - 16:00)</Option>
               </Select>
             </Form.Item>
-
-            <Form.Item label="Tình trạng sức khỏe" name="status">
-              <Input.TextArea rows={4} />
-            </Form.Item>
-
+            <Form.Item label="Tình trạng sức khỏe" name="status"> <Input.TextArea rows={4} /> </Form.Item>
             <Form.Item>
               <Button type="primary" htmlType="submit" block className="green-button">
                 Đăng ký

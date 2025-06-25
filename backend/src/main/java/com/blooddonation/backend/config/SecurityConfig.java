@@ -13,12 +13,18 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import com.blooddonation.backend.security.jwt.JwtAuthenticationFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
     
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -34,7 +40,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(Arrays.asList("*"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         
@@ -50,15 +56,10 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/").permitAll()
-                .requestMatchers("/test").permitAll()
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/test/**").permitAll()
-                .requestMatchers("/h2-console/**").permitAll()
-                .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
-                .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
-                .anyRequest().permitAll() // Cho phép tất cả
-            );
+                .requestMatchers("/", "/test", "/auth/**", "/h2-console/**", "/swagger-ui/**", "/api-docs/**", "/css/**", "/js/**", "/images/**").permitAll()
+                .anyRequest().authenticated() // Các request còn lại phải xác thực
+            )
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         
         return http.build();
     }

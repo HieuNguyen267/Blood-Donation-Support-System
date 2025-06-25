@@ -54,7 +54,8 @@ import MedicalFacilityManagement from './pages/Admin/MedicalFacilityManagement';
 import AccountManagement from './pages/Admin/AccountManagement';
 import AccountProfile from './pages/Admin/AccountProfile';
 import MatchingManagement from './pages/Admin/MatchingManagement';
-import BookingAntdForm from './pages/donor/BookingAntdForm';
+
+import BookingAntdForm from './pages/donor/BookingAntdForm/index';
 
 function AppContent() {
   const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') === 'true');
@@ -103,10 +104,10 @@ function AppContent() {
         <Route path="/user-info-form" element={<UserInfoForm />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/blood-donation-eligibility" element={<BloodDonationEligibility />} />
-        <Route path="/eligibility" element={<BloodDonationEligibility />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/verify-password" element={<VerifyPassword />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/booking-antd" element={<BookingAntdForm />} />
         <Route path="/medical-facility" element={<MedicalFacilityHome />} />
         <Route path="/medical-facility/profile" element={<MedicalFacilityProfile />} />
         <Route path="/medical-facility/receive-blood" element={<MedicalFacilityReceiveBlood />} />
@@ -130,7 +131,6 @@ function AppContent() {
         <Route path="/admin/profile" element={<AccountProfile />} />
         <Route path="/admin/settings" element={<Settings />} />
         <Route path="/admin/matching" element={<MatchingManagement />} />
-        <Route path="/booking-antd" element={<BookingAntdForm />} />
       </Routes>
     </>
   );

@@ -9,6 +9,7 @@ body, .booking-antd-layout {
   border: 1.5px solid #b2dfdb !important;
   background: #fff !important;
   padding: 32px 32px 24px 32px !important;
+  border-top: none !important;
 }
 .booking-antd-title {
   color: #43a047 !important;
@@ -64,4 +65,14 @@ body, .booking-antd-layout {
   .booking-antd-card {
     padding: 0 0.5rem 2.5rem;
   }
+}
+.form-header, .step-progress-wrapper {
+  border-top: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+/* Ẩn các đường nối dư thừa của Ant Design Steps, chỉ giữ lại 1 đường duy nhất */
+.ant-steps .ant-steps-item-tail {
+  display: none !important;
 } 

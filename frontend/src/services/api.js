@@ -1,12 +1,29 @@
-const API_BASE_URL = '/api';
+const API_BASE_URL = 'http://localhost:8080';
 
 // Helper function để xử lý response
 const handleResponse = async (response) => {
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || errorData.message || `HTTP error! status: ${response.status}`);
+    // Nếu có body JSON thì parse, không thì trả về text hoặc throw error
+    const text = await response.text();
+    try {
+      const errorData = JSON.parse(text);
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.message || errorData.error || text}`);
+    } catch (parseError) {
+      throw new Error(`HTTP error! status: ${response.status}, body: ${text}`);
+    }
   }
-  return response.json();
+  
+  // Kiểm tra response có body không
+  const text = await response.text();
+  if (!text) {
+    return null; // Trả về null nếu response rỗng
+  }
+  
+  try {
+    return JSON.parse(text);
+  } catch (parseError) {
+    throw new Error(`Invalid JSON response: ${text}`);
+  }
 };
 
 // Helper function để tạo headers
@@ -26,7 +43,12 @@ export const authAPI = {
       headers: getHeaders(),
       body: JSON.stringify(credentials)
     });
-    return handleResponse(response);
+    const data = await handleResponse(response);
+    console.log('Login response data:', data); // Debug log
+    console.log('Email from response:', data.email); // Debug log
+    console.log('Role from response:', data.role); // Debug log
+    setAuthToken(data.token, data.email, data.role);
+    return data;
   },
 
   register: async (userData) => {
@@ -237,13 +259,17 @@ export const analyticsAPI = {
 };
 
 // Utility functions
-export const setAuthToken = (token) => {
+export const setAuthToken = (token, email, role) => {
   if (token) {
     localStorage.setItem('token', token);
     localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('email', email);
+    localStorage.setItem('role', role);
   } else {
     localStorage.removeItem('token');
     localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('email');
+    localStorage.removeItem('role');
   }
 };
 
@@ -253,4 +279,18 @@ export const getAuthToken = () => {
 
 export const isAuthenticated = () => {
   return !!getAuthToken();
+};
+
+const email = localStorage.getItem('email') || '';
+const role = localStorage.getItem('role');
+
+const handleSave = async (values) => {
+  await donorAPI.updateProfile(values);
+  // ... xử lý tiếp
+};
+
+const handleSaveForm = async (e) => {
+  e.preventDefault(); // Ngăn submit mặc định
+  await donorAPI.updateProfile(formData); // Gọi API PUT
+  // ... xử lý tiếp (hiển thị thông báo, chuyển trang nếu thành công)
 }; 

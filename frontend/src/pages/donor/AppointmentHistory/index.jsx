@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Header from "../../../components/user/Header";
 import Footer from "../../../components/user/Footer";
-import StepProgress from "../../../components/user/StepProgress";
 import { Typography, Button, message, Spin } from "antd";
 import { Link } from "react-router-dom";
 import { EnvironmentOutlined, ClockCircleOutlined, FileTextOutlined } from "@ant-design/icons";
@@ -53,7 +52,6 @@ export default function AppointmentHistory() {
         <Title level={2} className="history-title">
           Lịch sử đặt hẹn
         </Title>
-
 
         <div className="appointment-list">
           {appointments.length > 0 ? (

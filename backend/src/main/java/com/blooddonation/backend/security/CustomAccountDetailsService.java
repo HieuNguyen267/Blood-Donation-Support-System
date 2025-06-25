@@ -18,8 +18,8 @@ public class CustomAccountDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Account account = accountRepository.findByEmailOrPhone(email, email)
-                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy account với email hoặc số điện thoại: " + email));
+        Account account = accountRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy account với email: " + email));
         return org.springframework.security.core.userdetails.User.builder()
                 .username(account.getEmail())
                 .password(account.getPasswordHash())

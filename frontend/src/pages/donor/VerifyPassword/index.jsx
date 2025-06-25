@@ -4,6 +4,7 @@ import Header from '../../../components/user/Header';
 import Footer from '../../../components/user/Footer';
 import { authAPI, setAuthToken } from '../../../services/api';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { donorAPI } from '../../../services/api';
 
 const { Title } = Typography;
 
@@ -140,7 +141,7 @@ export default function VerifyPassword() {
         
         // Tự động đăng nhập
         const loginResponse = await authAPI.login({ email, password });
-        setAuthToken(loginResponse.token);
+        setAuthToken(loginResponse.token, loginResponse.email, loginResponse.role);
         
         // Chuyển đến trang cập nhật thông tin sau khi đăng nhập thành công
         navigate('/user-info-form'); 
@@ -164,6 +165,15 @@ export default function VerifyPassword() {
     if (!domain) return email;
     return name[0] + '***' + name.slice(-1) + '@' + domain;
   }
+
+  const handleSave = async (formData) => {
+    try {
+      await donorAPI.updateProfile(formData);
+      message.success('Thông tin cá nhân đã được cập nhật thành công');
+    } catch (error) {
+      message.error('Cập nhật thông tin cá nhân thất bại');
+    }
+  };
 
   return (
     <>

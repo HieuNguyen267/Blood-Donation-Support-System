@@ -34,4 +34,7 @@ public interface DonorRepository extends JpaRepository<Donor, Integer> {
 
     @Query("SELECT d.bloodGroup.aboType, d.bloodGroup.rhFactor, COUNT(d) FROM Donor d GROUP BY d.bloodGroup.aboType, d.bloodGroup.rhFactor")
     List<Object[]> getBloodGroupDistribution();
+
+    @Query("SELECT d FROM Donor d WHERE d.account.email = :email")
+    Optional<Donor> findByEmail(@org.springframework.data.repository.query.Param("email") String email);
 } 

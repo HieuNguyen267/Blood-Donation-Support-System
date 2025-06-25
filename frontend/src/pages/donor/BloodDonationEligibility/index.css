@@ -1,125 +1,125 @@
 .page-container {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.eligibility-form-wrapper {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: #f5f7fa;
-  padding: 32px 8px;
-}
-
-.eligibility-card {
-  max-width: 800px;
-  width: 100%;
-  margin: 0 auto;
-  border-radius: 18px !important;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
-  padding: 40px 36px 32px 36px;
-  background: #fff;
-}
-
-.question-box {
-  margin-bottom: 28px;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-  border: 1.5px solid #e0e0e0;
-  background: #fff;
-}
-
-.question-header {
-  background: #4caf50;
-  color: #fff;
-  font-size: 1.08rem;
-  font-weight: 600;
-  padding: 13px 20px 11px 20px;
-  border-top-left-radius: 14px;
-  border-top-right-radius: 14px;
-}
-
-.question-content {
-  padding: 18px 20px 10px 20px;
-  background: #fff;
-}
-
-.question-label {
-  font-size: 1rem;
-  font-weight: 500;
-  color: #222;
-  margin-bottom: 10px;
-  display: block;
-}
-
-.ant-checkbox-group {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.ant-form-item {
-  margin-bottom: 0;
-}
-
-.check-btn {
-  background: linear-gradient(90deg, #e53935 0%, #e35d5b 100%);
-  border: none;
-  font-size: 1rem;
-  font-weight: 600;
-  border-radius: 8px;
-  height: 38px;
-  margin-top: 8px;
-  transition: background 0.2s;
-}
-
-.check-btn:hover {
-  background: linear-gradient(90deg, #b71c1c 0%, #e35d5b 100%);
-}
-
-.result-message {
-  margin-top: 28px;
-  text-align: center;
-  font-size: 1.15rem;
-  font-weight: bold;
-  color: #1976d2;
-  letter-spacing: 0.5px;
-}
-
-.btn-group-right {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 350px;
-  margin-top: 18px;
-}
-
-.btn-green,
-.btn-outline-green {
-  height: 38px !important;
-  font-size: 1rem !important;
-  min-width: 120px;
-  width: 120px;
-  padding: 0 !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn-green {
-  background: #4caf50 !important;
-  border-color: #4caf50 !important;
-  color: #fff !important;
-  font-weight: 300;
-}
-
-.btn-green:hover,
-.btn-green:focus {
-  background: #66bb6a !important;
-  border-color: #66bb6a !important;
-  color: #fff !important;
-} 
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .eligibility-form-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #f5f7fa;
+    padding: 32px 8px;
+  }
+  
+  .eligibility-card {
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
+    border-radius: 18px !important;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    padding: 40px 36px 32px 36px;
+    background: #fff;
+  }
+  
+  .question-box {
+    margin-bottom: 28px;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    border: 1.5px solid #e0e0e0;
+    background: #fff;
+  }
+  
+  .question-header {
+    background: #4caf50;
+    color: #fff;
+    font-size: 1.08rem;
+    font-weight: 600;
+    padding: 13px 20px 11px 20px;
+    border-top-left-radius: 14px;
+    border-top-right-radius: 14px;
+  }
+  
+  .question-content {
+    padding: 18px 20px 10px 20px;
+    background: #fff;
+  }
+  
+  .question-label {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #222;
+    margin-bottom: 10px;
+    display: block;
+  }
+  
+  .ant-checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .ant-form-item {
+    margin-bottom: 0;
+  }
+  
+  .check-btn {
+    background: linear-gradient(90deg, #e53935 0%, #e35d5b 100%);
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    height: 38px;
+    margin-top: 8px;
+    transition: background 0.2s;
+  }
+  
+  .check-btn:hover {
+    background: linear-gradient(90deg, #b71c1c 0%, #e35d5b 100%);
+  }
+  
+  .result-message {
+    margin-top: 28px;
+    text-align: center;
+    font-size: 1.15rem;
+    font-weight: bold;
+    color: #1976d2;
+    letter-spacing: 0.5px;
+  }
+  
+  .btn-group-right {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 350px;
+    margin-top: 18px;
+  }
+  
+  .btn-green,
+  .btn-outline-green {
+    height: 38px !important;
+    font-size: 1rem !important;
+    min-width: 120px;
+    width: 120px;
+    padding: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .btn-green {
+    background: #4caf50 !important;
+    border-color: #4caf50 !important;
+    color: #fff !important;
+    font-weight: 300;
+  }
+  
+  .btn-green:hover,
+  .btn-green:focus {
+    background: #66bb6a !important;
+    border-color: #66bb6a !important;
+    color: #fff !important;
+  } 

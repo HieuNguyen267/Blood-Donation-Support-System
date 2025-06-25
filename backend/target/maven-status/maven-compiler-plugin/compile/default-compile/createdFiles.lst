@@ -23,6 +23,7 @@ com\blooddonation\backend\entity\MedicalFacilities.class
 com\blooddonation\backend\controller\AuthController.class
 com\blooddonation\backend\config\SecurityConfig.class
 com\blooddonation\backend\repository\MatchingBloodRepository.class
+com\blooddonation\backend\service\impl\DonorServiceImpl.class
 com\blooddonation\backend\service\impl\ReminderServiceImpl.class
 com\blooddonation\backend\service\BloodRequestService.class
 com\blooddonation\backend\repository\BloodGroupRepository.class

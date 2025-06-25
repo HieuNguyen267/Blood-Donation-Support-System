@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, DatePicker, Select, Button, Card, Typography, Row, Col, message, Input } from 'antd';
 import { CalendarOutlined, EnvironmentOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import Header from '../../../components/user/Header';
 import Footer from '../../../components/user/Footer';
 import StepProgress from '../../../components/user/StepProgress';
 import './index.css';
+import { donorAPI } from '../../../services/api';
 
 const { Option } = Select;
 const { Title } = Typography;
@@ -33,6 +34,16 @@ const timeSlots = [
 
 export default function BookingAntdForm() {
   const [form] = Form.useForm();
+  const [profile, setProfile] = useState({});
+
+  useEffect(() => {
+    donorAPI.getProfile().then((data) => {
+      setProfile(data);
+      form.setFieldsValue({
+        bloodGroup: data.bloodType || '',
+      });
+    });
+  }, [form]);
 
   const onFinish = (values) => {
     // Lưu dữ liệu booking vào localStorage
@@ -87,15 +98,11 @@ export default function BookingAntdForm() {
                 <Input value={locations[0]} disabled style={{ background: '#f5f5f5', color: '#222', fontWeight: 500 }} />
               </Form.Item>
               <Form.Item
-                label={<span><EnvironmentOutlined style={{ color: '#43a047' }} /> Nhóm máu cần hiến</span>}
+                label={<span><EnvironmentOutlined style={{ color: '#43a047' }} /> Nhóm máu muốn hiến</span>}
                 name="bloodGroup"
                 rules={[{ required: true, message: 'Vui lòng chọn nhóm máu!' }]}
               >
-                <Select placeholder="Chọn nhóm máu">
-                  {bloodGroups.map(bg => (
-                    <Option key={bg.value} value={bg.value}>{bg.label}</Option>
-                  ))}
-                </Select>
+                <Input value={profile.bloodType || ''} disabled placeholder="Nhóm máu" />
               </Form.Item>
               <Form.Item
                 label={<span><ClockCircleOutlined style={{ color: '#43a047' }} /> Khung giờ hiến máu</span>}

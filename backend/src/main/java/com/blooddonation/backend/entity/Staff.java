@@ -36,6 +36,12 @@ public class Staff {
     @Column(length = 100)
     private String email;
 
+    @Column(name = "abo_type", nullable = false, length = 5)
+    private String aboType;
+
+    @Column(name = "rh_factor", nullable = false, length = 10)
+    private String rhFactor;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -65,6 +71,12 @@ public class Staff {
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
+    public String getAboType() { return aboType; }
+    public void setAboType(String aboType) { this.aboType = aboType; }
+
+    public String getRhFactor() { return rhFactor; }
+    public void setRhFactor(String rhFactor) { this.rhFactor = rhFactor; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
