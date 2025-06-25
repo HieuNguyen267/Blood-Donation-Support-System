@@ -35,6 +35,7 @@ const timeSlots = [
 export default function BookingAntdForm() {
   const [form] = Form.useForm();
   const [profile, setProfile] = useState({});
+  const [selectedDate, setSelectedDate] = useState(null);
 
   useEffect(() => {
     donorAPI.getProfile().then((data) => {
@@ -83,42 +84,6 @@ export default function BookingAntdForm() {
               className="booking-antd-form"
             >
               <Form.Item
-                label={<span><CalendarOutlined style={{ color: '#43a047' }} /> Ngày hiến máu</span>}
-                name="date"
-                rules={[{ required: true, message: 'Vui lòng chọn ngày hiến máu!' }]}
-              >
-                <DatePicker style={{ width: '100%' }} placeholder="Chọn ngày" />
-              </Form.Item>
-              <Form.Item
-                label={<span><EnvironmentOutlined style={{ color: '#43a047' }} /> Địa điểm</span>}
-                name="location"
-                rules={[{ required: true, message: 'Vui lòng chọn địa điểm!' }]}
-                initialValue={locations[0]}
-              >
-                <Input value={locations[0]} disabled style={{ background: '#f5f5f5', color: '#222', fontWeight: 500 }} />
-              </Form.Item>
-              <Form.Item
-                label={<span><EnvironmentOutlined style={{ color: '#43a047' }} /> Nhóm máu muốn hiến</span>}
-                name="bloodGroup"
-                rules={[{ required: true, message: 'Vui lòng chọn nhóm máu!' }]}
-              >
-                <Input value={profile.bloodType || ''} disabled placeholder="Nhóm máu" />
-              </Form.Item>
-              <Form.Item
-                label={<span><ClockCircleOutlined style={{ color: '#43a047' }} /> Khung giờ hiến máu</span>}
-                name="timeSlot"
-                rules={[{ required: true, message: 'Vui lòng chọn khung giờ!' }]}
-              >
-                <Select placeholder="Chọn khung giờ hiến máu">
-                  {timeSlots.map(slot => (
-                    <Option key={slot.value} value={slot.value}>{slot.label}</Option>
-                  ))}
-                </Select>
-              </Form.Item>
-              <Form.Item label="Ghi chú thêm" name="note">
-                <Input.TextArea rows={3} placeholder="Nhập ghi chú nếu có..." />
-              </Form.Item>
-              <Form.Item
                 label="Họ và tên"
                 name="fullName"
                 initialValue={profile.fullName || ''}
@@ -151,6 +116,50 @@ export default function BookingAntdForm() {
                 <Input disabled value={profile.email || ''} placeholder="Email" />
               </Form.Item>
               <Form.Item
+                label="Cân nặng (kg)"
+                name="weight"
+                rules={[{ required: true, message: 'Vui lòng nhập cân nặng!' }]}
+              >
+                <Input placeholder="Nhập cân nặng của bạn" type="number" min={1} max={300} />
+              </Form.Item>
+              <Form.Item
+                label={<span><CalendarOutlined style={{ color: '#43a047' }} /> Ngày hiến máu</span>}
+                name="date"
+                rules={[{ required: true, message: 'Vui lòng chọn ngày hiến máu!' }]}
+              >
+                <DatePicker 
+                  style={{ width: '100%' }} 
+                  placeholder="Chọn ngày" 
+                  onChange={date => setSelectedDate(date)}
+                />
+              </Form.Item>
+              <Form.Item
+                label={<span><EnvironmentOutlined style={{ color: '#43a047' }} /> Địa điểm</span>}
+                name="location"
+                rules={[{ required: true, message: 'Vui lòng chọn địa điểm!' }]}
+                initialValue={locations[0]}
+              >
+                <Input value={locations[0]} disabled style={{ background: '#f5f5f5', color: '#222', fontWeight: 500 }} />
+              </Form.Item>
+              <Form.Item
+                label={<span><EnvironmentOutlined style={{ color: '#43a047' }} /> Nhóm máu muốn hiến</span>}
+                name="bloodGroup"
+                rules={[{ required: true, message: 'Vui lòng chọn nhóm máu!' }]}
+              >
+                <Input value={profile.bloodType || ''} disabled placeholder="Nhóm máu" />
+              </Form.Item>
+              <Form.Item
+                label={<span><ClockCircleOutlined style={{ color: '#43a047' }} /> Khung giờ hiến máu</span>}
+                name="timeSlot"
+                rules={[{ required: true, message: 'Vui lòng chọn khung giờ!' }]}
+              >
+                <Select placeholder="Chọn khung giờ hiến máu" disabled={!selectedDate}>
+                  {timeSlots.map(slot => (
+                    <Option key={slot.value} value={slot.value}>{slot.label}</Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <Form.Item
                 label="Lần hiến máu gần nhất"
                 name="lastDonationDate"
                 initialValue={profile.lastDonationDate || ''}
@@ -158,11 +167,10 @@ export default function BookingAntdForm() {
                 <Input disabled value={profile.lastDonationDate || ''} placeholder="Lần hiến máu gần nhất" />
               </Form.Item>
               <Form.Item
-                label="Cân nặng (kg)"
-                name="weight"
-                rules={[{ required: true, message: 'Vui lòng nhập cân nặng!' }]}
+                label="Ghi chú thêm"
+                name="note"
               >
-                <Input placeholder="Nhập cân nặng của bạn" type="number" min={1} max={300} />
+                <Input.TextArea rows={3} placeholder="Nhập ghi chú nếu có..." />
               </Form.Item>
               <Form.Item>
                 <Button type="primary" htmlType="submit" block style={{ fontWeight: 600, fontSize: 18, height: 48, marginTop: 8 }}>

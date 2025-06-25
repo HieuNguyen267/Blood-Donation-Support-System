@@ -123,19 +123,6 @@ export default function RegisterDonate() {
             <Form.Item label="Email" name="email" rules={[{ required: true, type: "email" }]}> <Input prefix={<MailOutlined />} placeholder="abc@gmail.com" disabled /> </Form.Item>
             <Form.Item label="Địa chỉ hiến máu" name="address"> <Input prefix={<EnvironmentOutlined />} disabled /> </Form.Item>
             <Form.Item
-              label="Cân nặng (kg)"
-              name="weight"
-              rules={[
-                { required: true, message: "Vui lòng nhập cân nặng" },
-                {
-                  pattern: /^[0-9]{1,3}$/,
-                  message: "Cân nặng phải là số từ 1 đến 999",
-                },
-              ]}
-            >
-              <Input placeholder="Nhập cân nặng của bạn" />
-            </Form.Item>
-            <Form.Item
               label="Nhóm máu"
               name="sampleGroup"
               rules={[{ required: true, message: "Vui lòng chọn nhóm máu" }]}
@@ -154,17 +141,7 @@ export default function RegisterDonate() {
               </Select>
             </Form.Item>
             <Form.Item label="Lần hiến máu gần nhất" name="donateLast" rules={[{ required: true }]}> <DatePicker style={{ width: "100%" }} suffixIcon={<CalendarOutlined />} disabled /> </Form.Item>
-            <Form.Item label="Thời điểm sẵn sàng hiến máu" name="sendTime" rules={[{ required: true }]}> <DatePicker style={{ width: "100%" }} suffixIcon={<CalendarOutlined />} /> </Form.Item>
-            <Form.Item
-              label="Khung giờ có thể hiến máu"
-              name="donationTimeSlot"
-              rules={[{ required: true, message: "Vui lòng chọn khung giờ" }]}
-            >
-              <Select placeholder="Vui lòng chọn ngày trước" disabled={!isDateSelected}>
-                <Option value="08:00-11:00">Sáng (08:00 - 11:00)</Option>
-                <Option value="13:00-16:00">Chiều (13:00 - 16:00)</Option>
-              </Select>
-            </Form.Item>
+            <Form.Item label="Thời điểm sẵn sàng hiến máu" name="readyTimeRange" rules={[{ required: true, message: 'Vui lòng chọn khoảng thời gian sẵn sàng hiến máu!' }]}> <DatePicker.RangePicker style={{ width: "100%" }} suffixIcon={<CalendarOutlined />} /> </Form.Item>
             <Form.Item label="Tình trạng sức khỏe" name="status"> <Input.TextArea rows={4} /> </Form.Item>
             <Form.Item>
               <Button type="primary" htmlType="submit" block className="green-button">

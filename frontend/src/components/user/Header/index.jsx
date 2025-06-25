@@ -103,7 +103,7 @@ export default function Header() {
         <a href="/">TRANG CHỦ</a>
         {isLoggedIn ? (
           <>
-            <a href="/registerdonate">Đăng Ký Hiến Máu</a>
+            <a href="/registerdonate">ĐĂNG KÝ HIẾN MÁU</a>
             <a href="/appointmenthistory">LỊCH SỬ ĐẶT HẸN</a>
             <a href="/addcertificate">CHỨNG NHẬN</a>
             <a href="/faq">HỎI ĐÁP</a>

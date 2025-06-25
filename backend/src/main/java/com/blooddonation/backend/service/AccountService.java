@@ -3,7 +3,7 @@ package com.blooddonation.backend.service;
 import com.blooddonation.backend.dto.auth.JwtResponse;
 import com.blooddonation.backend.dto.auth.LoginRequest;
 import com.blooddonation.backend.dto.auth.SignupRequest;
-import com.blooddonation.backend.entity.Account;
+import com.blooddonation.backend.entity.common.Account;
 
 public interface AccountService {
     // Đăng ký account mới

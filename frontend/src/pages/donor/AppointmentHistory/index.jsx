@@ -16,18 +16,45 @@ export default function AppointmentHistory() {
   const hasAppointments = appointments.length > 0;
 
   useEffect(() => {
-    const history = JSON.parse(localStorage.getItem("appointmentHistory")) || [];
-    setAppointments(history);
-    setLoading(false);
+    const fetchHistory = async () => {
+      setLoading(true);
+      try {
+        const history = await donorAPI.getDonationHistory();
+        setAppointments(history || []);
+      } catch (error) {
+        setAppointments([]);
+      }
+      setLoading(false);
+    };
+    fetchHistory();
   }, []);
 
-  const handleDelete = (id) => {
-    const updatedAppointments = appointments.map(app =>
-      app.id === id ? { ...app, status: 'cancelled' } : app
-    );
-    setAppointments(updatedAppointments);
-    localStorage.setItem("appointmentHistory", JSON.stringify(updatedAppointments));
-    message.success('Đã hủy lịch hẹn thành công');
+  const handleDelete = async (id) => {
+    try {
+      await donorAPI.deleteDonation(id);
+      message.success('Đã xóa lịch hẹn thành công');
+      // Reload lại danh sách
+      const history = await donorAPI.getDonationHistory();
+      setAppointments(history || []);
+    } catch (error) {
+      message.error('Xóa lịch hẹn thất bại');
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'pending':
+      case 'awaiting':
+        return 'Đang chờ xác nhận';
+      case 'approved':
+        return 'Đã xác nhận';
+      case 'declined':
+        return 'Đã từ chối';
+      case 'cancelled':
+        return 'Đã xóa';
+      default:
+        return status;
+    }
   };
 
   if (loading) {
@@ -66,22 +93,23 @@ export default function AppointmentHistory() {
                     {app.address}
                   </Title>
                   <Text className="appointment-details">
-                    <EnvironmentOutlined /> {app.address}
+<EnvironmentOutlined /> {app.address}
                   </Text>
                   <Text className="appointment-details">
                     <ClockCircleOutlined /> {app.donationTimeSlot} - {app.sendDate ? moment(app.sendDate).format('DD/MM/YYYY') : '-'}
                   </Text>
                 </div>
                 <div className="card-right">
-                  {app.status === 'active' ? (
-                    <Button className="status-btn yellow-btn" onClick={() => handleDelete(app.id)}>
-                      Hủy lịch
+                  {app.status === 'cancelled' ? (
+                    <Button className="status-btn red-btn" disabled>
+                      Đã xóa
                     </Button>
                   ) : (
-                    <Button className="status-btn red-btn" disabled>
-                      Đã hủy
+                    <Button className="status-btn yellow-btn" onClick={() => handleDelete(app.registerId || app.id)}>
+                      Hủy lịch
                     </Button>
                   )}
+                  <div className="status-label">{getStatusText(app.status)}</div>
                   <Link to={`/appointment/${app.id}`} className="details-link">
                     <FileTextOutlined /> Xem chi tiết
                   </Link>

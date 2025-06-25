@@ -54,11 +54,7 @@ const UserInfoForm = () => {
           >
             <Title level={5} className="form-section-title">Thông tin định danh</Title>
             <Row gutter={24}>
-              <Col span={12}>
-                <Form.Item label="Số CCCD" name="cccd" rules={[{ required: true, message: 'Vui lòng nhập CCCD!' }]}>
-                  <Input placeholder="Nhập số Căn cước công dân" />
-                </Form.Item>
-              </Col>
+              {/* Đã xóa trường Số CCCD */}
             </Row>
 
             <Title level={5} className="form-section-title">Thông tin cá nhân & sức khỏe</Title>
@@ -71,6 +67,11 @@ const UserInfoForm = () => {
               <Col span={12}>
                 <Form.Item label="Ngày sinh" name="dob" rules={[{ required: true, message: 'Vui lòng chọn ngày sinh!' }]}>
                   <DatePicker style={{ width: '100%' }} placeholder="Chọn ngày"/>
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label="Lần hiến máu gần nhất" name="lastDonationDate">
+                  <DatePicker style={{ width: '100%' }} placeholder="Chọn ngày hiến máu gần nhất (không bắt buộc)" />
                 </Form.Item>
               </Col>
               <Col span={12}>
@@ -93,11 +94,13 @@ const UserInfoForm = () => {
                         <Option value="AB-">AB-</Option>
                         <Option value="O+">O+</Option>
                         <Option value="O-">O-</Option>
+                        <Option value="Bombay (hh)">Bombay (hh) (hiếm)</Option>
+                        <Option value="Rh-null">Rh-null (hiếm)</Option>
                     </Select>
                  </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item label="Nghề nghiệp" name="occupation">
+                <Form.Item label="Nghề nghiệp" name="occupation" rules={[{ required: true, message: 'Vui lòng nhập nghề nghiệp!' }]}>
                     <Input placeholder="Nhập nghề nghiệp hiện tại"/>
                 </Form.Item>
               </Col>
