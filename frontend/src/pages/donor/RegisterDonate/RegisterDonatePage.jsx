@@ -4,7 +4,7 @@ import Header from "../../../components/user/Header";
 import Footer from "../../../components/user/Footer";
 import StepProgress from "../../../components/user/StepProgress";
 import { donorAPI } from "../../../services/api";
-import { message } from "antd";
+import { message, Form, Input } from "antd";
 import moment from "moment";
 import "./RegisterDonatePage.css";
 
@@ -31,6 +31,7 @@ export default function RegisterDonatePage () {
   const [maxBloodVolume, setMaxBloodVolume] = useState(450);
   const [bookingData, setBookingData] = useState(null);
   const [donationFormData, setDonationFormData] = useState(null);
+  const [form] = Form.useForm();
 
   useEffect(() => {
     // Không cần loadData nữa vì chúng ta sẽ đọc trực tiếp từ localStorage
@@ -44,6 +45,13 @@ export default function RegisterDonatePage () {
       try {
         const profile = await donorAPI.getProfile();
         setUserInfo(profile);
+        form.setFieldsValue({
+          fullName: profile.fullName,
+          gender: profile.gender,
+          phone: profile.phone,
+          email: profile.email,
+          bloodGroup: profile.bloodGroup,
+        });
       } catch (error) {
         console.error('Load profile error:', error);
       }
@@ -66,7 +74,7 @@ export default function RegisterDonatePage () {
     }
 
     setLoading(false);
-  }, []);
+  }, [form]);
 
   const renderItem = (value) => value || '-';
   const renderDate = (date) => date ? moment(date).format('DD/MM/YYYY') : '-';

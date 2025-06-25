@@ -41,7 +41,12 @@ export default function BookingAntdForm() {
     donorAPI.getProfile().then((data) => {
       setProfile(data);
       form.setFieldsValue({
-        bloodGroup: data.bloodType || '',
+        fullName: data.fullName,
+        gender: data.gender,
+        phone: data.phone,
+        email: data.email,
+        bloodGroup: data.bloodGroup,
+        lastDonationDate: data.lastDonationDate,
       });
     });
   }, [form]);
@@ -86,34 +91,30 @@ export default function BookingAntdForm() {
               <Form.Item
                 label="Họ và tên"
                 name="fullName"
-                initialValue={profile.fullName || ''}
                 rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }]}
               >
-                <Input disabled value={profile.fullName || ''} placeholder="Họ và tên" />
+                <Input readOnly placeholder="Họ và tên" />
               </Form.Item>
               <Form.Item
                 label="Giới tính"
                 name="gender"
-                initialValue={profile.gender || ''}
                 rules={[{ required: true, message: 'Vui lòng nhập giới tính!' }]}
               >
-                <Input disabled value={profile.gender || ''} placeholder="Giới tính" />
+                <Input readOnly placeholder="Giới tính" />
               </Form.Item>
               <Form.Item
                 label="Số điện thoại"
                 name="phone"
-                initialValue={profile.phone || ''}
                 rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }]}
               >
-                <Input disabled value={profile.phone || ''} placeholder="Số điện thoại" />
+                <Input readOnly placeholder="Số điện thoại" />
               </Form.Item>
               <Form.Item
                 label="Email"
                 name="email"
-                initialValue={profile.email || ''}
                 rules={[{ required: true, message: 'Vui lòng nhập email!' }]}
               >
-                <Input disabled value={profile.email || ''} placeholder="Email" />
+                <Input readOnly placeholder="Email" />
               </Form.Item>
               <Form.Item
                 label="Cân nặng (kg)"
@@ -146,7 +147,7 @@ export default function BookingAntdForm() {
                 name="bloodGroup"
                 rules={[{ required: true, message: 'Vui lòng chọn nhóm máu!' }]}
               >
-                <Input value={profile.bloodType || ''} disabled placeholder="Nhóm máu" />
+                <Input readOnly placeholder="Nhóm máu" />
               </Form.Item>
               <Form.Item
                 label={<span><ClockCircleOutlined style={{ color: '#43a047' }} /> Khung giờ hiến máu</span>}
@@ -162,9 +163,8 @@ export default function BookingAntdForm() {
               <Form.Item
                 label="Lần hiến máu gần nhất"
                 name="lastDonationDate"
-                initialValue={profile.lastDonationDate || ''}
               >
-                <Input disabled value={profile.lastDonationDate || ''} placeholder="Lần hiến máu gần nhất" />
+                <Input readOnly placeholder="Lần hiến máu gần nhất" />
               </Form.Item>
               <Form.Item
                 label="Ghi chú thêm"
