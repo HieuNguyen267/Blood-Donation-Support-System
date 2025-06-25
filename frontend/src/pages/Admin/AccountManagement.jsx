@@ -3,6 +3,7 @@ import Header from "../../components/admin/Header";
 import Sidebar from "../../components/admin/Sidebar";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { getStatusStyle } from "./utils";
+import { accountAPI } from '../../services/api';
 
 const accountsDataInit = [
   { account_id: 1, username: "admin", password_hash: "********", email: "admin@blood.vn", phone: "0909123456", role: "admin", is_active: true, created_at: "2024-01-01 08:00", updated_at: "2024-01-01 08:00" },
@@ -21,7 +22,7 @@ const roles = [
 const PAGE_SIZE = 8;
 
 export default function AccountManagement() {
-  const [accounts, setAccounts] = useState(accountsDataInit);
+  const [accounts, setAccounts] = useState([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [editIdx, setEditIdx] = useState(null);
@@ -113,6 +114,33 @@ export default function AccountManagement() {
     setEditData(null);
     setValidationErrors({});
   };
+
+  React.useEffect(() => {
+    const fetchAccounts = async () => {
+      try {
+        const data = await accountAPI.getAllAccounts();
+        setAccounts(data.map(a => ({
+          account_id: a.accountId || a.account_id || '',
+          username: a.username || '',
+          password_hash: '********',
+          email: a.email || '',
+          phone: a.phone || '',
+          role: a.role || '',
+          is_active: a.active !== undefined ? a.active : (a.is_active !== undefined ? a.is_active : true),
+          created_at: a.createdAt || a.created_at || '',
+          updated_at: a.updatedAt || a.updated_at || '',
+        })));
+      } catch (error) {
+        setAccounts([
+          { account_id: 1, username: "admin", password_hash: "********", email: "admin@blood.vn", phone: "0909123456", role: "admin", is_active: true, created_at: "2024-01-01 08:00", updated_at: "2024-01-01 08:00" },
+          { account_id: 2, username: "staff1", password_hash: "********", email: "staff1@blood.vn", phone: "0912345678", role: "staff", is_active: true, created_at: "2024-01-02 09:00", updated_at: "2024-01-02 09:00" },
+          { account_id: 3, username: "facility1", password_hash: "********", email: "facility1@blood.vn", phone: "0923456789", role: "medical_facility", is_active: false, created_at: "2024-01-03 10:00", updated_at: "2024-01-03 10:00" },
+          { account_id: 4, username: "donor1", password_hash: "********", email: "donor1@blood.vn", phone: "0934567890", role: "donor", is_active: true, created_at: "2024-01-04 11:00", updated_at: "2024-01-04 11:00" },
+        ]);
+      }
+    };
+    fetchAccounts();
+  }, []);
 
   return (
     <div className="dashboard-root">

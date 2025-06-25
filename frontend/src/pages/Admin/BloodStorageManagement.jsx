@@ -4,6 +4,7 @@ import Sidebar from "../../components/admin/Sidebar";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './BloodStorageManagement.css';
 import { validateBloodStorage, getStatusStyle } from './utils';
+import { bloodStockAPI } from '../../services/api';
 
 const bloodDataInit = [
   { code: "BP001", group: "Rh NULL", collect: "11/4/2024, 10:30", expire: "11/4/2027, 09:30", amount: 12, status: "Mới", quality: "Tốt", temp: "2 -6 °C" },
@@ -38,6 +39,30 @@ export default function BloodStorageManagement() {
   const [deleteIdx, setDeleteIdx] = useState(null);
   const [addMode, setAddMode] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
+
+  React.useEffect(() => {
+    const fetchBloodStock = async () => {
+      try {
+        const stock = await bloodStockAPI.getStock();
+        // Map dữ liệu backend về đúng format nếu cần
+        setData(stock.map(s => ({
+          id: s.bloodStockId || s.id,
+          code: s.code || '',
+          group: s.bloodGroup ? (s.bloodGroup.aboType + s.bloodGroup.rhFactor) : s.group,
+          collect: s.collectionDateTime || '',
+          expire: s.expiryDateTime || '',
+          amount: s.amount || '',
+          status: s.status || 'Mới',
+          quality: s.quality || 'Tốt',
+          temp: s.temperatureRange || '',
+        })));
+      } catch (error) {
+        // Nếu lỗi thì fallback về dữ liệu mẫu
+        setData(bloodDataInit);
+      }
+    };
+    fetchBloodStock();
+  }, []);
 
   // Filter logic (chỉ search theo nhóm máu)
   const filtered = data.filter(d => d.group.toLowerCase().includes(search.toLowerCase()));

@@ -4,6 +4,7 @@ import Header from "../../components/admin/Header";
 import Sidebar from "../../components/admin/Sidebar";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
+import { donationRegisterAPI } from '../../services/api';
 // Import không cần thiết, đã có function riêng
 // import { getStatusStyle } from './utils';
 
@@ -19,45 +20,36 @@ export default function DonationProcessManagement() {
   const [page, setPage] = useState(1);
   const navigate = useNavigate();
 
-  // Lấy dữ liệu từ localStorage hoặc fallback data
-  const getConfirmedDonations = () => {
-    const fallbackData = [
-      { code: "A001", name: "Nguyễn Duy Hiếu", donateDate: "11/4/2024, 09:30", completeDate: "11/4/2024, 10:30", amount: "120 ml", status: "Xác nhận", blood: "Rh NULL", processStatus: "Đang xử lý" },
-      { code: "A003", name: "Nguyễn Gia Triệu", donateDate: "4/11/2025, 15:35", completeDate: "4/11/2025, 16:35", amount: "120 ml", status: "Xác nhận", blood: "O+", processStatus: "Hoàn thành" },
-      { code: "A004", name: "Đậu Nguyễn Bảo Tuấn", donateDate: "27/5/2025, 10:30", completeDate: "27/5/2025, 11:30", amount: "120 ml", status: "Xác nhận", blood: "AB+", processStatus: "Đang xử lý" },
-      { code: "A005", name: "Nguyễn Anh Khoa", donateDate: "27/5/2025, 10:45", completeDate: "27/5/2025, 11:45", amount: "120 ml", status: "Xác nhận", blood: "AB-", processStatus: "Hoàn thành" },
-      { code: "A007", name: "Nguyễn Trí Thông", donateDate: "15/4/2024, 08:30", completeDate: "15/4/2024, 09:30", amount: "120 ml", status: "Xác nhận", blood: "B-", processStatus: "Tạm dừng" },
-    ];
+  const [confirmedDonations, setConfirmedDonations] = useState([]);
 
-    try {
-      const storedDonations = localStorage.getItem('donations');
-      if (storedDonations) {
-        const allDonations = JSON.parse(storedDonations);
-        // Chỉ lấy những đơn có trạng thái "Xác nhận" và thêm processStatus nếu chưa có
-        return allDonations
-          .filter(d => d.status === "Xác nhận")
-          .map(d => ({
-            ...d,
-            processStatus: d.processStatus || "Đang xử lý"
-          }));
-      }
-    } catch (error) {
-      console.error('Error loading donations from localStorage:', error);
-    }
-    
-    return fallbackData;
-  };
-
-  const [confirmedDonations, setConfirmedDonations] = useState(getConfirmedDonations());
-
-  // Cập nhật dữ liệu khi có thay đổi trong localStorage
   React.useEffect(() => {
-    const handleStorageChange = () => {
-      setConfirmedDonations(getConfirmedDonations());
+    const fetchDonations = async () => {
+      try {
+        const data = await donationRegisterAPI.getAllDonationRegisters();
+        // Chỉ lấy những đơn có trạng thái "Xác nhận" hoặc phù hợp quá trình hiến
+        setConfirmedDonations(data.filter(d => d.status === 'Xác nhận').map(d => ({
+          id: d.donationRegisterId || d.id,
+          code: d.code || d.donationRegisterId || '',
+          name: d.donorName || d.name || '',
+          donateDate: d.donationDate || '',
+          completeDate: d.completionDate || '',
+          amount: d.amount ? `${d.amount} ml` : '',
+          status: d.status || '',
+          blood: d.bloodGroup ? (d.bloodGroup.aboType + d.bloodGroup.rhFactor) : d.blood,
+          processStatus: d.processStatus || 'Đang xử lý',
+        })));
+      } catch (error) {
+        // Nếu lỗi thì fallback về dữ liệu mẫu
+        setConfirmedDonations([
+          { code: "A001", name: "Nguyễn Duy Hiếu", donateDate: "11/4/2024, 09:30", completeDate: "11/4/2024, 10:30", amount: "120 ml", status: "Xác nhận", blood: "Rh NULL", processStatus: "Đang xử lý" },
+          { code: "A003", name: "Nguyễn Gia Triệu", donateDate: "4/11/2025, 15:35", completeDate: "4/11/2025, 16:35", amount: "120 ml", status: "Xác nhận", blood: "O+", processStatus: "Hoàn thành" },
+          { code: "A004", name: "Đậu Nguyễn Bảo Tuấn", donateDate: "27/5/2025, 10:30", completeDate: "27/5/2025, 11:30", amount: "120 ml", status: "Xác nhận", blood: "AB+", processStatus: "Đang xử lý" },
+          { code: "A005", name: "Nguyễn Anh Khoa", donateDate: "27/5/2025, 10:45", completeDate: "27/5/2025, 11:45", amount: "120 ml", status: "Xác nhận", blood: "AB-", processStatus: "Hoàn thành" },
+          { code: "A007", name: "Nguyễn Trí Thông", donateDate: "15/4/2024, 08:30", completeDate: "15/4/2024, 09:30", amount: "120 ml", status: "Xác nhận", blood: "B-", processStatus: "Tạm dừng" },
+        ]);
+      }
     };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    fetchDonations();
   }, []);
 
   // Filter logic

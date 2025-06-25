@@ -4,6 +4,7 @@ import Header from "../../components/admin/Header";
 import Sidebar from "../../components/admin/Sidebar";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { validateDonor, getStatusStyle } from './utils';
+import { donorAPI } from '../../services/api';
 
 const donorsDataInit = [
   { id: 1, name: "Đậu Nguyễn Bảo Tuấn", gender: "Nam", phone: "03627929786", staff: "Nguyễn Văn A", address: "abcdef", blood: "A+", age: 20, email: "abcde@gmail.com", last: "2024-07-07", amount: "120ml", role: "Donor", status: "Đạt chuẩn", ready: "Có" },
@@ -143,7 +144,32 @@ export default function DonorManagement() {
   };
 
   React.useEffect(() => {
-    localStorage.setItem('donors', JSON.stringify(donorsDataInit));
+    const fetchDonors = async () => {
+      try {
+        const data = await donorAPI.getAllDonors();
+        // Map dữ liệu backend về đúng format nếu cần
+        setDonors(data.map(d => ({
+          id: d.donorId || d.id,
+          name: d.fullName || d.name,
+          gender: d.gender,
+          phone: d.phone,
+          staff: d.staffName || '',
+          address: d.address,
+          blood: d.bloodGroup ? (d.bloodGroup.aboType + d.bloodGroup.rhFactor) : d.blood,
+          age: d.age,
+          email: d.email,
+          last: d.lastDonationDate || '',
+          amount: d.lastDonationAmount || '',
+          role: 'Donor',
+          status: d.status || 'Đạt chuẩn',
+          ready: d.ready || ''
+        })));
+      } catch (error) {
+        // Nếu lỗi thì fallback về dữ liệu mẫu
+        setDonors(donorsDataInit);
+      }
+    };
+    fetchDonors();
   }, []);
 
   return (

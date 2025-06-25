@@ -5,18 +5,7 @@ import Sidebar from "../../components/admin/Sidebar";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
 import { validateDonation, getStatusStyle } from './utils';
-
-const donationDataInit = [
-  { code: "A001", name: "Nguyễn Duy Hiếu", donateDate: "11/4/2024, 09:30", completeDate: "11/4/2024, 10:30", amount: "120 ml", status: "Xác nhận", blood: "Rh NULL" },
-  { code: "A002", name: "Lữ Phước Nhật Tú", donateDate: "15/4/2024, 08:30", completeDate: "15/4/2024, 09:30", amount: "120 ml", status: "Chờ xác nhận", blood: "O-" },
-  { code: "A003", name: "Nguyễn Gia Triệu", donateDate: "4/11/2025, 15:35", completeDate: "4/11/2025, 16:35", amount: "120 ml", status: "Xác nhận", blood: "O+" },
-  { code: "A004", name: "Đậu Nguyễn Bảo Tuấn", donateDate: "27/5/2025, 10:30", completeDate: "27/5/2025, 11:30", amount: "120 ml", status: "Xác nhận", blood: "AB+" },
-  { code: "A005", name: "Nguyễn Anh Khoa", donateDate: "27/5/2025, 10:45", completeDate: "27/5/2025, 11:45", amount: "", status: "Xác nhận", blood: "AB-" },
-  { code: "A006", name: "Đoàn Nguyễn Thành Hòa", donateDate: "15/4/2024, 08:30", completeDate: "15/4/2024, 09:30", amount: "120 ml", status: "Từ chối", blood: "A+" },
-  { code: "A007", name: "Nguyễn Trí Thông", donateDate: "15/4/2024, 08:30", completeDate: "15/4/2024, 09:30", amount: "120 ml", status: "Xác nhận", blood: "B-" },
-  { code: "A008", name: "Nguyễn Văn Ớ", donateDate: "15/4/2024, 08:30", completeDate: "15/4/2024, 09:30", amount: "120 ml", status: "Từ chối", blood: "A-" },
-  { code: "A009", name: "Nguyễn Công Chiến", donateDate: "27/5/2025, 10:45", completeDate: "27/5/2025, 11:45", amount: "120 ml", status: "Chờ xác nhận", blood: "B+" },
-];
+import { donationRegisterAPI } from '../../services/api';
 
 const bloodTypes = ["Tất cả", "Rh NULL", "O-", "O+", "AB+", "AB-", "A+", "B-", "A-", "B+"];
 const statuses = ["Tất cả", "Xác nhận", "Chờ xác nhận", "Từ chối"];
@@ -24,7 +13,7 @@ const statuses = ["Tất cả", "Xác nhận", "Chờ xác nhận", "Từ chối
 const PAGE_SIZE = 8;
 
 export default function DonationManagement() {
-  const [donations, setDonations] = useState(donationDataInit);
+  const [donations, setDonations] = useState([]);
   const [search, setSearch] = useState("");
   const [blood, setBlood] = useState("Tất cả");
   const [status, setStatus] = useState("Tất cả");
@@ -37,6 +26,36 @@ export default function DonationManagement() {
   const [selectedItems, setSelectedItems] = useState([]);
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    const fetchDonations = async () => {
+      try {
+        const data = await donationRegisterAPI.getAllDonationRegisters();
+        setDonations(data.map(d => ({
+          code: d.code || d.donationRegisterId || '',
+          name: d.donorName || d.name || '',
+          donateDate: d.donationDate || '',
+          completeDate: d.completionDate || '',
+          amount: d.amount ? `${d.amount} ml` : '',
+          status: d.status || '',
+          blood: d.bloodGroup ? (d.bloodGroup.aboType + d.bloodGroup.rhFactor) : d.blood,
+        })));
+      } catch (error) {
+        setDonations([
+          { code: "A001", name: "Nguyễn Duy Hiếu", donateDate: "11/4/2024, 09:30", completeDate: "11/4/2024, 10:30", amount: "120 ml", status: "Xác nhận", blood: "Rh NULL" },
+          { code: "A002", name: "Lữ Phước Nhật Tú", donateDate: "15/4/2024, 08:30", completeDate: "15/4/2024, 09:30", amount: "120 ml", status: "Chờ xác nhận", blood: "O-" },
+          { code: "A003", name: "Nguyễn Gia Triệu", donateDate: "4/11/2025, 15:35", completeDate: "4/11/2025, 16:35", amount: "120 ml", status: "Xác nhận", blood: "O+" },
+          { code: "A004", name: "Đậu Nguyễn Bảo Tuấn", donateDate: "27/5/2025, 10:30", completeDate: "27/5/2025, 11:30", amount: "120 ml", status: "Xác nhận", blood: "AB+" },
+          { code: "A005", name: "Nguyễn Anh Khoa", donateDate: "27/5/2025, 10:45", completeDate: "27/5/2025, 11:45", amount: "", status: "Xác nhận", blood: "AB-" },
+          { code: "A006", name: "Đoàn Nguyễn Thành Hòa", donateDate: "15/4/2024, 08:30", completeDate: "15/4/2024, 09:30", amount: "120 ml", status: "Từ chối", blood: "A+" },
+          { code: "A007", name: "Nguyễn Trí Thông", donateDate: "15/4/2024, 08:30", completeDate: "15/4/2024, 09:30", amount: "120 ml", status: "Xác nhận", blood: "B-" },
+          { code: "A008", name: "Nguyễn Văn Ớ", donateDate: "15/4/2024, 08:30", completeDate: "15/4/2024, 09:30", amount: "120 ml", status: "Từ chối", blood: "A-" },
+          { code: "A009", name: "Nguyễn Công Chiến", donateDate: "27/5/2025, 10:45", completeDate: "27/5/2025, 11:45", amount: "120 ml", status: "Chờ xác nhận", blood: "B+" },
+        ]);
+      }
+    };
+    fetchDonations();
+  }, []);
 
   // Filter logic
   const filtered = donations.filter(d => {

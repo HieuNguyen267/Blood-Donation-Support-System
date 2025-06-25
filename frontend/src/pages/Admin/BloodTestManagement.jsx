@@ -4,6 +4,7 @@ import Header from "../../components/admin/Header";
 import Sidebar from "../../components/admin/Sidebar";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
+import { donationRegisterAPI } from '../../services/api';
 
 const bloodTypes = ["Tất cả", "Rh NULL", "O-", "O+", "AB+", "AB-", "A+", "B-", "A-", "B+"];
 const testStatuses = ["Tất cả", "Đạt chuẩn", "Đang xét nghiệm", "Đợi xét nghiệm", "Không đạt chuẩn"];
@@ -19,44 +20,32 @@ export default function BloodTestManagement() {
   const [editData, setEditData] = useState({});
   const [toast, setToast] = useState({ show: false, type: '', message: '' });
   const navigate = useNavigate();
+  const [bloodTests, setBloodTests] = useState([]);
 
-  // Lấy dữ liệu từ localStorage - chỉ những đơn có trạng thái "Hoàn thành"
-  const getCompletedDonations = () => {
-    const fallbackData = [
-      { code: "A001", name: "Nguyễn Duy Hiếu", donateDate: "11/4/2024, 09:30", completeDate: "11/4/2024, 10:30", amount: "120 ml", blood: "Rh NULL", testStatus: "Đang xét nghiệm" },
-      { code: "A003", name: "Nguyễn Gia Triệu", donateDate: "4/11/2025, 15:35", completeDate: "4/11/2025, 16:35", amount: "120 ml", blood: "O+", testStatus: "Đạt chuẩn" },
-      { code: "A005", name: "Nguyễn Anh Khoa", donateDate: "27/5/2025, 10:45", completeDate: "27/5/2025, 11:45", amount: "120 ml", blood: "AB-", testStatus: "Đợi xét nghiệm" },
-    ];
-
-    try {
-      const storedDonations = localStorage.getItem('donations');
-      if (storedDonations) {
-        const allDonations = JSON.parse(storedDonations);
-        // Chỉ lấy những đơn có processStatus "Hoàn thành"
-        return allDonations
-          .filter(d => d.processStatus === "Hoàn thành")
-          .map(d => ({
-            ...d,
-            testStatus: d.testStatus || "Đợi xét nghiệm"
-          }));
-      }
-    } catch (error) {
-      console.error('Error loading donations from localStorage:', error);
-    }
-    
-    return fallbackData;
-  };
-
-  const [bloodTests, setBloodTests] = useState(getCompletedDonations());
-
-  // Cập nhật dữ liệu khi có thay đổi trong localStorage
   React.useEffect(() => {
-    const handleStorageChange = () => {
-      setBloodTests(getCompletedDonations());
+    const fetchBloodTests = async () => {
+      try {
+        const data = await donationRegisterAPI.getAllDonationRegisters();
+        // Lọc các đơn có trạng thái hoàn thành hoặc phù hợp kiểm tra máu
+        setBloodTests(data.filter(d => d.processStatus === 'Hoàn thành' || d.status === 'Hoàn thành').map(d => ({
+          code: d.code || d.donationRegisterId || '',
+          name: d.donorName || d.name || '',
+          donateDate: d.donationDate || '',
+          completeDate: d.completionDate || '',
+          amount: d.amount ? `${d.amount} ml` : '',
+          blood: d.bloodGroup ? (d.bloodGroup.aboType + d.bloodGroup.rhFactor) : d.blood,
+          testStatus: d.testStatus || 'Đợi xét nghiệm',
+        })));
+      } catch (error) {
+        // Nếu lỗi thì fallback về dữ liệu mẫu
+        setBloodTests([
+          { code: "A001", name: "Nguyễn Duy Hiếu", donateDate: "11/4/2024, 09:30", completeDate: "11/4/2024, 10:30", amount: "120 ml", blood: "Rh NULL", testStatus: "Đang xét nghiệm" },
+          { code: "A003", name: "Nguyễn Gia Triệu", donateDate: "4/11/2025, 15:35", completeDate: "4/11/2025, 16:35", amount: "120 ml", blood: "O+", testStatus: "Đạt chuẩn" },
+          { code: "A005", name: "Nguyễn Anh Khoa", donateDate: "27/5/2025, 10:45", completeDate: "27/5/2025, 11:45", amount: "120 ml", blood: "AB-", testStatus: "Đợi xét nghiệm" },
+        ]);
+      }
     };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    fetchBloodTests();
   }, []);
 
   // Filter logic

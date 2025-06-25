@@ -105,6 +105,13 @@ export const donorAPI = {
       headers: getHeaders()
     });
     return handleResponse(response);
+  },
+
+  getAllDonors: async () => {
+    const response = await fetch(`${API_BASE_URL}/donors`, {
+      headers: getHeaders()
+    });
+    return handleResponse(response);
   }
 };
 
@@ -253,4 +260,31 @@ export const getAuthToken = () => {
 
 export const isAuthenticated = () => {
   return !!getAuthToken();
+};
+
+export const donationRegisterAPI = {
+  getAllDonationRegisters: async () => {
+    const response = await fetch(`${API_BASE_URL}/donation-registers`, {
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  }
+};
+
+export const accountAPI = {
+  getAllAccounts: async () => {
+    const response = await fetch(`${API_BASE_URL}/accounts`, {
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  }
+};
+
+export const matchingAPI = {
+  getAllMatchings: async () => {
+    const response = await fetch(`${API_BASE_URL}/matching`, {
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  }
 }; 
