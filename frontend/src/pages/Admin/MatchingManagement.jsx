@@ -87,7 +87,40 @@ const MatchingManagement = () => {
                         </span>
                       </td>
                       <td className="text-center">
-                        <button className="btn btn-sm btn-outline-primary">Xem</button>
+                        <div style={{display: 'flex', gap: '6px', justifyContent: 'center'}}>
+                          <button 
+                            title="Xem chi tiết"
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              width: '32px',
+                              height: '32px',
+                              backgroundColor: '#2563eb',
+                              color: '#ffffff',
+                              border: 'none',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease-in-out',
+                              boxShadow: '0 1px 3px rgba(37, 99, 235, 0.2)'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.target.style.backgroundColor = '#1d4ed8';
+                              e.target.style.transform = 'translateY(-1px)';
+                              e.target.style.boxShadow = '0 2px 6px rgba(37, 99, 235, 0.3)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.target.style.backgroundColor = '#2563eb';
+                              e.target.style.transform = 'translateY(0)';
+                              e.target.style.boxShadow = '0 1px 3px rgba(37, 99, 235, 0.2)';
+                            }}
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                              <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))

@@ -157,8 +157,77 @@ export default function MedicalFacilityManagement() {
                     <td className="text-center">{f.created_at}</td>
                     <td className="text-center">{f.updated_at}</td>
                     <td className="text-center">
-                      <button className="btn btn-sm btn-outline-primary me-1" title="Sửa" onClick={() => handleEdit(i)}><span className="donor-action edit">✏️</span></button>
-                      <button className="btn btn-sm btn-outline-danger" title="Xóa" onClick={() => handleDelete(i)}><span className="donor-action delete">🗑️</span></button>
+                      <div style={{display: 'flex', gap: '6px', justifyContent: 'center'}}>
+                        <button 
+                          onClick={() => handleEdit(i)}
+                          title="Chỉnh sửa"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '32px',
+                            height: '32px',
+                            backgroundColor: '#059669',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease-in-out',
+                            boxShadow: '0 1px 3px rgba(5, 150, 105, 0.2)'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = '#047857';
+                            e.target.style.transform = 'translateY(-1px)';
+                            e.target.style.boxShadow = '0 2px 6px rgba(5, 150, 105, 0.3)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = '#059669';
+                            e.target.style.transform = 'translateY(0)';
+                            e.target.style.boxShadow = '0 1px 3px rgba(5, 150, 105, 0.2)';
+                          }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                          </svg>
+                        </button>
+                        
+                        <button 
+                          onClick={() => handleDelete(i)}
+                          title="Xóa"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '32px',
+                            height: '32px',
+                            backgroundColor: '#dc2626',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease-in-out',
+                            boxShadow: '0 1px 3px rgba(220, 38, 38, 0.2)'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = '#b91c1c';
+                            e.target.style.transform = 'translateY(-1px)';
+                            e.target.style.boxShadow = '0 2px 6px rgba(220, 38, 38, 0.3)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = '#dc2626';
+                            e.target.style.transform = 'translateY(0)';
+                            e.target.style.boxShadow = '0 1px 3px rgba(220, 38, 38, 0.2)';
+                          }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polyline points="3,6 5,6 21,6"></polyline>
+                            <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2V6"></path>
+                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                          </svg>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

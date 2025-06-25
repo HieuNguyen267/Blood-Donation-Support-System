@@ -41,11 +41,16 @@ import MedicalFacilityRequestDetail from './pages/medicalfacility/RequestHistory
 import MedicalFacilityEmergencyRequest from './pages/medicalfacility/EmergencyRequest/index';
 import MedicalFacilityContact from './pages/medicalfacility/Contact/ContactPage';
 
+// Admin Pages
+import AdminDashBoard from './pages/Admin/dashBoard';
 import Statistics from './pages/Admin/Statistics';
 import DonorManagement from './pages/Admin/DonorManagement';
 import BloodStorageManagement from './pages/Admin/BloodStorageManagement';
 import DonationManagement from './pages/Admin/DonationManagement';
+import DonationProcessManagement from './pages/Admin/DonationProcessManagement';
+import DonationProcessDetail from './pages/Admin/DonationProcessDetail';
 import DonationDetail from './pages/Admin/DonationDetail';
+import BloodTestManagement from './pages/Admin/BloodTestManagement';
 import NewsManagement from './pages/Admin/NewsManagement';
 import BloodRequestManagement from './pages/Admin/BloodRequestManagement';
 import EmergencyDonorMatching from './pages/Admin/EmergencyDonorMatching';
@@ -114,18 +119,20 @@ function AppContent() {
         <Route path="/medical-facility/request-history/:id" element={<MedicalFacilityRequestDetail />} />
         <Route path="/medical-facility/emergency-request" element={<MedicalFacilityEmergencyRequest />} />
         <Route path="/medical-facility/contact" element={<MedicalFacilityContact />} />
-        <Route path="/" element={<Navigate to="/admin" replace />} />
-        <Route path="/admin" element={<Navigate to="/admin/statistics" replace />} />
+        <Route path="/admin" element={<AdminDashBoard />} />
+        <Route path="/admin/statistics" element={<Statistics />} />
         <Route path="/admin/donors" element={<DonorManagement />} />
         <Route path="/admin/blood-storage" element={<BloodStorageManagement />} />
         <Route path="/admin/donations" element={<DonationManagement />} />
+        <Route path="/admin/donation-process" element={<DonationProcessManagement />} />
+        <Route path="/admin/donation-process/:id" element={<DonationProcessDetail />} />
+        <Route path="/admin/blood-test" element={<BloodTestManagement />} />
         <Route path="/admin/donations/:id" element={<DonationDetail />} />
         <Route path="/admin/news" element={<NewsManagement />} />
         <Route path="/admin/blood-requests" element={<BloodRequestManagement />} />
         <Route path="/admin/emergency-donor-matching/:requestId" element={<EmergencyDonorMatching />} />
         <Route path="/admin/emergency-process/:requestId" element={<EmergencyProcess />} />
         <Route path="/admin/medical-facilities" element={<MedicalFacilityManagement />} />
-        <Route path="/admin/statistics" element={<Statistics />} />
         <Route path="/admin/accounts" element={<AccountManagement />} />
         <Route path="/admin/profile" element={<AccountProfile />} />
         <Route path="/admin/settings" element={<Settings />} />

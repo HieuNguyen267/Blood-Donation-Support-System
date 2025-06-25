@@ -1,5 +1,5 @@
 import React from "react";
-import { getStatusBadge } from '../../../Pages/Admin/utils';
+import { getStatusBadge } from '../../../pages/Admin/utils';
 
 const sampleData = [
   {

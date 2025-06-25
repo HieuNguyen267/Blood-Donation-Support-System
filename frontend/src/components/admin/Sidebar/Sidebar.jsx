@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import {
   FaTachometerAlt, FaUserInjured, FaUsers, FaBox, FaHeartbeat,
-  FaNewspaper, FaProcedures, FaCity, FaChartBar, FaLink, FaChevronDown, FaChevronRight
+  FaNewspaper, FaProcedures, FaCity, FaChartBar, FaLink, FaChevronDown, FaChevronRight, FaCogs
 } from 'react-icons/fa';
 import './Sidebar.css';
 
@@ -10,6 +10,8 @@ import './Sidebar.css';
 const menuItems = [
   { path: '/admin', icon: <FaTachometerAlt />, label: 'Dashboard' },
   { path: '/admin/donations', icon: <FaUserInjured />, label: 'Quản lý đơn hiến' },
+  { path: '/admin/donation-process', icon: <FaCogs />, label: 'Quản lý quá trình hiến' },
+  { path: '/admin/blood-test', icon: <FaProcedures />, label: 'Quản lý kiểm tra máu' },
   { path: '/admin/donors', icon: <FaUsers />, label: 'Quản lý người hiến' },
   { path: '/admin/blood-storage', icon: <FaBox />, label: 'Quản lý kho máu' },
   {

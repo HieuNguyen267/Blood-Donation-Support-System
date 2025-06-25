@@ -26,56 +26,27 @@ export default function DonationDetail() {
   } catch {}
   const donation = donations.find(d => d.code === id) || fallbackDonations[0];
 
-  const [showEdit, setShowEdit] = useState(false);
-  const [editData, setEditData] = useState(donation);
+
   const [toast, setToast] = useState({ show: false, type: '', message: '' });
   const [currentDonation, setCurrentDonation] = useState(donation);
-  // Khi id thay đổi, cập nhật editData và currentDonation
-  React.useEffect(() => { setEditData(donation); setCurrentDonation(donation); }, [id]);
+  const [selectedStatus, setSelectedStatus] = useState('');
+  // Khi id thay đổi, cập nhật currentDonation
+  React.useEffect(() => { setCurrentDonation(donation); }, [id]);
 
-  // Validate dữ liệu
-  const validate = () => {
-    if (!editData.name || !editData.donateDate || !editData.completeDate || !editData.amount || !editData.blood) {
-      setToast({ show: true, type: 'error', message: 'Vui lòng nhập đầy đủ thông tin!' });
-      return false;
-    }
-    if (isNaN(parseInt(editData.amount)) || parseInt(editData.amount) <= 0) {
-      setToast({ show: true, type: 'error', message: 'Số lượng phải là số dương!' });
-      return false;
-    }
-    return true;
+
+
+  // Xử lý chọn trạng thái
+  const handleStatusChange = (status) => {
+    setSelectedStatus(status);
   };
 
-  // Hàm lưu chỉnh sửa
-  const handleSaveEdit = () => {
-    if (!validate()) return;
-    let donations = fallbackDonations;
-    try {
-      const local = localStorage.getItem('donations');
-      if (local) donations = JSON.parse(local);
-    } catch {}
-    const idx = donations.findIndex(d => d.code === id);
-    if (idx !== -1) {
-      donations[idx] = { ...donations[idx], ...editData };
-      localStorage.setItem('donations', JSON.stringify(donations));
-      setCurrentDonation(donations[idx]);
-      setToast({ show: true, type: 'success', message: 'Lưu thành công!' });
-      setShowEdit(false);
-    } else {
-      setToast({ show: true, type: 'error', message: 'Không tìm thấy đơn hiến!' });
-    }
-  };
-
-  // Xác nhận đơn
-  const handleConfirm = () => {
-    updateStatus('Xác nhận');
-  };
-  // Từ chối đơn
-  const handleReject = () => {
-    updateStatus('Từ chối');
-  };
   // Hàm cập nhật trạng thái
-  const updateStatus = (newStatus) => {
+  const handleStatusUpdate = () => {
+    if (!selectedStatus) {
+      setToast({ show: true, type: 'error', message: 'Vui lòng chọn trạng thái!' });
+      return;
+    }
+    
     let donations = fallbackDonations;
     try {
       const local = localStorage.getItem('donations');
@@ -83,11 +54,22 @@ export default function DonationDetail() {
     } catch {}
     const idx = donations.findIndex(d => d.code === id);
     if (idx !== -1) {
-      donations[idx] = { ...donations[idx], status: newStatus };
+      donations[idx] = { ...donations[idx], status: selectedStatus };
       localStorage.setItem('donations', JSON.stringify(donations));
       setCurrentDonation(donations[idx]);
-      setToast({ show: true, type: 'success', message: `Đã cập nhật trạng thái: ${newStatus}` });
+      setToast({ show: true, type: 'success', message: `Đã cập nhật trạng thái: ${selectedStatus}` });
+      setSelectedStatus(''); // Reset selection
     }
+  };
+
+  // Hàm lấy style cho trạng thái
+  const getStatusStyle = (status) => {
+    const styles = {
+      'Xác nhận': { color: '#059669', fontWeight: '600' },
+      'Chờ xác nhận': { color: '#f59e0b', fontWeight: '600' },
+      'Từ chối': { color: '#dc2626', fontWeight: '600' }
+    };
+    return styles[status] || { color: '#6b7280', fontWeight: '600' };
   };
 
   // Ẩn toast sau 2.5s
@@ -107,86 +89,190 @@ export default function DonationDetail() {
           <h2 className="donation-detail-title">Chi tiết đơn hiến</h2>
           <div className="donation-detail-content">
             <div className="donation-detail-table">
-              <div className="donation-detail-section-title">Thông tin chung</div>
+              <div className="donation-detail-section-title">Thông tin đơn hiến</div>
               <table>
                 <tbody>
                   <tr><td>Họ và tên :</td><td>{currentDonation.name}</td></tr>
                   <tr><td>Ngày và giờ hiến :</td><td>{currentDonation.donateDate}</td></tr>
                   <tr><td>Ngày và giờ hoàn thành :</td><td>{currentDonation.completeDate}</td></tr>
                   <tr><td>Số lượng (ml) :</td><td>{currentDonation.amount}</td></tr>
-                  <tr><td>Trạng thái :</td><td>{currentDonation.status}</td></tr>
+                  <tr><td>Trạng thái :</td><td style={getStatusStyle(currentDonation.status)}>{currentDonation.status}</td></tr>
                   <tr><td>Nhóm máu :</td><td>{currentDonation.blood}</td></tr>
                 </tbody>
               </table>
-              <button className="btn-edit-info" style={{marginTop: 24, width: '100%'}} onClick={()=>setShowEdit(true)}>✏️ Chỉnh sửa thông tin</button>
+
             </div>
-            <div className="donation-detail-statusbox">
-              <div className="donation-detail-status-title">Trạng thái :
-                <span className={`donation-detail-status-label ${currentDonation.status === 'Chờ xác nhận' ? 'waiting' : currentDonation.status === 'Xác nhận' ? 'confirmed' : 'rejected'}`}>
-                  <span className="dot"/> {currentDonation.status}
-                </span>
-              </div>
-              {/* Chỉ hiện nút khi trạng thái là Chờ xác nhận */}
-              {currentDonation.status === 'Chờ xác nhận' && (
-                <div className="donation-detail-status-actions">
-                  <button className="btn-cancel" onClick={handleReject}>✖ Hủy đơn</button>
-                  <button className="btn-confirm" onClick={handleConfirm}>✔ Xác nhận</button>
+            
+            {/* Bảng cập nhật trạng thái */}
+            <div className="donation-detail-table" style={{marginTop: 24}}>
+              <div className="donation-detail-section-title">Cập nhật trạng thái đơn hiến</div>
+              <div style={{padding: '24px'}}>
+                <label className="form-label" style={{
+                  fontWeight: '500', 
+                  marginBottom: '16px', 
+                  color: '#374151',
+                  fontSize: '14px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
+                  textAlign: 'center',
+                  display: 'block'
+                }}>
+                  Cập nhật trạng thái
+                </label>
+                
+                <div style={{display: 'flex', gap: '16px', justifyContent: 'center', marginBottom: '24px'}}>
+                  {/* Nút Xác nhận */}
+                  <div 
+                    onClick={() => handleStatusChange('Xác nhận')}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '12px 20px',
+                      borderRadius: '12px',
+                      border: selectedStatus === 'Xác nhận' ? '2px solid #059669' : '2px solid #e5e7eb',
+                      backgroundColor: selectedStatus === 'Xác nhận' ? '#f0fdf4' : '#ffffff',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease-in-out',
+                      minWidth: '140px',
+                      boxShadow: selectedStatus === 'Xác nhận' ? '0 4px 12px rgba(5, 150, 105, 0.15)' : '0 2px 4px rgba(0, 0, 0, 0.05)',
+                      userSelect: 'none'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedStatus !== 'Xác nhận') {
+                        e.target.style.borderColor = '#d1d5db';
+                        e.target.style.backgroundColor = '#f9fafb';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedStatus !== 'Xác nhận') {
+                        e.target.style.borderColor = '#e5e7eb';
+                        e.target.style.backgroundColor = '#ffffff';
+                      }
+                    }}
+                  >
+                    <div style={{
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
+                      backgroundColor: selectedStatus === 'Xác nhận' ? '#059669' : '#e5e7eb',
+                      marginRight: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.2s ease-in-out'
+                    }}>
+                      {selectedStatus === 'Xác nhận' && (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                          <polyline points="20,6 9,17 4,12"></polyline>
+                        </svg>
+                      )}
+                    </div>
+                    <span style={{
+                      color: selectedStatus === 'Xác nhận' ? '#059669' : '#6b7280',
+                      fontWeight: '500',
+                      fontSize: '14px'
+                    }}>
+                      Xác nhận
+                    </span>
+                  </div>
+
+                  {/* Nút Từ chối */}
+                  <div 
+                    onClick={() => handleStatusChange('Từ chối')}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '12px 20px',
+                      borderRadius: '12px',
+                      border: selectedStatus === 'Từ chối' ? '2px solid #dc2626' : '2px solid #e5e7eb',
+                      backgroundColor: selectedStatus === 'Từ chối' ? '#fef2f2' : '#ffffff',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease-in-out',
+                      minWidth: '140px',
+                      boxShadow: selectedStatus === 'Từ chối' ? '0 4px 12px rgba(220, 38, 38, 0.15)' : '0 2px 4px rgba(0, 0, 0, 0.05)',
+                      userSelect: 'none'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedStatus !== 'Từ chối') {
+                        e.target.style.borderColor = '#d1d5db';
+                        e.target.style.backgroundColor = '#f9fafb';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedStatus !== 'Từ chối') {
+                        e.target.style.borderColor = '#e5e7eb';
+                        e.target.style.backgroundColor = '#ffffff';
+                      }
+                    }}
+                  >
+                    <div style={{
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
+                      backgroundColor: selectedStatus === 'Từ chối' ? '#dc2626' : '#e5e7eb',
+                      marginRight: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.2s ease-in-out'
+                    }}>
+                      {selectedStatus === 'Từ chối' && (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                          <path d="M18 6L6 18M6 6l12 12"></path>
+                        </svg>
+                      )}
+                    </div>
+                    <span style={{
+                      color: selectedStatus === 'Từ chối' ? '#dc2626' : '#6b7280',
+                      fontWeight: '500',
+                      fontSize: '14px'
+                    }}>
+                      Từ chối
+                    </span>
+                  </div>
                 </div>
-              )}
-              <div className="donation-detail-status-history">
-                <div className="donation-detail-status-history-title">Lịch sử trạng thái</div>
-                <div className="donation-detail-status-history-item">
-                  <span className="clock">🕒</span> 15:25 23.04.2024
+                
+                <div style={{display: 'flex', justifyContent: 'center'}}>
+                  <button 
+                    onClick={handleStatusUpdate}
+                    disabled={!selectedStatus}
+                    style={{
+                      padding: '14px 32px',
+                      borderRadius: '12px',
+                      border: 'none',
+                      backgroundColor: selectedStatus ? '#2563eb' : '#e5e7eb',
+                      color: selectedStatus ? '#ffffff' : '#9ca3af',
+                      fontWeight: '600',
+                      fontSize: '14px',
+                      cursor: selectedStatus ? 'pointer' : 'not-allowed',
+                      transition: 'all 0.2s ease-in-out',
+                      boxShadow: selectedStatus ? '0 4px 12px rgba(37, 99, 235, 0.25)' : 'none',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      minWidth: '200px'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedStatus) {
+                        e.target.style.backgroundColor = '#1d4ed8';
+                        e.target.style.transform = 'translateY(-1px)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedStatus) {
+                        e.target.style.backgroundColor = '#2563eb';
+                        e.target.style.transform = 'translateY(0)';
+                      }
+                    }}
+                  >
+                    Cập nhật
+                  </button>
                 </div>
-                <div className="donation-detail-status-history-desc">{currentDonation.status}</div>
               </div>
             </div>
           </div>
         </main>
       </div>
-      {/* Modal chỉnh sửa thông tin */}
-      {showEdit && (
-        <div className="modal fade show" style={{display:'block',background:'rgba(0,0,0,0.3)'}} tabIndex="-1">
-          <div className="modal-dialog modal-lg modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-header" style={{background:'#8fd19e'}}>
-                <h5 className="modal-title">Chỉnh sửa thông tin đơn hiến</h5>
-                <button type="button" className="btn-close" onClick={()=>setShowEdit(false)}></button>
-              </div>
-              <div className="modal-body">
-                <div className="row g-3">
-                  <div className="col-md-6">
-                    <input className="form-control" placeholder="Họ và tên*" value={editData.name} onChange={e=>setEditData({...editData,name:e.target.value})} />
-                  </div>
-                  <div className="col-md-6">
-                    <input className="form-control" placeholder="Ngày và giờ hiến*" value={editData.donateDate} onChange={e=>setEditData({...editData,donateDate:e.target.value})} />
-                  </div>
-                  <div className="col-md-6">
-                    <input className="form-control" placeholder="Ngày và giờ hoàn thành*" value={editData.completeDate} onChange={e=>setEditData({...editData,completeDate:e.target.value})} />
-                  </div>
-                  <div className="col-md-6">
-                    <input className="form-control" placeholder="Số lượng (ml)*" value={editData.amount} onChange={e=>setEditData({...editData,amount:e.target.value})} />
-                  </div>
-                  <div className="col-md-6">
-                    <select className="form-control" value={editData.status} onChange={e=>setEditData({...editData,status:e.target.value})}>
-                      <option>Xác nhận</option>
-                      <option>Chờ xác nhận</option>
-                      <option>Từ chối</option>
-                    </select>
-                  </div>
-                  <div className="col-md-6">
-                    <input className="form-control" placeholder="Nhóm máu*" value={editData.blood} onChange={e=>setEditData({...editData,blood:e.target.value})} />
-                  </div>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button className="btn btn-success" onClick={handleSaveEdit}>Lưu</button>
-                <button className="btn btn-danger" onClick={()=>setShowEdit(false)}>Hủy</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+
       {/* Toast thông báo */}
       {toast.show && (
         <div className={`custom-toast ${toast.type}`}>{toast.message}</div>
