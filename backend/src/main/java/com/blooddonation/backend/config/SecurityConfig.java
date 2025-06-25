@@ -56,7 +56,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/", "/test", "/auth/**", "/h2-console/**", "/swagger-ui/**", "/api-docs/**", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers("/", "/auth/**", "/h2-console/**", "/swagger-ui/**", "/api-docs/**", "/css/**", "/js/**", "/images/**").permitAll()
                 .anyRequest().authenticated() // Các request còn lại phải xác thực
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

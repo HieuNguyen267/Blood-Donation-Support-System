@@ -37,12 +37,11 @@ export default function RegisterDonate() {
         fullName: data.fullName,
         phone: data.phone,
         email: data.email,
-        donateLast: data.lastDonationDate ? moment(data.lastDonationDate, 'DD/MM/YYYY') : undefined,
-        sampleGroup: data.bloodType,
+        donateLast: data.dateOfBirth ? moment(data.dateOfBirth) : undefined,
+        sampleGroup: data.bloodGroup,
         ...initialValues
       });
     });
-    form.setFieldsValue(initialValues);
   }, [location.state, form]);
 
   const handleFormChange = (changedValues) => {
@@ -118,30 +117,33 @@ export default function RegisterDonate() {
             onFinish={handleSubmit}
             onValuesChange={handleFormChange}
           >
-            <Form.Item label="Họ và tên" name="fullName" rules={[{ required: true }]}> <Input prefix={<UserOutlined />} placeholder="Nhập họ tên" disabled /> </Form.Item>
-            <Form.Item label="Số điện thoại" name="phone" rules={[{ required: true }]}> <Input prefix={<PhoneOutlined />} placeholder="Nhập SĐT" disabled /> </Form.Item>
-            <Form.Item label="Email" name="email" rules={[{ required: true, type: "email" }]}> <Input prefix={<MailOutlined />} placeholder="abc@gmail.com" disabled /> </Form.Item>
-            <Form.Item label="Địa chỉ hiến máu" name="address"> <Input prefix={<EnvironmentOutlined />} disabled /> </Form.Item>
+            <Form.Item label="Họ và tên" name="fullName" rules={[{ required: true }]}>
+              <Input prefix={<UserOutlined />} placeholder="Nhập họ tên" readOnly />
+            </Form.Item>
+            <Form.Item label="Số điện thoại" name="phone" rules={[{ required: true }]}>
+              <Input prefix={<PhoneOutlined />} placeholder="Nhập SĐT" readOnly />
+            </Form.Item>
+            <Form.Item label="Email" name="email" rules={[{ required: true, type: "email" }]}>
+              <Input prefix={<MailOutlined />} placeholder="abc@gmail.com" readOnly />
+            </Form.Item>
+            <Form.Item label="Địa chỉ hiến máu" name="address">
+              <Input prefix={<EnvironmentOutlined />} readOnly />
+            </Form.Item>
             <Form.Item
               label="Nhóm máu"
               name="sampleGroup"
               rules={[{ required: true, message: "Vui lòng chọn nhóm máu" }]}
             >
-              <Select placeholder="Chọn nhóm máu" disabled>
-                <Select.Option value="A+">A+</Select.Option>
-                <Select.Option value="A-">A-</Select.Option>
-                <Select.Option value="B+">B+</Select.Option>
-                <Select.Option value="B-">B-</Select.Option>
-                <Select.Option value="O+">O+</Select.Option>
-                <Select.Option value="O-">O-</Select.Option>
-                <Select.Option value="AB+">AB+</Select.Option>
-                <Select.Option value="AB-">AB-</Select.Option>
-                <Select.Option value="Rh null">Rh null</Select.Option>
-                <Select.Option value="Bombay(hh)">Bombay (hh)</Select.Option>
-              </Select>
+              <Input readOnly />
             </Form.Item>
             <Form.Item label="Lần hiến máu gần nhất" name="donateLast" rules={[{ required: true }]}> <DatePicker style={{ width: "100%" }} suffixIcon={<CalendarOutlined />} disabled /> </Form.Item>
-            <Form.Item label="Thời điểm sẵn sàng hiến máu" name="readyTimeRange" rules={[{ required: true, message: 'Vui lòng chọn khoảng thời gian sẵn sàng hiến máu!' }]}> <DatePicker.RangePicker style={{ width: "100%" }} suffixIcon={<CalendarOutlined />} /> </Form.Item>
+            <Form.Item
+              label="Thời điểm sẵn sàng hiến máu"
+              name="readyTimeRange"
+              rules={[{ required: true, message: 'Vui lòng chọn khoảng thời gian sẵn sàng hiến máu!' }]}
+            >
+              <DatePicker.RangePicker style={{ width: "100%" }} suffixIcon={<CalendarOutlined />} />
+            </Form.Item>
             <Form.Item label="Tình trạng sức khỏe" name="status"> <Input.TextArea rows={4} /> </Form.Item>
             <Form.Item>
               <Button type="primary" htmlType="submit" block className="green-button">

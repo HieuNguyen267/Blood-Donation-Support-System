@@ -38,23 +38,6 @@ const ProfilePage = () => {
     loadProfile();
   }, []);
 
-  useEffect(() => {
-    if (isEditMode) {
-      const values = {
-        fullName: 'Test Name',
-        dateOfBirth: dayjs('2000-01-01'),
-        identityNumber: '123456789',
-        gender: 'Nam',
-        address: 'Test Address',
-        bloodGroup: 'A+',
-        job: 'Test Job',
-        phone: '0123456789',
-        email: 'test@email.com'
-      };
-      form.setFieldsValue(values);
-    }
-  }, [isEditMode, form]);
-
   const loadProfile = async () => {
     setLoading(true);
     try {
@@ -216,17 +199,6 @@ const ProfilePage = () => {
         layout="vertical"
         onFinish={handleSave}
         className="profile-antd-form"
-        initialValues={{
-          fullName: 'Test Name',
-          dateOfBirth: dayjs('2000-01-01'),
-          identityNumber: '123456789',
-          gender: 'Nam',
-          address: 'Test Address',
-          bloodGroup: 'A+',
-          job: 'Test Job',
-          phone: '0123456789',
-          email: 'test@email.com'
-        }}
       >
         <Row gutter={32}>
           {/* Cột trái */}
