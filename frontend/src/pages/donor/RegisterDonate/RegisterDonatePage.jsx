@@ -145,14 +145,15 @@ export default function RegisterDonatePage () {
   return (
     <div className="donate-bg">
       <Header />
+      {/* Chỉ hiển thị StepProgress nếu đã có healthAnswers */}
+      {healthAnswers && (
+        <div className="step-progress-wrapper" style={{ marginTop: 32, marginBottom: 32 }}>
+          <StepProgress currentStep={3} />
+        </div>
+      )}
 
       <div className="donate-content">
         <div className="donate-title-main">Thông tin đăng ký hiến máu</div>
-
-        {/* Thêm StepProgress */}
-        <div className="step-progress-wrapper" style={{ marginTop: 32, marginBottom: 32 }}>
-          <StepProgress />
-        </div>
 
         <div className="donate-mainbox">
           {/* Thông tin cá nhân */}
@@ -184,12 +185,9 @@ export default function RegisterDonatePage () {
                 {donationFormData && (
                   <div className="donate-appointment-info" style={{marginBottom: 16}}>
                     <div><b>Địa điểm hiến máu:</b> {donationFormData.address || '-'}</div>
-                    <div><b>Ngày hiến máu:</b> {donationFormData.sendTime ? moment(donationFormData.sendTime).format('DD/MM/YYYY') : '-'}</div>
-                    <div><b>Khung giờ:</b> {donationFormData.donationTimeSlot || '-'}</div>
-                    <div><b>Cân nặng:</b> {donationFormData.weight || '-'} kg</div>
+                    <div><b>Lần hiến máu gần nhất:</b> {donationFormData && donationFormData.donateLast ? moment(donationFormData.donateLast).format('DD/MM/YYYY') : '-'}</div>
+                    <div><b>Khoảng thời gian sẵn sàng hiến máu:</b> {donationFormData.readyTimeRange ? (Array.isArray(donationFormData.readyTimeRange) ? donationFormData.readyTimeRange.map(date => moment(date).format('DD/MM/YYYY')).join(' - ') : '-') : '-'}</div>
                     <div><b>Nhóm máu:</b> {donationFormData.sampleGroup || '-'}</div>
-                    <div><b>Lần hiến máu gần nhất:</b> {donationFormData.donateLast ? moment(donationFormData.donateLast).format('DD/MM/YYYY') : '-'}</div>
-                    {donationFormData.status && <div><b>Tình trạng sức khỏe:</b> {donationFormData.status}</div>}
                   </div>
                 )}
 
@@ -217,10 +215,28 @@ export default function RegisterDonatePage () {
           )}
 
           {/* Phiếu khảo sát sức khỏe */}
-          <div className="donate-phieubox">
-            <div className="donate-phieutitle">Phiếu khảo sát sức khỏe</div>
-            <div className="donate-phieucontent">
-              {healthAnswers ? (
+          {(
+            !bookingData && !latestAppointment && !donationFormData
+          ) ? (
+            <div className="donate-phieubox">
+              <div className="donate-phieutitle">Phiếu khảo sát sức khỏe</div>
+              <div className="donate-phieucontent">
+                <div className="no-content-placeholder">
+                  <img
+                    src="https://cdn-icons-png.flaticon.com/512/685/685352.png"
+                    alt="Empty"
+                    style={{ width: "80px", marginTop: "10px" }}
+                  />
+                  <div style={{ marginTop: "10px", fontWeight: "bold" }}>
+                    Chưa có thông tin khảo sát sức khỏe
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : healthAnswers && (
+            <div className="donate-phieubox">
+              <div className="donate-phieutitle">Phiếu khảo sát sức khỏe</div>
+              <div className="donate-phieucontent">
                 <div className="health-answers-list">
                   {healthQuestions.map((q, index) => {
                     const answerValues = healthAnswers[q.name];
@@ -236,20 +252,9 @@ export default function RegisterDonatePage () {
                     );
                   })}
                 </div>
-              ) : (
-                <div className="no-content-placeholder">
-                  <img
-                    src="https://cdn-icons-png.flaticon.com/512/685/685352.png"
-                    alt="Empty"
-                    style={{ width: "80px", marginTop: "10px" }}
-                  />
-                  <div style={{ marginTop: "10px", fontWeight: "bold" }}>
-                    Chưa có thông tin khảo sát sức khỏe
-                  </div>
-                </div>
-              )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Nút xóa đơn đăng ký luôn hiển thị nếu có dữ liệu */}

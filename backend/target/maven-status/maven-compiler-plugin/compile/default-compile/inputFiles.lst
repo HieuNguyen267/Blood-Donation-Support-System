@@ -49,7 +49,6 @@ C:\Users\ASUS\Blood-Donation-Support-System\backend\src\main\java\com\blooddonat
 C:\Users\ASUS\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\dto\common\EventDTO.java
 C:\Users\ASUS\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\entity\admin\DonationRegister.java
 C:\Users\ASUS\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\service\admin\BloodRequestService.java
-C:\Users\ASUS\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\controller\common\TestController.java
 C:\Users\ASUS\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\config\ModelMapperConfig.java
 C:\Users\ASUS\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\controller\admin\BloodGroupController.java
 C:\Users\ASUS\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\repository\admin\BloodStockRepository.java

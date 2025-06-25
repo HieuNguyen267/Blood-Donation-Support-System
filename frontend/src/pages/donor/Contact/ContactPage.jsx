@@ -36,7 +36,7 @@ export default function ContactPage() {
               <MailOutlined />
               <h3>Email</h3>
             </div>
-            <p>gmv@intelin.vn</p>
+            <p>swp391.donateblood@gmail.com</p>
           </div>
           <div className="contact-section">
             <div className="contact-section-header">
@@ -63,7 +63,7 @@ export default function ContactPage() {
           <p>
             Nếu bạn có bất kì thắc mắc nào liên quan đến các hoạt động
             hiến máu tình nguyện xin liên hệ với chúng tôi qua địa chỉ
-            email gmv@intelin.vn hoặc gửi thông tin cho chúng tôi theo
+            email swp391.donateblood@gmail.com hoặc gửi thông tin cho chúng tôi theo
             mẫu bên dưới
           </p>
           <form onSubmit={handleSubmit}>

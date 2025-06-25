@@ -56,7 +56,6 @@ com\blooddonation\backend\dto\admin\CertificatesDTO.class
 com\blooddonation\backend\repository\admin\MedicalFacilitiesRepository.class
 com\blooddonation\backend\controller\admin\BloodGroupController.class
 com\blooddonation\backend\service\impl\AccountServiceImpl$SignupCache.class
-com\blooddonation\backend\controller\common\TestController.class
 com\blooddonation\backend\BloodDonationApplication.class
 com\blooddonation\backend\controller\admin\CertificatesController.class
 com\blooddonation\backend\entity\admin\DonationRegister.class

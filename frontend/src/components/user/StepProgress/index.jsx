@@ -13,10 +13,11 @@ export default function StepProgress({ currentStep = 1 }) {
     <div className="step-progress-wrapper">
       <div className="step-progress">
         {steps.map((step, index) => {
+          const isActive = step.number <= currentStep;
           const isCurrent = step.number === currentStep;
           return (
             <React.Fragment key={step.number}>
-              <div className={`step-item${isCurrent ? ' current active' : ''}`}>
+              <div className={`step-item${isActive ? ' active' : ''}${isCurrent ? ' current' : ''}`}>
                 <div className="step-circle">{step.number}</div>
                 <p className="step-title">{step.title}</p>
                 <p className="step-desc">{step.description}</p>

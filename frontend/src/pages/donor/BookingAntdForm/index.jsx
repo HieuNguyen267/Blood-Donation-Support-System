@@ -54,6 +54,25 @@ export default function BookingAntdForm() {
   const onFinish = (values) => {
     // Lưu dữ liệu booking vào localStorage
     localStorage.setItem('bookingFormData', JSON.stringify(values));
+    // Thêm vào appointmentHistory để lịch sử và chi tiết hiển thị đúng
+    const existingHistory = JSON.parse(localStorage.getItem('appointmentHistory')) || [];
+    const newAppointment = {
+      id: Date.now(),
+      status: 'active',
+      fullName: values.fullName,
+      gender: values.gender,
+      phone: values.phone,
+      email: values.email,
+      weight: values.weight,
+      date: values.date ? values.date.format('DD/MM/YYYY') : null,
+      location: values.location,
+      bloodGroup: values.bloodGroup,
+      timeSlot: values.timeSlot,
+      lastDonationDate: values.lastDonationDate,
+      note: values.note || '',
+    };
+    const updatedHistory = [newAppointment, ...existingHistory];
+    localStorage.setItem('appointmentHistory', JSON.stringify(updatedHistory));
     // Chuyển hướng sang trang khảo sát sức khỏe
     window.location.href = '/blood-donation-eligibility';
   };

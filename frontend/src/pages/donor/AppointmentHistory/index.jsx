@@ -4,7 +4,6 @@ import Footer from "../../../components/user/Footer";
 import { Typography, Button, message, Spin } from "antd";
 import { Link } from "react-router-dom";
 import { EnvironmentOutlined, ClockCircleOutlined, FileTextOutlined } from "@ant-design/icons";
-import { donorAPI } from "../../../services/api";
 import "./index.css";
 import moment from 'moment';
 
@@ -16,29 +15,20 @@ export default function AppointmentHistory() {
   const hasAppointments = appointments.length > 0;
 
   useEffect(() => {
-    const fetchHistory = async () => {
-      setLoading(true);
-      try {
-        const history = await donorAPI.getDonationHistory();
-        setAppointments(history || []);
-      } catch (error) {
-        setAppointments([]);
-      }
-      setLoading(false);
-    };
-    fetchHistory();
+    setLoading(true);
+    // Lấy lịch sử từ localStorage thay vì gọi API
+    const history = JSON.parse(localStorage.getItem("appointmentHistory")) || [];
+    setAppointments(history);
+    setLoading(false);
   }, []);
 
   const handleDelete = async (id) => {
-    try {
-      await donorAPI.deleteDonation(id);
-      message.success('Đã xóa lịch hẹn thành công');
-      // Reload lại danh sách
-      const history = await donorAPI.getDonationHistory();
-      setAppointments(history || []);
-    } catch (error) {
-      message.error('Xóa lịch hẹn thất bại');
-    }
+    // Xóa lịch sử khỏi localStorage
+    const history = JSON.parse(localStorage.getItem("appointmentHistory")) || [];
+    const updated = history.filter(item => item.id !== id);
+    localStorage.setItem("appointmentHistory", JSON.stringify(updated));
+    setAppointments(updated);
+    message.success('Đã xóa lịch hẹn thành công');
   };
 
   const getStatusText = (status) => {
@@ -90,13 +80,19 @@ export default function AppointmentHistory() {
                 </div>
                 <div className="card-main">
                   <Title level={4} className="location-title">
-                    {app.address}
+                    {app.location || app.address || '-'}
                   </Title>
                   <Text className="appointment-details">
-<EnvironmentOutlined /> {app.address}
+                    <EnvironmentOutlined /> {app.location || app.address || '-'}
                   </Text>
                   <Text className="appointment-details">
-                    <ClockCircleOutlined /> {app.donationTimeSlot} - {app.sendDate ? moment(app.sendDate).format('DD/MM/YYYY') : '-'}
+                    <ClockCircleOutlined /> {(app.timeSlot || app.donationTimeSlot || '-')}
+                  </Text>
+                  <Text className="appointment-details">
+                    Ngày hiến máu: {app.date || app.sendDate || '-'}
+                  </Text>
+                  <Text className="appointment-details">
+                    Nhóm máu: {app.bloodGroup || app.sampleGroup || '-'}
                   </Text>
                 </div>
                 <div className="card-right">
@@ -109,7 +105,6 @@ export default function AppointmentHistory() {
                       Hủy lịch
                     </Button>
                   )}
-                  <div className="status-label">{getStatusText(app.status)}</div>
                   <Link to={`/appointment/${app.id}`} className="details-link">
                     <FileTextOutlined /> Xem chi tiết
                   </Link>

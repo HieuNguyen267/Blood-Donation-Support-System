@@ -23,9 +23,14 @@ export default function AppointmentDetail() {
     return <div>Đang tải hoặc không tìm thấy lịch hẹn...</div>;
   }
 
-  const statusTag = appointment.status === 'active' 
-    ? <Tag color="yellow">Đã hẹn lịch</Tag> 
-    : <Tag color="red">Đã hủy</Tag>;
+  const getStatusText = (status) => {
+    if (status === 'cancelled') return 'Đã hủy';
+    return 'Đang chờ xác nhận';
+  };
+
+  const statusTag = appointment.status === 'cancelled' 
+    ? <Tag color="red">{getStatusText(appointment.status)}</Tag> 
+    : <Tag color="yellow">{getStatusText(appointment.status)}</Tag>;
 
   return (
     <div className="detail-page-container">
@@ -39,26 +44,112 @@ export default function AppointmentDetail() {
         <div className="info-card">
           <Title level={4} className="info-card-title">Thông tin hiến máu</Title>
           <div className="info-grid">
-            <div className="info-row">
-              <Text className="info-label">Cơ sở tiếp nhận máu:</Text>
-              <Text className="info-value">Hiến máu tình nguyện</Text>
-            </div>
-            <div className="info-row">
-              <Text className="info-label">Địa chỉ:</Text>
-              <Text className="info-value">{appointment.address}</Text>
-            </div>
-            <div className="info-row">
-              <Text className="info-label">Lượng máu đã hiến:</Text>
-              <Text className="info-value">{appointment.sampleQuantity ? `${appointment.sampleQuantity} ml` : '-'}</Text>
-            </div>
-            <div className="info-row">
-              <Text className="info-label">Ngày hiến:</Text>
-              <Text className="info-value">{appointment.sendDate ? moment(appointment.sendDate).format('DD/MM/YYYY') : '-'}</Text>
-            </div>
-             <div className="info-row">
-              <Text className="info-label">Khung giờ:</Text>
-              <Text className="info-value">{appointment.donationTimeSlot}</Text>
-            </div>
+            {appointment.fullName && (
+              <div className="info-row">
+                <Text className="info-label">Họ và tên:</Text>
+                <Text className="info-value">{appointment.fullName}</Text>
+              </div>
+            )}
+            {appointment.phone && (
+              <div className="info-row">
+                <Text className="info-label">Số điện thoại:</Text>
+                <Text className="info-value">{appointment.phone}</Text>
+              </div>
+            )}
+            {appointment.email && (
+              <div className="info-row">
+                <Text className="info-label">Email:</Text>
+                <Text className="info-value">{appointment.email}</Text>
+              </div>
+            )}
+            {appointment.address && (
+              <div className="info-row">
+                <Text className="info-label">Địa điểm hiến máu:</Text>
+                <Text className="info-value">{appointment.address}</Text>
+              </div>
+            )}
+            {appointment.location && (
+              <div className="info-row">
+                <Text className="info-label">Địa điểm hiến máu:</Text>
+                <Text className="info-value">{appointment.location}</Text>
+              </div>
+            )}
+            {appointment.weight && (
+              <div className="info-row">
+                <Text className="info-label">Cân nặng:</Text>
+                <Text className="info-value">{appointment.weight} kg</Text>
+              </div>
+            )}
+            {appointment.sampleGroup && (
+              <div className="info-row">
+                <Text className="info-label">Nhóm máu:</Text>
+                <Text className="info-value">{appointment.sampleGroup}</Text>
+              </div>
+            )}
+            {appointment.bloodGroup && (
+              <div className="info-row">
+                <Text className="info-label">Nhóm máu:</Text>
+                <Text className="info-value">{appointment.bloodGroup}</Text>
+              </div>
+            )}
+            {appointment.donateLast && (
+              <div className="info-row">
+                <Text className="info-label">Lần hiến máu gần nhất:</Text>
+                <Text className="info-value">{appointment.donateLast}</Text>
+              </div>
+            )}
+            {appointment.lastDonationDate && (
+              <div className="info-row">
+                <Text className="info-label">Lần hiến máu gần nhất:</Text>
+                <Text className="info-value">{appointment.lastDonationDate}</Text>
+              </div>
+            )}
+            {appointment.sendDate && (
+              <div className="info-row">
+                <Text className="info-label">Ngày hiến máu:</Text>
+                <Text className="info-value">{appointment.sendDate}</Text>
+              </div>
+            )}
+            {appointment.date && (
+              <div className="info-row">
+                <Text className="info-label">Ngày hiến máu:</Text>
+                <Text className="info-value">{appointment.date}</Text>
+              </div>
+            )}
+            {appointment.donationTimeSlot && (
+              <div className="info-row">
+                <Text className="info-label">Khung giờ:</Text>
+                <Text className="info-value">{appointment.donationTimeSlot}</Text>
+              </div>
+            )}
+            {appointment.timeSlot && (
+              <div className="info-row">
+                <Text className="info-label">Khung giờ hiến máu:</Text>
+                <Text className="info-value">{appointment.timeSlot}</Text>
+              </div>
+            )}
+            {appointment.readyTimeRange && (
+              <div className="info-row">
+                <Text className="info-label">Khoảng thời gian sẵn sàng hiến máu:</Text>
+                <Text className="info-value">{
+                  Array.isArray(appointment.readyTimeRange)
+                    ? appointment.readyTimeRange.map(date => moment(date).format('DD/MM/YYYY')).join(' - ')
+                    : moment(appointment.readyTimeRange).isValid() ? moment(appointment.readyTimeRange).format('DD/MM/YYYY') : appointment.readyTimeRange
+                }</Text>
+              </div>
+            )}
+            {appointment.sampleQuantity && (
+              <div className="info-row">
+                <Text className="info-label">Số lượng mẫu:</Text>
+                <Text className="info-value">{appointment.sampleQuantity}</Text>
+              </div>
+            )}
+            {appointment.note && (
+              <div className="info-row">
+                <Text className="info-label">Ghi chú:</Text>
+                <Text className="info-value">{appointment.note}</Text>
+              </div>
+            )}
           </div>
         </div>
         

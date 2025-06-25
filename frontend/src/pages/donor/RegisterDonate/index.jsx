@@ -2,7 +2,6 @@ import { Button, Form, Input, Select, DatePicker, Layout, Typography } from "ant
 import { MailOutlined, PhoneOutlined, UserOutlined, CalendarOutlined, EnvironmentOutlined } from "@ant-design/icons";
 import Header from "../../../components/user/Header";
 import Footer from "../../../components/user/Footer";
-import StepProgress from "../../../components/user/StepProgress";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import moment from "moment";
@@ -37,7 +36,7 @@ export default function RegisterDonate() {
         fullName: data.fullName,
         phone: data.phone,
         email: data.email,
-        donateLast: data.dateOfBirth ? moment(data.dateOfBirth) : undefined,
+        donateLast: undefined,
         sampleGroup: data.bloodGroup,
         ...initialValues
       });
@@ -72,6 +71,8 @@ export default function RegisterDonate() {
       sendDate: values.sendTime ? moment(values.sendTime).format("DD/MM/YYYY") : null,
       donationTimeSlot: values.donationTimeSlot,
       healthStatus: values.status,
+      readyTimeRange: values.readyTimeRange || null,
+      status: values.status || null
     };
 
     // Thêm lịch hẹn mới vào đầu danh sách
@@ -100,17 +101,10 @@ export default function RegisterDonate() {
             Đăng kí hiến máu theo thời gian
           </Button>
         </div>
-        <div className="step-progress-wrapper">
-          <StepProgress currentStep={1} />
-        </div>
       </div>
 
       <Content className="content">
         <div className="form-container">
-          {/* Hiển thị số lần hiến máu gần nhất */}
-          <div style={{ marginBottom: 16, fontWeight: 500, fontSize: 16 }}>
-            Lần hiến máu gần nhất: {profile.lastDonationCount ?? profile.donationCount ?? profile.lastDonationTimes ?? '-'}
-          </div>
           <Form
             form={form}
             layout="vertical"
@@ -136,7 +130,7 @@ export default function RegisterDonate() {
             >
               <Input readOnly />
             </Form.Item>
-            <Form.Item label="Lần hiến máu gần nhất" name="donateLast" rules={[{ required: true }]}> <DatePicker style={{ width: "100%" }} suffixIcon={<CalendarOutlined />} disabled /> </Form.Item>
+            <Form.Item label="Lần hiến máu gần nhất" name="donateLast"> <DatePicker style={{ width: "100%" }} suffixIcon={<CalendarOutlined />} disabled /> </Form.Item>
             <Form.Item
               label="Thời điểm sẵn sàng hiến máu"
               name="readyTimeRange"
