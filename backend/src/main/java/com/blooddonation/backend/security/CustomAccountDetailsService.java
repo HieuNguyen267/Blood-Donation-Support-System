@@ -1,7 +1,7 @@
 package com.blooddonation.backend.security;
 
-import com.blooddonation.backend.entity.Account;
-import com.blooddonation.backend.repository.AccountRepository;
+import com.blooddonation.backend.entity.common.Account;
+import com.blooddonation.backend.repository.common.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

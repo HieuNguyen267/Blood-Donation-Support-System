@@ -1,7 +1,11 @@
 package com.blooddonation.backend.service.impl;
-
-import com.blooddonation.backend.repository.*;
-import com.blooddonation.backend.service.AnalyticsService;
+import com.blooddonation.backend.repository.donor.DonorRepository;
+import com.blooddonation.backend.repository.common.EventRepository;
+import com.blooddonation.backend.repository.admin.BloodRequestRepository;
+import com.blooddonation.backend.repository.admin.BloodStockRepository;
+import com.blooddonation.backend.repository.admin.DonationRegisterRepository;
+import com.blooddonation.backend.repository.admin.MedicalFacilitiesRepository;
+import com.blooddonation.backend.service.admin.AnalyticsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
