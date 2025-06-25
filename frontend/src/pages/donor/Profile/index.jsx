@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Descriptions, Typography, Button, Row, Col, Form, Input, DatePicker, Select, Radio, Space, message, Spin, Avatar, Tag, Divider, List, Modal } from 'antd';
+import { Card, Descriptions, Typography, Button, Row, Col, Form, Input, DatePicker, Select, Radio, Space, message, Spin, Avatar, Tag, Divider, List, Modal, Dropdown, Menu } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { Edit, User, Trash2 } from 'lucide-react';
 import Header from '../../../components/user/Header';
 import Footer from '../../../components/user/Footer';
 import { donorAPI } from '../../../services/api';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import './index.css';
 
 const { Title, Text } = Typography;
@@ -38,29 +38,61 @@ const ProfilePage = () => {
     loadProfile();
   }, []);
 
+  useEffect(() => {
+    if (isEditMode) {
+      const values = {
+        fullName: 'Test Name',
+        dateOfBirth: dayjs('2000-01-01'),
+        identityNumber: '123456789',
+        gender: 'Nam',
+        address: 'Test Address',
+        bloodGroup: 'A+',
+        job: 'Test Job',
+        phone: '0123456789',
+        email: 'test@email.com'
+      };
+      form.setFieldsValue(values);
+    }
+  }, [isEditMode, form]);
+
   const loadProfile = async () => {
     setLoading(true);
     try {
-      const profile = await donorAPI.getProfile();
-      form.setFieldsValue({
+      let profile = await donorAPI.getProfile();
+      if (!profile || Object.keys(profile).length === 0) {
+        const localProfile = localStorage.getItem('userInfo');
+        if (localProfile) {
+          profile = JSON.parse(localProfile);
+        }
+      }
+      const fixedProfile = {
         ...profile,
-        dateOfBirth: profile.dateOfBirth ? moment(profile.dateOfBirth) : null,
-      });
-      setUserInfo({
-        ...profile,
-        dateOfBirth: profile.dateOfBirth ? moment(profile.dateOfBirth) : null,
-      });
+        dateOfBirth: profile.dateOfBirth ? dayjs(profile.dateOfBirth) : null,
+      };
+      setUserInfo(fixedProfile);
     } catch (error) {
-      console.error('Load profile error:', error);
-      message.error('Không thể tải thông tin hồ sơ. Vui lòng thử lại.');
+      // Nếu lỗi, thử lấy từ localStorage
+      const localProfile = localStorage.getItem('userInfo');
+      if (localProfile) {
+        const profile = JSON.parse(localProfile);
+        const fixedProfile = {
+          ...profile,
+          dateOfBirth: profile.dateOfBirth ? dayjs(profile.dateOfBirth) : null,
+        };
+        setUserInfo(fixedProfile);
+      } else {
+        message.error('Không thể tải thông tin hồ sơ. Vui lòng thử lại.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handleEdit = () => {
-    form.setFieldsValue(userInfo);
     setIsEditMode(true);
+    setTimeout(() => {
+      form.setFieldsValue(userInfo);
+    }, 0);
   };
 
   const handleSave = async (values) => {
@@ -68,7 +100,7 @@ const ProfilePage = () => {
     try {
       await donorAPI.updateProfile({
         fullName: values.fullName,
-        dateOfBirth: values.dateOfBirth ? moment(values.dateOfBirth).format('YYYY-MM-DD') : undefined,
+        dateOfBirth: values.dateOfBirth ? values.dateOfBirth.format('YYYY-MM-DD') : undefined,
         identityNumber: values.identityNumber,
         gender: values.gender,
         address: values.address,
@@ -79,7 +111,7 @@ const ProfilePage = () => {
       });
       const newProfile = {
         ...values,
-        dateOfBirth: values.dateOfBirth ? moment(values.dateOfBirth) : undefined,
+        dateOfBirth: values.dateOfBirth ? values.dateOfBirth : undefined,
         identityNumber: values.identityNumber,
         bloodGroup: values.bloodGroup,
         job: values.job,
@@ -87,6 +119,7 @@ const ProfilePage = () => {
       setUserInfo(newProfile);
       setIsEditMode(false);
       message.success('Cập nhật thông tin thành công!');
+      localStorage.setItem('userInfo', JSON.stringify(newProfile));
     } catch (error) {
       console.error('Update profile error:', error);
       message.error(error.message || 'Cập nhật thông tin thất bại. Vui lòng thử lại.');
@@ -161,7 +194,7 @@ const ProfilePage = () => {
       <Col xs={24} md={10}>
         <Card className="profile-card" title="Thông tin liên hệ" style={{ marginBottom: 24 }}>
           <Descriptions layout="vertical" column={1} bordered size="small">
-            <Descriptions.Item label="Ngày sinh">{userInfo.dateOfBirth ? moment(userInfo.dateOfBirth).format('DD/MM/YYYY') : '-'}</Descriptions.Item>
+            <Descriptions.Item label="Ngày sinh">{userInfo.dateOfBirth ? userInfo.dateOfBirth.format('DD/MM/YYYY') : '-'}</Descriptions.Item>
             <Descriptions.Item label="Giới tính">{renderItem(userInfo.gender)}</Descriptions.Item>
             <Descriptions.Item label="Nhóm máu">{renderItem(userInfo.bloodGroup)}</Descriptions.Item>
             <Descriptions.Item label="Điện thoại di động">{renderItem(userInfo.phone)}</Descriptions.Item>
@@ -178,22 +211,103 @@ const ProfilePage = () => {
   const renderEditMode = () => (
     <Card className="profile-edit-card">
       <Title level={4} style={{ textAlign: 'center', marginBottom: '32px' }}>Chỉnh sửa thông tin cá nhân</Title>
-      <Form form={form} layout="vertical" onFinish={handleSave} className="profile-antd-form">
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleSave}
+        className="profile-antd-form"
+        initialValues={{
+          fullName: 'Test Name',
+          dateOfBirth: dayjs('2000-01-01'),
+          identityNumber: '123456789',
+          gender: 'Nam',
+          address: 'Test Address',
+          bloodGroup: 'A+',
+          job: 'Test Job',
+          phone: '0123456789',
+          email: 'test@email.com'
+        }}
+      >
         <Row gutter={32}>
           {/* Cột trái */}
           <Col span={12}>
-            <Form.Item label="Họ và Tên" name="fullName" rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }]}> <Input /> </Form.Item>
-            <Form.Item label="Ngày sinh" name="dateOfBirth" rules={[{ required: true, message: 'Vui lòng chọn ngày sinh!' }]}> <DatePicker style={{ width: '100%' }} /> </Form.Item>
-            <Form.Item label="Số CCCD" name="identityNumber" rules={[{ required: true, message: 'Vui lòng nhập CCCD!' }]}> <Input /> </Form.Item>
-            <Form.Item label="Giới tính" name="gender" rules={[{ required: true, message: 'Vui lòng chọn giới tính!' }]}> <Radio.Group> <Radio value="Nam">Nam</Radio> <Radio value="Nữ">Nữ</Radio> <Radio value="Khác">Khác</Radio> </Radio.Group> </Form.Item>
-            <Form.Item label="Nhóm máu" name="bloodGroup" rules={[{ required: true, message: 'Vui lòng chọn nhóm máu!' }]}> <Select> <Option value="A+">A+</Option> <Option value="A-">A-</Option> <Option value="B+">B+</Option> <Option value="B-">B-</Option> <Option value="AB+">AB+</Option> <Option value="AB-">AB-</Option> <Option value="O+">O+</Option> <Option value="O-">O-</Option> </Select> </Form.Item>
+            <Form.Item
+              label="Họ và Tên"
+              name="fullName"
+              rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              label="Ngày sinh"
+              name="dateOfBirth"
+              rules={[{ required: true, message: 'Vui lòng chọn ngày sinh!' }]}
+            >
+              <DatePicker style={{ width: '100%' }} />
+            </Form.Item>
+            <Form.Item
+              label="Số CCCD"
+              name="identityNumber"
+              rules={[{ required: true, message: 'Vui lòng nhập CCCD!' }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              label="Giới tính"
+              name="gender"
+              rules={[{ required: true, message: 'Vui lòng chọn giới tính!' }]}
+            >
+              <Radio.Group>
+                <Radio value="Nam">Nam</Radio>
+                <Radio value="Nữ">Nữ</Radio>
+                <Radio value="Khác">Khác</Radio>
+              </Radio.Group>
+            </Form.Item>
+            <Form.Item
+              label="Nhóm máu"
+              name="bloodGroup"
+              rules={[{ required: true, message: 'Vui lòng chọn nhóm máu!' }]}
+            >
+              <Select>
+                <Option value="A+">A+</Option>
+                <Option value="A-">A-</Option>
+                <Option value="B+">B+</Option>
+                <Option value="B-">B-</Option>
+                <Option value="AB+">AB+</Option>
+                <Option value="AB-">AB-</Option>
+                <Option value="O+">O+</Option>
+                <Option value="O-">O-</Option>
+              </Select>
+            </Form.Item>
           </Col>
           {/* Cột phải */}
           <Col span={12}>
-            <Form.Item label="Email" name="email"> <Input readOnly /> </Form.Item>
-            <Form.Item label="Điện thoại di động" name="phone" rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }]}> <Input /> </Form.Item>
-            <Form.Item label="Nghề nghiệp" name="job"> <Input /> </Form.Item>
-            <Form.Item label="Địa chỉ liên hệ" name="address" rules={[{ required: true, message: 'Vui lòng nhập địa chỉ!' }]}> <Input.TextArea rows={5} /> </Form.Item>
+            <Form.Item
+              label="Email"
+              name="email"
+            >
+              <Input readOnly />
+            </Form.Item>
+            <Form.Item
+              label="Điện thoại di động"
+              name="phone"
+              rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              label="Nghề nghiệp"
+              name="job"
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              label="Địa chỉ liên hệ"
+              name="address"
+              rules={[{ required: true, message: 'Vui lòng nhập địa chỉ!' }]}
+            >
+              <Input.TextArea rows={5} />
+            </Form.Item>
           </Col>
         </Row>
         <Row justify="end" style={{ marginTop: '24px' }}>
