@@ -28,7 +28,7 @@ export default function RegisterDonate() {
     };
     if (preselectedDate) {
       initialValues.sendTime = moment(preselectedDate, "YYYY-MM-DD");
-      setIsDateSelected(true); // Enable time slots if date is pre-selected
+      setIsDateSelected(true); // Enable time slots if date is pre-selected 
     }
     // Lấy profile
     donorAPI.getProfile().then((data) => {

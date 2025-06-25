@@ -153,10 +153,10 @@ export default function RegisterDonatePage () {
               <div className="donate-infotitle green">Thông tin cá nhân</div>
               <div className="donate-inforow"><label>Họ và tên:</label> <span>{renderItem(userInfo.fullName)}</span></div>
               <div className="donate-inforow"><label>Lần cuối hiến máu:</label> <span>{renderDate(userInfo.lastDonationDate)}</span></div>
-              <div className="donate-inforow"><label>Ngày sinh:</label> <span>{renderDate(userInfo.dob)}</span></div>
+              <div className="donate-inforow"><label>Ngày sinh:</label> <span>{renderDate(userInfo.dateOfBirth)}</span></div>
               <div className="donate-inforow"><label>Giới tính:</label> <span>{renderItem(userInfo.gender)}</span></div>
-              <div className="donate-inforow"><label>Nghề nghiệp:</label> <span>{renderItem(userInfo.occupation)}</span></div>
-              <div className="donate-inforow"><label>Nhóm máu:</label> <span>{renderItem(userInfo.bloodType)}</span></div>
+              <div className="donate-inforow"><label>Nghề nghiệp:</label> <span>{renderItem(userInfo.job)}</span></div>
+              <div className="donate-inforow"><label>Nhóm máu:</label> <span>{renderItem(userInfo.bloodGroup)}</span></div>
             </div>
 
             <div className="donate-infocard">
