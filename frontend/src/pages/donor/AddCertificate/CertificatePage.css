@@ -1,0 +1,92 @@
+.certificate-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 70vh;
+  padding: 40px 16px;
+  text-align: center;
+}
+
+.certificate-box {
+  width: 100%;
+  max-width: 900px;
+  padding: 0;
+  background-color: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.certificate-box p {
+  margin-bottom: 24px;
+  font-size: 20px;
+  line-height: 1.8;
+  color: #222;
+  font-weight: 500;
+}
+
+.add-btn {
+  background-color: #2e7d32;
+  color: white;
+  padding: 12px 28px;
+  font-size: 17px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.add-btn:hover {
+  background-color: #256229;
+}
+
+/* === THÔNG TIN CHỨNG NHẬN === */
+.certificate-info {
+  margin-top: 32px;
+  padding: 32px;
+  border-radius: 12px;
+  background-color: #fdfdfd;
+  border: 1px solid #ddd;
+  font-size: 18px;
+  line-height: 1.8;
+  color: #333;
+  text-align: left;
+}
+
+/* Tiêu đề */
+.certificate-info h3 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 24px;
+  color: #c62828;
+  text-align: center;
+}
+
+/* Ảnh giấy chứng nhận */
+.certificate-image {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.certificate-image img {
+  max-width: 360px;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  padding: 6px;
+  background-color: #fff;
+}
+
+/* Dòng thông tin */
+.certificate-info p {
+  margin: 8px 0;
+  font-size: 18px;
+}
+
+.certificate-info p strong {
+  display: inline-block;
+  width: 200px;
+  font-weight: 600;
+  color: #000;
+}
