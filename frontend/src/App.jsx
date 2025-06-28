@@ -11,7 +11,7 @@ import AppointmentDetail from './pages/donor/AppointmentHistory/AppointmentDetai
 import Faq from './pages/donor/Faq/FaqPage'; // Thêm trang FAQ nếu cần
 
 import CertificatePage from "./pages/donor/AddCertificate/CertificatePage";
-import CertificatePageform from "./pages/donor/AddCertificate/index";
+// import CertificatePageform from "./pages/donor/AddCertificate/index";
 
 import ReceiveBloodPage from './pages/donor/ReceiveBlood/ReceiveBloodPage';
 
@@ -31,6 +31,8 @@ import BloodDonationEligibility from './pages/donor/BloodDonationEligibility';
 import ForgotPasswordPage from './pages/donor/ForgotPasswordPage';
 import Settings from './pages/donor/Settings';
 import VerifyPassword from './pages/donor/VerifyPassword';
+
+import News from './pages/donor/News/News';
 
 // Medical Facility Pages
 import MedicalFacilityHome from './pages/medicalfacility/MedicalFacilityHome/index';
@@ -58,7 +60,7 @@ import MatchingManagement from './pages/Admin/MatchingManagement';
 import BookingAntdForm from './pages/donor/BookingAntdForm/index';
 
 import AboutPage from './pages/donor/AboutPage';
-import NewsPage from './pages/donor/NewsPage';
+
 import ActivityPage from './pages/donor/ActivityPage';
 
 function AppContent() {
@@ -72,7 +74,7 @@ function AppContent() {
         <Route path="/faq" element={<Faq />} />
         <Route path="/registerdonateform" element={<RegisterDonateform />} />
         <Route path="/addcertificate" element={<CertificatePage />} />
-        <Route path="/certificateform" element={<CertificatePageform />} />
+        <Route path="/certificateform" element={<CertificatePage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/receiveblood" element={<ReceiveBloodPage />} />
         <Route path="/bloodgroup-info" element={<BloodGroupInfo />} />
@@ -110,8 +112,9 @@ function AppContent() {
         <Route path="/admin/settings" element={<Settings />} />
         <Route path="/admin/matching" element={<MatchingManagement />} />
         <Route path="/about" element={<AboutPage />} />
-        <Route path="/news" element={<NewsPage />} />
+
         <Route path="/activities" element={<ActivityPage />} />
+        <Route path="/news" element={<News />} />
       </Routes>
     </>
   );

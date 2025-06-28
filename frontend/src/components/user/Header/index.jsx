@@ -105,7 +105,7 @@ export default function Header() {
           <>
             <a href="/registerdonate">ĐĂNG KÝ HIẾN MÁU</a>
             <a href="/appointmenthistory">LỊCH SỬ ĐẶT HẸN</a>
-            <a href="/addcertificate">CHỨNG NHẬN</a>
+            <a href="/certificateform">CHỨNG NHẬN</a>
             <a href="/faq">HỎI ĐÁP</a>
             <a href="/news">TIN TỨC</a>
             <a href="/contact">LIÊN HỆ</a>

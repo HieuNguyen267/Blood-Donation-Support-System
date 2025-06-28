@@ -193,25 +193,11 @@ export default function BookingAntdForm() {
                 <Input readOnly placeholder="Lần hiến máu gần nhất" />
               </Form.Item>
               <Form.Item
-                label="Thời điểm sẵn sàng hiến máu"
-                name="readyTimeRange"
-                rules={[
-                  { required: true, message: 'Vui lòng chọn thời điểm sẵn sàng!' },
-                  { validator: (_, value) => {
-                      if (!value || value.length === 0) return Promise.resolve();
-                      const now = moment().startOf('day');
-                      const invalid = value.some(date => moment(date).isBefore(now, 'day'));
-                      if (invalid) return Promise.reject('Chỉ được chọn từ ngày hiện tại trở đi!');
-                      return Promise.resolve();
-                    }
-                  }
-                ]}
+                label="Thời điểm hiến máu"
+                name="readyTimeFE"
+                rules={[{ required: true, message: 'Vui lòng chọn thời điểm hiến máu!' }]}
               >
-                <DatePicker.RangePicker
-                  format="DD/MM/YYYY"
-                  style={{ width: '100%' }}
-                  disabledDate={current => current && current < moment().startOf('day')}
-                />
+                <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
               </Form.Item>
               <Form.Item
                 label="Ghi chú thêm"

@@ -356,3 +356,11 @@ body {
     border-color: #43a047;
   }
   
+  .center-btn {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 0px;
+    margin-bottom: 48px;
+  }
+  

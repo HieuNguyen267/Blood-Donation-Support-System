@@ -165,7 +165,6 @@ export default function RegisterDonatePage () {
                   <div className="donate-appointment-info" style={{marginBottom: 16}}>
                     <div><b>Địa điểm hiến máu:</b> {bookingData.address || '-'}</div>
                     <div><b>Khung giờ hiến máu:</b> {bookingData.timeSlot || bookingData.donationTimeSlot || '-'}</div>
-                    <div><b>Số lượng máu muốn hiến:</b> {bookingData.quantity ? `${bookingData.quantity} ml` : '-'}</div>
                     {bookingData.note && <div><b>Ghi chú:</b> {bookingData.note}</div>}
                   </div>
                 )}
@@ -178,7 +177,6 @@ export default function RegisterDonatePage () {
                     ) : (
                       <div><b>Khung giờ hiến máu:</b> {donationFormData.timeSlot || donationFormData.donationTimeSlot || '-'}</div>
                     )}
-                    <div><b>Số lượng máu muốn hiến:</b> {donationFormData.quantity ? `${donationFormData.quantity} ml` : '-'}</div>
                   </div>
                 )}
                 {/* Nếu không có cả hai thì đến latestAppointment */}
@@ -186,7 +184,6 @@ export default function RegisterDonatePage () {
                   <div className="donate-appointment-info" style={{marginBottom: 16}}>
                     <div><b>Địa điểm hiến máu:</b> {latestAppointment.address || '-'}</div>
                     <div><b>Khung giờ:</b> {latestAppointment.donationTimeSlot || '-'}</div>
-                    <div><b>Số lượng máu muốn hiến:</b> {latestAppointment.quantity ? `${latestAppointment.quantity} ml` : '-'}</div>
                   </div>
                 )}
               </div>
@@ -196,16 +193,21 @@ export default function RegisterDonatePage () {
               <div className="donate-phieutitle">Thông tin đăng ký hiến máu</div>
               <div className="donate-phieucontent">
                 <span style={{ color: '#888' }}>Bạn chưa có đơn đăng ký hiến máu nào.</span>
-                <div style={{ marginTop: 24 }}>
-                  <Button type="primary" className="green-button" onClick={() => navigate('/registerdonateform')}>
-                    Đăng ký hiến máu
-                  </Button>
-                </div>
               </div>
             </div>
           )}
         </div>
       </div>
+
+      {/* Nút đăng ký hiến máu chỉ hiển thị khi chưa có đơn đăng ký */}
+      {!(bookingData || latestAppointment || donationFormData) && (
+        <div className="center-btn">
+          <Button type="primary" className="green-button" style={{ minWidth: 240, fontWeight: 600, fontSize: 18 }} onClick={() => navigate('/registerdonateform')}>
+            Đăng ký hiến máu
+          </Button>
+        </div>
+      )}
+
       {/* Nút xóa đơn đăng ký luôn hiển thị nếu có dữ liệu */}
       {(bookingData || latestAppointment || donationFormData) && (
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: 32, marginBottom: 32 }}>
