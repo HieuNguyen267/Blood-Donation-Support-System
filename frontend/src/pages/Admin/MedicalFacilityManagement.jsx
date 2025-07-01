@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../../components/admin/Header";
 import Sidebar from "../../components/admin/Sidebar";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { medicalFacilitiesAPI } from "../../services/api";
 
 const facilitiesDataInit = [
   { facility_id: 1, account_id: 101, facility_name: "BV Chợ Rẫy", facility_type: "hospital", license_number: "CR123456", address: "201B Nguyễn Chí Thanh, Q.5, TP.HCM", phone: "02838554137", email: "info@choray.vn", created_at: "2024-01-01 08:00", updated_at: "2024-01-01 08:00" },
@@ -20,7 +21,7 @@ const facilityTypes = [
 const PAGE_SIZE = 8;
 
 export default function MedicalFacilityManagement() {
-  const [facilities, setFacilities] = useState(facilitiesDataInit);
+  const [facilities, setFacilities] = useState([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [editIdx, setEditIdx] = useState(null);
@@ -28,6 +29,24 @@ export default function MedicalFacilityManagement() {
   const [deleteIdx, setDeleteIdx] = useState(null);
   const [addMode, setAddMode] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
+
+  // Fetch facilities from backend
+  useEffect(() => {
+    medicalFacilitiesAPI.getFacilities().then(data => {
+      setFacilities(data.map(f => ({
+        facility_id: f.facilityId || f.facility_id,
+        account_id: f.accountId || f.account_id,
+        facility_name: f.facilityName || f.facility_name,
+        facility_type: f.facilityType || f.facility_type,
+        license_number: f.licenseNumber || f.license_number,
+        address: f.address,
+        phone: f.phone,
+        email: f.email,
+        created_at: f.createdAt ? f.createdAt.replace("T", " ").slice(0, 16) : f.created_at,
+        updated_at: f.updatedAt ? f.updatedAt.replace("T", " ").slice(0, 16) : f.updated_at,
+      })));
+    });
+  }, []);
 
   // Filter logic
   const filtered = facilities.filter(f => f.facility_name.toLowerCase().includes(search.toLowerCase()));
@@ -52,19 +71,32 @@ export default function MedicalFacilityManagement() {
     setEditData({...filtered[idx]});
     setValidationErrors({});
   };
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     const errors = validateFacility(editData);
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
-    const globalIdx = facilities.findIndex(f => f === filtered[editIdx]);
-    const newFacilities = [...facilities];
-    newFacilities[globalIdx] = editData;
-    setFacilities(newFacilities);
-    setEditIdx(null);
-    setEditData(null);
-    setValidationErrors({});
+    try {
+      await medicalFacilitiesAPI.updateFacility(editData.facility_id, {
+        facilityName: editData.facility_name,
+        facilityType: editData.facility_type,
+        licenseNumber: editData.license_number,
+        address: editData.address,
+        phone: editData.phone,
+        email: editData.email,
+        // Thêm các trường khác nếu cần
+      });
+      const globalIdx = facilities.findIndex(f => f.facility_id === editData.facility_id);
+      const newFacilities = [...facilities];
+      newFacilities[globalIdx] = { ...editData };
+      setFacilities(newFacilities);
+      setEditIdx(null);
+      setEditData(null);
+      setValidationErrors({});
+    } catch (e) {
+      alert("Lỗi khi cập nhật cơ sở y tế: " + e.message);
+    }
   };
   const handleCancelEdit = () => {
     setEditIdx(null);
@@ -73,10 +105,16 @@ export default function MedicalFacilityManagement() {
   };
   // Delete logic
   const handleDelete = (idx) => { setDeleteIdx(idx); };
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     const globalIdx = facilities.findIndex(f => f === filtered[deleteIdx]);
-    setFacilities(facilities.filter((_, i) => i !== globalIdx));
-    setDeleteIdx(null);
+    const facility = filtered[deleteIdx];
+    try {
+      await medicalFacilitiesAPI.deleteFacility(facility.facility_id);
+      setFacilities(facilities.filter((f) => f.facility_id !== facility.facility_id));
+      setDeleteIdx(null);
+    } catch (e) {
+      alert("Lỗi khi xóa cơ sở y tế: " + e.message);
+    }
   };
   const handleCancelDelete = () => { setDeleteIdx(null); };
 
@@ -98,16 +136,29 @@ export default function MedicalFacilityManagement() {
     });
     setValidationErrors({});
   };
-  const handleSaveAdd = () => {
+  const handleSaveAdd = async () => {
     const errors = validateFacility(editData);
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
-    setFacilities([{ ...editData, facility_id: Date.now() }, ...facilities]);
-    setAddMode(false);
-    setEditData(null);
-    setValidationErrors({});
+    try {
+      const newFacility = await medicalFacilitiesAPI.createFacility({
+        facilityName: editData.facility_name,
+        facilityType: editData.facility_type,
+        licenseNumber: editData.license_number,
+        address: editData.address,
+        phone: editData.phone,
+        email: editData.email,
+        // Thêm các trường khác nếu cần
+      });
+      setFacilities([{ ...editData, facility_id: newFacility.facilityId }, ...facilities]);
+      setAddMode(false);
+      setEditData(null);
+      setValidationErrors({});
+    } catch (e) {
+      alert("Lỗi khi thêm cơ sở y tế: " + e.message);
+    }
   };
   const handleCancelAdd = () => {
     setAddMode(false);

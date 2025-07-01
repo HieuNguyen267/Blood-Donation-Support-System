@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import './DonorManagement.css';
 import Header from "../../components/admin/Header";
 import Sidebar from "../../components/admin/Sidebar";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { validateDonor, getStatusStyle } from './utils';
+import { donorAPI } from "../../services/api";
 
 const donorsDataInit = [
   { id: 1, name: "Đậu Nguyễn Bảo Tuấn", gender: "Nam", phone: "03627929786", staff: "Nguyễn Văn A", address: "abcdef", blood: "A+", age: 20, email: "abcde@gmail.com", last: "2024-07-07", amount: "120ml", role: "Donor", status: "Đạt chuẩn", ready: "Có" },
@@ -45,7 +46,7 @@ const statuses = ["Tất cả", "Đạt chuẩn", "Đang xét nghiệm", "Không
 const PAGE_SIZE = 5;
 
 export default function DonorManagement() {
-  const [donors, setDonors] = useState(donorsDataInit);
+  const [donors, setDonors] = useState([]);
   const [search, setSearch] = useState("");
   const [blood, setBlood] = useState("Tất cả");
   const [status, setStatus] = useState("Tất cả");
@@ -69,7 +70,29 @@ export default function DonorManagement() {
   const paged = filtered.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
 
   // Reset page if filter/search changes
-  React.useEffect(() => { setPage(1); }, [search, blood, status]);
+  useEffect(() => { setPage(1); }, [search, blood, status]);
+
+  // Fetch donors from backend
+  useEffect(() => {
+    donorAPI.getAllDonors().then(data => {
+      setDonors(data.map(d => ({
+        id: d.donorId,
+        name: d.fullName || d.name,
+        gender: d.gender,
+        phone: d.phone,
+        staff: d.staffName || "", // Nếu có trường staff
+        address: d.address,
+        blood: d.bloodGroup ? (d.bloodGroup.aboType ? d.bloodGroup.aboType + d.bloodGroup.rhFactor : d.bloodGroup) : "",
+        age: d.age || (d.dateOfBirth ? (new Date().getFullYear() - new Date(d.dateOfBirth).getFullYear()) : ""),
+        email: d.email,
+        last: d.lastDonationDate || "",
+        amount: d.lastDonationAmount || "",
+        role: "Donor",
+        status: d.status || "Đạt chuẩn",
+        ready: d.ready || "Có"
+      })));
+    });
+  }, []);
 
   // Xử lý mở popup sửa
   const handleEdit = (idx) => {
@@ -78,19 +101,43 @@ export default function DonorManagement() {
     setValidationErrors({});
   };
   // Xử lý lưu chỉnh sửa
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     const errors = validateDonor(editData);
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
-    const globalIdx = donors.findIndex(d => d === filtered[editIdx]);
-    const newDonors = [...donors];
-    newDonors[globalIdx] = editData;
-    setDonors(newDonors);
-    setEditIdx(null);
-    setEditData(null);
-    setValidationErrors({});
+    try {
+      console.log('Dữ liệu gửi lên:', {
+        fullName: editData.name,
+        gender: editData.gender,
+        phone: editData.phone,
+        address: editData.address,
+        bloodGroup: editData.blood,
+        age: editData.age,
+        email: editData.email,
+      });
+      await donorAPI.updateDonor(editData.id, {
+        fullName: editData.name,
+        gender: editData.gender,
+        phone: editData.phone,
+        address: editData.address,
+        bloodGroup: editData.blood,
+        age: editData.age,
+        email: editData.email,
+        // Thêm các trường khác nếu cần
+      });
+      const globalIdx = donors.findIndex(d => d.id === editData.id);
+      const newDonors = [...donors];
+      newDonors[globalIdx] = { ...editData };
+      setDonors(newDonors);
+      setEditIdx(null);
+      setEditData(null);
+      setValidationErrors({});
+    } catch (e) {
+      console.error("Lỗi khi cập nhật người hiến:", e);
+      alert("Lỗi khi cập nhật người hiến: " + e.message);
+    }
   };
   // Xử lý hủy chỉnh sửa
   const handleCancelEdit = () => {
@@ -103,11 +150,16 @@ export default function DonorManagement() {
     setDeleteIdx(idx);
   };
   // Xác nhận xóa
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     const globalIdx = donors.findIndex(d => d === filtered[deleteIdx]);
-    const newDonors = donors.filter((_, i) => i !== globalIdx);
-    setDonors(newDonors);
-    setDeleteIdx(null);
+    const donor = filtered[deleteIdx];
+    try {
+      await donorAPI.deleteDonor(donor.id);
+      setDonors(donors.filter((d) => d.id !== donor.id));
+      setDeleteIdx(null);
+    } catch (e) {
+      alert("Lỗi khi xóa người hiến: " + e.message);
+    }
   };
   // Hủy xóa
   const handleCancelDelete = () => {
@@ -124,16 +176,30 @@ export default function DonorManagement() {
     setValidationErrors({});
   };
   // Lưu thêm mới
-  const handleSaveAdd = () => {
+  const handleSaveAdd = async () => {
     const errors = validateDonor(editData);
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
-    setDonors([editData, ...donors]);
-    setAddMode(false);
-    setEditData(null);
-    setValidationErrors({});
+    try {
+      const newDonor = await donorAPI.createDonor({
+        fullName: editData.name,
+        gender: editData.gender,
+        phone: editData.phone,
+        address: editData.address,
+        bloodGroup: editData.blood,
+        age: editData.age,
+        email: editData.email,
+        // Thêm các trường khác nếu cần
+      });
+      setDonors([{ ...editData, id: newDonor.donorId }, ...donors]);
+      setAddMode(false);
+      setEditData(null);
+      setValidationErrors({});
+    } catch (e) {
+      alert("Lỗi khi thêm người hiến: " + e.message);
+    }
   };
   // Hủy thêm mới
   const handleCancelAdd = () => {
@@ -141,10 +207,6 @@ export default function DonorManagement() {
     setEditData(null);
     setValidationErrors({});
   };
-
-  React.useEffect(() => {
-    localStorage.setItem('donors', JSON.stringify(donorsDataInit));
-  }, []);
 
   return (
     <div className="dashboard-root">

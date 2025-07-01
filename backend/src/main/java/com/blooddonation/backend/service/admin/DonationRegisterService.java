@@ -207,6 +207,16 @@ public class DonationRegisterService {
         dto.setStaffNotes(register.getStaffNotes());
         dto.setCreatedAt(register.getCreatedAt());
         dto.setUpdatedAt(register.getUpdatedAt());
+
+        // Bổ sung thông tin người hiến
+        Donor donor = register.getDonor();
+        if (donor != null) {
+            dto.setDonorName(donor.getFullName());
+            dto.setBloodGroup(donor.getBloodGroup() != null ? donor.getBloodGroup().getAboType() + donor.getBloodGroup().getRhFactor() : null);
+            dto.setPhone(donor.getPhone());
+            dto.setEmail(donor.getEmail());
+            dto.setAddress(donor.getAddress());
+        }
         return dto;
     }
 } 

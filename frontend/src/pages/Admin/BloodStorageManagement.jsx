@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../../components/admin/Header";
 import Sidebar from "../../components/admin/Sidebar";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './BloodStorageManagement.css';
 import { validateBloodStorage, getStatusStyle } from './utils';
+import { bloodStockAPI, bloodGroupAPI } from "../../services/api";
 
 const bloodDataInit = [
   { code: "BP001", group: "Rh NULL", collect: "11/4/2024, 10:30", expire: "11/4/2027, 09:30", amount: 12, status: "Mới", quality: "Tốt", temp: "2 -6 °C" },
@@ -30,7 +31,8 @@ const qualities = ["Tốt", "Đã tiêu huỷ", "Đã đông"];
 const PAGE_SIZE = 8;
 
 export default function BloodStorageManagement() {
-  const [data, setData] = useState(bloodDataInit);
+  const [data, setData] = useState([]);
+  const [bloodGroupsList, setBloodGroupsList] = useState([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [editIdx, setEditIdx] = useState(null);
@@ -38,6 +40,27 @@ export default function BloodStorageManagement() {
   const [deleteIdx, setDeleteIdx] = useState(null);
   const [addMode, setAddMode] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
+
+  // Fetch blood stock & blood groups from backend
+  useEffect(() => {
+    bloodStockAPI.getStock().then(stock => {
+      setData(stock.map(item => ({
+        id: item.id || item.bloodStockId,
+        code: item.code || item.bloodStockCode || item.id || item.bloodStockId,
+        group: item.bloodGroupName || (item.bloodGroup ? (item.bloodGroup.aboType ? item.bloodGroup.aboType + item.bloodGroup.rhFactor : item.bloodGroup) : ""),
+        collect: item.collectionDate || item.collect || "",
+        expire: item.expiryDate || item.expire || "",
+        amount: item.amount || item.quantity || item.volume || "",
+        status: item.status || "Mới",
+        quality: item.quality || "Tốt",
+        temp: item.temperatureRange || item.temp || ""
+      })));
+    });
+    // Fetch danh sách nhóm máu
+    bloodGroupAPI.getBloodGroups().then(groups => {
+      setBloodGroupsList(groups);
+    });
+  }, []);
 
   // Filter logic (chỉ search theo nhóm máu)
   const filtered = data.filter(d => d.group.toLowerCase().includes(search.toLowerCase()));
@@ -51,16 +74,27 @@ export default function BloodStorageManagement() {
     setEditData({...filtered[idx]});
     setValidationErrors({});
   };
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     const errors = validateBloodStorage(editData);
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
-    const globalIdx = data.findIndex(d => d === filtered[editIdx]);
-    const newData = [...data];
-    newData[globalIdx] = editData;
-    setData(newData);
+    // Gọi API cập nhật
+    await bloodStockAPI.updateStock({ ...editData, id: editData.id });
+    // Fetch lại danh sách
+    const stock = await bloodStockAPI.getStock();
+    setData(stock.map(item => ({
+      id: item.id || item.bloodStockId,
+      code: item.code || item.bloodStockCode || item.id || item.bloodStockId,
+      group: item.bloodGroupName || (item.bloodGroup ? (item.bloodGroup.aboType ? item.bloodGroup.aboType + item.bloodGroup.rhFactor : item.bloodGroup) : ""),
+      collect: item.collectionDate || item.collect || "",
+      expire: item.expiryDate || item.expire || "",
+      amount: item.amount || item.quantity || item.volume || "",
+      status: item.status || "Mới",
+      quality: item.quality || "Tốt",
+      temp: item.temperatureRange || item.temp || ""
+    })));
     setEditIdx(null);
     setEditData(null);
     setValidationErrors({});
@@ -73,9 +107,24 @@ export default function BloodStorageManagement() {
   
   // Delete logic
   const handleDelete = (idx) => { setDeleteIdx(idx); };
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
+    // Gọi API xóa
     const globalIdx = data.findIndex(d => d === filtered[deleteIdx]);
-    setData(data.filter((_, i) => i !== globalIdx));
+    const delId = filtered[deleteIdx].id;
+    await bloodStockAPI.deleteStock(delId);
+    // Fetch lại danh sách
+    const stock = await bloodStockAPI.getStock();
+    setData(stock.map(item => ({
+      id: item.id || item.bloodStockId,
+      code: item.code || item.bloodStockCode || item.id || item.bloodStockId,
+      group: item.bloodGroupName || (item.bloodGroup ? (item.bloodGroup.aboType ? item.bloodGroup.aboType + item.bloodGroup.rhFactor : item.bloodGroup) : ""),
+      collect: item.collectionDate || item.collect || "",
+      expire: item.expiryDate || item.expire || "",
+      amount: item.amount || item.quantity || item.volume || "",
+      status: item.status || "Mới",
+      quality: item.quality || "Tốt",
+      temp: item.temperatureRange || item.temp || ""
+    })));
     setDeleteIdx(null);
   };
   const handleCancelDelete = () => { setDeleteIdx(null); };
@@ -85,17 +134,42 @@ export default function BloodStorageManagement() {
     setAddMode(true);
     setEditIdx(null);
     setEditData({
-      code: '', group: 'A+', collect: '', expire: '', amount: '', status: 'Mới', quality: 'Tốt', temp: ''
+      code: '', group: bloodGroupsList[0]?.name || 'A+', collect: '', expire: '', amount: '', status: 'Mới', quality: 'Tốt', temp: ''
     });
     setValidationErrors({});
   };
-  const handleSaveAdd = () => {
+  const handleSaveAdd = async () => {
     const errors = validateBloodStorage(editData);
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
-    setData([editData, ...data]);
+    // Map tên nhóm máu sang id
+    const selectedGroup = bloodGroupsList.find(bg => bg.name === editData.group);
+    // Mapping lại dữ liệu đúng format backend
+    const mappedData = {
+      bloodGroupId: selectedGroup ? selectedGroup.id : null,
+      collectionDate: editData.collect ? editData.collect.split(",")[0].split("/").reverse().join("-") : null, // Chuyển dd/MM/yyyy thành yyyy-MM-dd
+      expiryDate: editData.expire ? editData.expire.split(",")[0].split("/").reverse().join("-") : null,
+      volume: parseInt(editData.amount),
+      status: editData.status,
+      // Có thể bổ sung các trường khác nếu cần
+    };
+    console.log('Dữ liệu gửi lên:', mappedData);
+    await bloodStockAPI.addStock(mappedData);
+    // Fetch lại danh sách
+    const stock = await bloodStockAPI.getStock();
+    setData(stock.map(item => ({
+      id: item.id || item.bloodStockId,
+      code: item.code || item.bloodStockCode || item.id || item.bloodStockId,
+      group: item.bloodGroupName || (item.bloodGroup ? (item.bloodGroup.aboType ? item.bloodGroup.aboType + item.bloodGroup.rhFactor : item.bloodGroup) : ""),
+      collect: item.collectionDate || item.collect || "",
+      expire: item.expiryDate || item.expire || "",
+      amount: item.amount || item.quantity || item.volume || "",
+      status: item.status || "Mới",
+      quality: item.quality || "Tốt",
+      temp: item.temperatureRange || item.temp || ""
+    })));
     setAddMode(false);
     setEditData(null);
     setValidationErrors({});
@@ -192,7 +266,7 @@ export default function BloodStorageManagement() {
                       </div>
                       <div className="col-md-6">
                         <select className="form-control" value={editData.group} onChange={e=>setEditData({...editData,group:e.target.value})}>
-                          {bloodGroups.map(b=><option key={b}>{b}</option>)}
+                          {bloodGroupsList.map(bg => <option key={bg.id} value={bg.name}>{bg.name}</option>)}
                         </select>
                       </div>
                       <div className="col-md-6">

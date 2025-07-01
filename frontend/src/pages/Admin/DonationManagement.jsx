@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import './DonationManagement.css';
 import Header from "../../components/admin/Header";
 import Sidebar from "../../components/admin/Sidebar";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
 import { validateDonation, getStatusStyle } from './utils';
+import { donationRegisterAPI } from "../../services/api";
 
 const donationDataInit = [
   { code: "A001", name: "Nguyễn Duy Hiếu", donateDate: "11/4/2024, 09:30", completeDate: "11/4/2024, 10:30", amount: "120 ml", status: "Xác nhận", blood: "Rh NULL" },
@@ -24,7 +25,7 @@ const statuses = ["Tất cả", "Xác nhận", "Chờ xác nhận", "Từ chối
 const PAGE_SIZE = 8;
 
 export default function DonationManagement() {
-  const [donations, setDonations] = useState(donationDataInit);
+  const [donations, setDonations] = useState([]);
   const [search, setSearch] = useState("");
   const [blood, setBlood] = useState("Tất cả");
   const [status, setStatus] = useState("Tất cả");
@@ -35,6 +36,25 @@ export default function DonationManagement() {
   const [addMode, setAddMode] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const navigate = useNavigate();
+
+  // Fetch donations from backend
+  useEffect(() => {
+    donationRegisterAPI.getAllDonationRegisters().then(data => {
+      setDonations(data.map(d => ({
+        id: d.registerId,
+        code: d.code || d.donationRegisterCode || d.registerId,
+        name: d.donorName || d.name || "",
+        donateDate: d.donationDate || d.donateDate || "",
+        completeDate: d.completionDate || d.completeDate || "",
+        amount: d.amount || d.quantity || "",
+        status: d.status || "Xác nhận",
+        blood: d.bloodGroup || "",
+        email: d.email || "",
+        phone: d.phone || "",
+        address: d.address || "",
+      })));
+    });
+  }, []);
 
   // Filter logic
   const filtered = donations.filter(d => {
@@ -53,21 +73,34 @@ export default function DonationManagement() {
   // Edit logic
   const handleEdit = (idx) => {
     const donation = filtered[idx];
-    navigate(`/admin/donations/${donation.code}`);
+    navigate(`/admin/donations/${donation.id}`);
   };
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     const errors = validateDonation(editData);
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
-    const globalIdx = donations.findIndex(d => d === filtered[editIdx]);
-    const newDonations = [...donations];
-    newDonations[globalIdx] = editData;
-    setDonations(newDonations);
-    setEditIdx(null);
-    setEditData(null);
-    setValidationErrors({});
+    try {
+      await donationRegisterAPI.updateDonationRegister(editData.id, {
+        code: editData.code,
+        donorName: editData.name,
+        donationDate: editData.donateDate,
+        completionDate: editData.completeDate,
+        amount: editData.amount,
+        status: editData.status,
+        bloodGroup: editData.blood,
+      });
+      const globalIdx = donations.findIndex(d => d.id === editData.id);
+      const newDonations = [...donations];
+      newDonations[globalIdx] = { ...editData };
+      setDonations(newDonations);
+      setEditIdx(null);
+      setEditData(null);
+      setValidationErrors({});
+    } catch (e) {
+      alert("Lỗi khi cập nhật đơn hiến: " + e.message);
+    }
   };
   const handleCancelEdit = () => {
     setEditIdx(null);
@@ -76,10 +109,16 @@ export default function DonationManagement() {
   };
   // Delete logic
   const handleDelete = (idx) => { setDeleteIdx(idx); };
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     const globalIdx = donations.findIndex(d => d === filtered[deleteIdx]);
-    setDonations(donations.filter((_, i) => i !== globalIdx));
-    setDeleteIdx(null);
+    const donation = filtered[deleteIdx];
+    try {
+      await donationRegisterAPI.deleteDonationRegister(donation.id);
+      setDonations(donations.filter((d) => d.id !== donation.id));
+      setDeleteIdx(null);
+    } catch (e) {
+      alert("Lỗi khi xóa đơn hiến: " + e.message);
+    }
   };
   const handleCancelDelete = () => { setDeleteIdx(null); };
 
@@ -92,16 +131,29 @@ export default function DonationManagement() {
     });
     setValidationErrors({});
   };
-  const handleSaveAdd = () => {
+  const handleSaveAdd = async () => {
     const errors = validateDonation(editData);
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
-    setDonations([editData, ...donations]);
-    setAddMode(false);
-    setEditData(null);
-    setValidationErrors({});
+    try {
+      const newDonation = await donationRegisterAPI.createDonationRegister({
+        code: editData.code,
+        donorName: editData.name,
+        donationDate: editData.donateDate,
+        completionDate: editData.completeDate,
+        amount: editData.amount,
+        status: editData.status,
+        bloodGroup: editData.blood,
+      });
+      setDonations([{ ...editData, id: newDonation.id || newDonation.donationRegisterId }, ...donations]);
+      setAddMode(false);
+      setEditData(null);
+      setValidationErrors({});
+    } catch (e) {
+      alert("Lỗi khi thêm đơn hiến: " + e.message);
+    }
   };
   const handleCancelAdd = () => {
     setAddMode(false);
@@ -140,6 +192,9 @@ export default function DonationManagement() {
                   <th className="text-center" style={{minWidth: 60}}>Mã</th>
                   <th className="text-center" style={{minWidth: 110}}>Mã đơn nhận</th>
                   <th className="text-center" style={{minWidth: 180}}>Họ và tên</th>
+                  <th className="text-center" style={{minWidth: 160}}>Email</th>
+                  <th className="text-center" style={{minWidth: 120}}>Số điện thoại</th>
+                  <th className="text-center" style={{minWidth: 180}}>Địa chỉ</th>
                   <th className="text-center" style={{minWidth: 160}}>Ngày và giờ hiến</th>
                   <th className="text-center" style={{minWidth: 180}}>Ngày và giờ hoàn thành</th>
                   <th className="text-center" style={{minWidth: 110}}>Số lượng (ml)</th>
@@ -154,6 +209,9 @@ export default function DonationManagement() {
                     <td className="text-center">{d.id || (i+1+(page-1)*PAGE_SIZE)}</td>
                     <td className="text-center">{d.code}</td>
                     <td className="text-truncate" style={{maxWidth: 180}}>{d.name}</td>
+                    <td className="text-center">{d.email}</td>
+                    <td className="text-center">{d.phone}</td>
+                    <td className="text-truncate" style={{maxWidth: 180}}>{d.address}</td>
                     <td className="text-center">{d.donateDate}</td>
                     <td className="text-center">{d.completeDate}</td>
                     <td className="text-center">{d.amount}</td>
@@ -169,7 +227,7 @@ export default function DonationManagement() {
                 ))}
                 {paged.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="text-center text-secondary">Không có dữ liệu phù hợp</td>
+                    <td colSpan={12} className="text-center text-secondary">Không có dữ liệu phù hợp</td>
                   </tr>
                 )}
               </tbody>

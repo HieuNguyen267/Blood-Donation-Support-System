@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../../components/admin/Header";
 import Sidebar from "../../components/admin/Sidebar";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { getStatusStyle } from "./utils";
+import { accountAPI } from "../../services/api";
 
 const accountsDataInit = [
   { account_id: 1, username: "admin", password_hash: "********", email: "admin@blood.vn", phone: "0909123456", role: "admin", is_active: true, created_at: "2024-01-01 08:00", updated_at: "2024-01-01 08:00" },
@@ -21,7 +22,7 @@ const roles = [
 const PAGE_SIZE = 8;
 
 export default function AccountManagement() {
-  const [accounts, setAccounts] = useState(accountsDataInit);
+  const [accounts, setAccounts] = useState([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [editIdx, setEditIdx] = useState(null);
@@ -29,6 +30,21 @@ export default function AccountManagement() {
   const [deleteIdx, setDeleteIdx] = useState(null);
   const [addMode, setAddMode] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
+
+  // Fetch accounts from backend
+  useEffect(() => {
+    accountAPI.getAccounts().then(data => {
+      // Chuyển đổi dữ liệu cho phù hợp nếu cần
+      setAccounts(data.map(acc => ({
+        ...acc,
+        account_id: acc.accountId,
+        password_hash: "********", // Không show hash thật
+        is_active: acc.isActive,
+        created_at: acc.createdAt ? acc.createdAt.replace("T", " ").slice(0, 16) : "",
+        updated_at: acc.updatedAt ? acc.updatedAt.replace("T", " ").slice(0, 16) : "",
+      })));
+    });
+  }, []);
 
   // Filter logic
   const filtered = accounts.filter(a => a.username.toLowerCase().includes(search.toLowerCase()) || a.email.toLowerCase().includes(search.toLowerCase()));
@@ -52,19 +68,47 @@ export default function AccountManagement() {
     setEditData({...filtered[idx]});
     setValidationErrors({});
   };
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     const errors = validateAccount(editData);
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
-    const globalIdx = accounts.findIndex(a => a === filtered[editIdx]);
-    const newAccounts = [...accounts];
-    newAccounts[globalIdx] = editData;
-    setAccounts(newAccounts);
-    setEditIdx(null);
-    setEditData(null);
-    setValidationErrors({});
+    try {
+      console.log('Dữ liệu gửi lên:', {
+        username: editData.username,
+        passwordHash: editData.password_hash !== "********" ? editData.password_hash : undefined,
+        email: editData.email,
+        phone: editData.phone,
+        role: editData.role,
+        isActive: editData.is_active,
+      });
+      const updated = await accountAPI.updateAccount(editData.account_id, {
+        username: editData.username,
+        passwordHash: editData.password_hash !== "********" ? editData.password_hash : undefined,
+        email: editData.email,
+        phone: editData.phone,
+        role: editData.role,
+        isActive: editData.is_active,
+      });
+      const globalIdx = accounts.findIndex(a => a.account_id === editData.account_id);
+      const newAccounts = [...accounts];
+      newAccounts[globalIdx] = {
+        ...updated,
+        account_id: updated.accountId,
+        password_hash: "********",
+        is_active: updated.isActive,
+        created_at: updated.createdAt ? updated.createdAt.replace("T", " ").slice(0, 16) : "",
+        updated_at: updated.updatedAt ? updated.updatedAt.replace("T", " ").slice(0, 16) : "",
+      };
+      setAccounts(newAccounts);
+      setEditIdx(null);
+      setEditData(null);
+      setValidationErrors({});
+    } catch (e) {
+      console.error("Lỗi khi cập nhật tài khoản:", e);
+      alert("Lỗi khi cập nhật tài khoản: " + e.message);
+    }
   };
   const handleCancelEdit = () => {
     setEditIdx(null);
@@ -73,10 +117,16 @@ export default function AccountManagement() {
   };
   // Delete logic
   const handleDelete = (idx) => { setDeleteIdx(idx); };
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     const globalIdx = accounts.findIndex(a => a === filtered[deleteIdx]);
-    setAccounts(accounts.filter((_, i) => i !== globalIdx));
-    setDeleteIdx(null);
+    const acc = filtered[deleteIdx];
+    try {
+      await accountAPI.deleteAccount(acc.account_id);
+      setAccounts(accounts.filter((a) => a.account_id !== acc.account_id));
+      setDeleteIdx(null);
+    } catch (e) {
+      alert("Lỗi khi xóa tài khoản: " + e.message);
+    }
   };
   const handleCancelDelete = () => { setDeleteIdx(null); };
 
@@ -97,16 +147,35 @@ export default function AccountManagement() {
     });
     setValidationErrors({});
   };
-  const handleSaveAdd = () => {
+  const handleSaveAdd = async () => {
     const errors = validateAccount(editData);
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
-    setAccounts([{ ...editData, account_id: Date.now() }, ...accounts]);
-    setAddMode(false);
-    setEditData(null);
-    setValidationErrors({});
+    try {
+      const newAcc = await accountAPI.createAccount({
+        username: editData.username,
+        passwordHash: editData.password_hash,
+        email: editData.email,
+        phone: editData.phone,
+        role: editData.role,
+        isActive: editData.is_active,
+      });
+      setAccounts([{
+        ...newAcc,
+        account_id: newAcc.accountId,
+        password_hash: "********",
+        is_active: newAcc.isActive,
+        created_at: newAcc.createdAt ? newAcc.createdAt.replace("T", " ").slice(0, 16) : "",
+        updated_at: newAcc.updatedAt ? newAcc.updatedAt.replace("T", " ").slice(0, 16) : "",
+      }, ...accounts]);
+      setAddMode(false);
+      setEditData(null);
+      setValidationErrors({});
+    } catch (e) {
+      alert("Lỗi khi thêm tài khoản: " + e.message);
+    }
   };
   const handleCancelAdd = () => {
     setAddMode(false);
@@ -187,25 +256,25 @@ export default function AccountManagement() {
                   <div className="modal-body">
                     <div className="row g-3">
                       <div className="col-md-6">
-                        <input className={`form-control ${validationErrors.username ? 'is-invalid' : ''}`} placeholder="Tên đăng nhập*" value={editData.username} onChange={e=>setEditData({...editData,username:e.target.value})} disabled={!addMode} />
+                        <input className={`form-control ${validationErrors.username ? 'is-invalid' : ''}`} placeholder="Tên đăng nhập*" value={editData.username || ""} onChange={e=>setEditData({...editData,username:e.target.value})} disabled={!addMode} />
                         {validationErrors.username && <div className="invalid-feedback">{validationErrors.username}</div>}
                       </div>
                       <div className="col-md-6">
-                        <input className={`form-control ${validationErrors.email ? 'is-invalid' : ''}`} placeholder="Email*" value={editData.email} onChange={e=>setEditData({...editData,email:e.target.value})} disabled={!addMode} />
+                        <input className={`form-control ${validationErrors.email ? 'is-invalid' : ''}`} placeholder="Email*" value={editData.email || ""} onChange={e=>setEditData({...editData,email:e.target.value})} disabled={!addMode} />
                         {validationErrors.email && <div className="invalid-feedback">{validationErrors.email}</div>}
                       </div>
                       <div className="col-md-6">
-                        <input className="form-control" placeholder="Số điện thoại" value={editData.phone} onChange={e=>setEditData({...editData,phone:e.target.value})} disabled={!addMode} />
+                        <input className="form-control" placeholder="Số điện thoại" value={editData.phone || ""} onChange={e=>setEditData({...editData,phone:e.target.value})} disabled={!addMode} />
                       </div>
                       <div className="col-md-6">
-                        <select className={`form-control ${validationErrors.role ? 'is-invalid' : ''}`} value={editData.role} onChange={e=>setEditData({...editData,role:e.target.value})} disabled={!addMode}>
+                        <select className={`form-control ${validationErrors.role ? 'is-invalid' : ''}`} value={editData.role || ""} onChange={e=>setEditData({...editData,role:e.target.value})} disabled={!addMode}>
                           <option value="">Chọn vai trò*</option>
                           {roles.map(r=><option key={r.value} value={r.value}>{r.label}</option>)}
                         </select>
                         {validationErrors.role && <div className="invalid-feedback">{validationErrors.role}</div>}
                       </div>
                       <div className="col-md-6">
-                        <input className={`form-control ${validationErrors.password_hash ? 'is-invalid' : ''}`} placeholder="Mật khẩu*" type="password" value={editData.password_hash} onChange={e=>setEditData({...editData,password_hash:e.target.value})} disabled={!addMode} />
+                        <input className={`form-control ${validationErrors.password_hash ? 'is-invalid' : ''}`} placeholder="Mật khẩu*" type="password" value={editData.password_hash || ""} onChange={e=>setEditData({...editData,password_hash:e.target.value})} disabled={!addMode} />
                         {validationErrors.password_hash && <div className="invalid-feedback">{validationErrors.password_hash}</div>}
                       </div>
                       <div className="col-md-6">

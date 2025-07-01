@@ -23,6 +23,8 @@ public class MatchingBloodDTO {
     private String notes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String hospitalName;
+    private String bloodType;
 
     public Integer getMatchingId() { return matchingId; }
     public void setMatchingId(Integer matchingId) { this.matchingId = matchingId; }
@@ -58,4 +60,61 @@ public class MatchingBloodDTO {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public String getHospitalName() { return hospitalName; }
+    public void setHospitalName(String hospitalName) { this.hospitalName = hospitalName; }
+    public String getBloodType() { return bloodType; }
+    public void setBloodType(String bloodType) { this.bloodType = bloodType; }
+
+    // Mapping from entity to DTO
+    public static MatchingBloodDTO fromEntity(com.blooddonation.backend.entity.common.MatchingBlood entity) {
+        MatchingBloodDTO dto = new MatchingBloodDTO();
+        dto.setMatchingId(entity.getMatchingId());
+        dto.setRequestId(entity.getBloodRequest() != null ? entity.getBloodRequest().getRequestId() : null);
+        dto.setDonorId(entity.getDonor() != null ? entity.getDonor().getDonorId() : null);
+        dto.setDonorName(entity.getDonor() != null ? entity.getDonor().getFullName() : null);
+        dto.setDistanceKm(entity.getDistanceKm());
+        dto.setNotificationSentAt(entity.getNotificationSentAt());
+        dto.setDonorResponse(entity.getDonorResponse());
+        dto.setResponseTime(entity.getResponseTime());
+        dto.setEstimatedArrivalTime(entity.getEstimatedArrivalTime());
+        dto.setActualArrivalTime(entity.getActualArrivalTime());
+        dto.setDonationCompleted(entity.getDonationCompleted());
+        dto.setDonationCompletionTime(entity.getDonationCompletionTime());
+        dto.setFacilityConfirmation(entity.getFacilityConfirmation());
+        dto.setFacilityConfirmationTime(entity.getFacilityConfirmationTime());
+        dto.setNotes(entity.getNotes());
+        dto.setCreatedAt(entity.getCreatedAt());
+        dto.setUpdatedAt(entity.getUpdatedAt());
+        dto.setHospitalName(
+            entity.getBloodRequest() != null && entity.getBloodRequest().getFacility() != null
+                ? entity.getBloodRequest().getFacility().getFacilityName()
+                : null
+        );
+        dto.setBloodType(
+            entity.getDonor() != null && entity.getDonor().getBloodGroup() != null
+                ? entity.getDonor().getBloodGroup().getAboType() + entity.getDonor().getBloodGroup().getRhFactor()
+                : null
+        );
+        return dto;
+    }
+
+    // Mapping from DTO to entity
+    public com.blooddonation.backend.entity.common.MatchingBlood toEntity() {
+        com.blooddonation.backend.entity.common.MatchingBlood entity = new com.blooddonation.backend.entity.common.MatchingBlood();
+        entity.setMatchingId(this.getMatchingId());
+        entity.setDistanceKm(this.getDistanceKm());
+        entity.setNotificationSentAt(this.getNotificationSentAt());
+        entity.setDonorResponse(this.getDonorResponse());
+        entity.setResponseTime(this.getResponseTime());
+        entity.setEstimatedArrivalTime(this.getEstimatedArrivalTime());
+        entity.setActualArrivalTime(this.getActualArrivalTime());
+        entity.setDonationCompleted(this.getDonationCompleted());
+        entity.setDonationCompletionTime(this.getDonationCompletionTime());
+        entity.setFacilityConfirmation(this.getFacilityConfirmation());
+        entity.setFacilityConfirmationTime(this.getFacilityConfirmationTime());
+        entity.setNotes(this.getNotes());
+        entity.setCreatedAt(this.getCreatedAt());
+        entity.setUpdatedAt(this.getUpdatedAt());
+        return entity;
+    }
 } 

@@ -1,33 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../../components/admin/Header';
 import Sidebar from '../../components/admin/Sidebar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './DonorManagement.css';
-import { getStatusStyle } from './utils'; // Import from shared utils
-
-// Mock Data
-const initialMatchingData = [
-  { id: 'M001', requestId: 'REQ056', hospital: 'Bệnh viện Trung Ương', donor: 'Đậu Nguyễn Bảo Tuấn', bloodType: 'O+', matchDate: '2024-07-20', status: 'Đã đồng ý' },
-  { id: 'M002', requestId: 'REQ056', hospital: 'Bệnh viện Trung Ương', donor: 'Lê Văn Hùng', bloodType: 'O+', matchDate: '2024-07-20', status: 'Chờ xác nhận' },
-  { id: 'M003', requestId: 'REQ057', hospital: 'Bệnh viện Chợ Rẫy', donor: 'Trần Thị Mai', bloodType: 'A+', matchDate: '2024-07-19', status: 'Đã từ chối' },
-  { id: 'M004', requestId: 'REQ058', hospital: 'Bệnh viện Bạch Mai', donor: 'Phạm Minh Tuấn', bloodType: 'B+', matchDate: '2024-07-18', status: 'Hoàn thành' },
-  { id: 'M005', requestId: 'REQ059', hospital: 'Bệnh viện 108', donor: 'Nguyễn Thị Lan', bloodType: 'AB-', matchDate: '2024-07-18', status: 'Chờ xác nhận' },
-  { id: 'M006', requestId: 'REQ060', hospital: 'Bệnh viện Việt Đức', donor: 'Đỗ Quang Vinh', bloodType: 'O+', matchDate: '2024-07-17', status: 'Đã đồng ý' },
-];
+import { getStatusStyle } from './utils';
+import { matchingAPI } from '../../services/api';
 
 const bloodTypes = ["Tất cả", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const statuses = ["Tất cả", "Đã đồng ý", "Chờ xác nhận", "Đã từ chối", "Hoàn thành"];
 
 const MatchingManagement = () => {
-  const [matchings, setMatchings] = useState(initialMatchingData);
+  const [matchings, setMatchings] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [bloodTypeFilter, setBloodTypeFilter] = useState('Tất cả');
   const [statusFilter, setStatusFilter] = useState('Tất cả');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    matchingAPI.getAllMatchings()
+      .then(data => {
+        // Map dữ liệu từ backend sang format FE cần
+        const mapped = (data || []).map(m => ({
+          id: m.matchingId,
+          requestId: m.requestId,
+          hospital: m.hospitalName || '', // cần backend trả về hoặc FE phải join thêm
+          donor: m.donorName,
+          bloodType: m.bloodType || '', // cần backend trả về hoặc FE phải join thêm
+          matchDate: m.notificationSentAt ? m.notificationSentAt.split('T')[0] : '',
+          status: m.donorResponse || 'Chờ xác nhận',
+        }));
+        setMatchings(mapped);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
 
   const filteredMatchings = matchings.filter(m => 
     (m.hospital.toLowerCase().includes(searchTerm.toLowerCase()) ||
     m.donor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    m.id.toLowerCase().includes(searchTerm.toLowerCase())) &&
+    m.id.toString().toLowerCase().includes(searchTerm.toLowerCase())) &&
     (bloodTypeFilter === 'Tất cả' || m.bloodType === bloodTypeFilter) &&
     (statusFilter === 'Tất cả' || m.status === statusFilter)
   );
@@ -58,6 +69,9 @@ const MatchingManagement = () => {
           </div>
 
           <div className="donor-table-card">
+            {loading ? (
+              <div>Đang tải dữ liệu...</div>
+            ) : (
             <table className="table table-hover table-bordered align-middle mb-0">
               <thead className="table-light">
                 <tr>
@@ -98,6 +112,7 @@ const MatchingManagement = () => {
                 )}
               </tbody>
             </table>
+            )}
           </div>
         </main>
       </div>

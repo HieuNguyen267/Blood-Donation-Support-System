@@ -172,6 +172,39 @@ export const donorAPI = {
       headers: getHeaders()
     });
     return handleResponse(response);
+  },
+
+  getAllDonors: async () => {
+    const response = await fetch(`${API_BASE_URL}/donor`, {
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  },
+
+  createDonor: async (donorData) => {
+    const response = await fetch(`${API_BASE_URL}/donor`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(donorData)
+    });
+    return handleResponse(response);
+  },
+
+  updateDonor: async (id, donorData) => {
+    const response = await fetch(`${API_BASE_URL}/donor/${id}`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify(donorData)
+    });
+    return handleResponse(response);
+  },
+
+  deleteDonor: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/donor/${id}`, {
+      method: 'DELETE',
+      headers: getHeaders()
+    });
+    return handleResponse(response);
   }
 };
 
@@ -221,8 +254,17 @@ export const bloodRequestAPI = {
 // Blood Stock API
 export const bloodStockAPI = {
   getStock: async () => {
-    const response = await fetch(`${API_BASE_URL}/blood-stock`, {
+    const response = await fetch(`${API_BASE_URL}/api/blood-stock`, {
       headers: getHeaders()
+    });
+    return handleResponse(response);
+  },
+
+  addStock: async (data) => {
+    const response = await fetch(`${API_BASE_URL}/api/blood-stock`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(data)
     });
     return handleResponse(response);
   },
@@ -232,6 +274,14 @@ export const bloodStockAPI = {
       method: 'PUT',
       headers: getHeaders(),
       body: JSON.stringify(stockData)
+    });
+    return handleResponse(response);
+  },
+
+  deleteStock: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/api/blood-stock/${id}`, {
+      method: 'DELETE',
+      headers: getHeaders()
     });
     return handleResponse(response);
   }
@@ -248,6 +298,32 @@ export const medicalFacilitiesAPI = {
 
   getFacilityById: async (id) => {
     const response = await fetch(`${API_BASE_URL}/medical-facilities/${id}`, {
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  },
+
+  createFacility: async (facilityData) => {
+    const response = await fetch(`${API_BASE_URL}/medical-facilities`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(facilityData)
+    });
+    return handleResponse(response);
+  },
+
+  updateFacility: async (id, facilityData) => {
+    const response = await fetch(`${API_BASE_URL}/medical-facilities/${id}`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify(facilityData)
+    });
+    return handleResponse(response);
+  },
+
+  deleteFacility: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/medical-facilities/${id}`, {
+      method: 'DELETE',
       headers: getHeaders()
     });
     return handleResponse(response);
@@ -288,6 +364,13 @@ export const certificatesAPI = {
 
 // Analytics API
 export const analyticsAPI = {
+  getDashboardAnalytics: async () => {
+    const response = await fetch(`${API_BASE_URL}/analytics/dashboard`, {
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  },
+
   getDashboardStats: async () => {
     const response = await fetch(`${API_BASE_URL}/analytics/dashboard`, {
       headers: getHeaders()
@@ -336,5 +419,96 @@ export const medicalFacilityAPI = {
   },
   // Có thể bổ sung các hàm khác nếu cần
   };
+
+// Account API
+export const accountAPI = {
+  getAccounts: async () => {
+    const response = await fetch(`${API_BASE_URL}/accounts`, {
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  },
+
+  getAccountById: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/accounts/${id}`, {
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  },
+
+  createAccount: async (accountData) => {
+    const response = await fetch(`${API_BASE_URL}/accounts`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(accountData)
+    });
+    return handleResponse(response);
+  },
+
+  updateAccount: async (id, accountData) => {
+    const response = await fetch(`${API_BASE_URL}/accounts/${id}`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify(accountData)
+    });
+    return handleResponse(response);
+  },
+
+  deleteAccount: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/accounts/${id}`, {
+      method: 'DELETE',
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  }
+};
+
+export const donationRegisterAPI = {
+  getAllDonationRegisters: async () => {
+    const response = await fetch(`${API_BASE_URL}/donation-registers`, {
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  },
+  createDonationRegister: async (data) => {
+    const response = await fetch(`${API_BASE_URL}/donation-registers`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(data)
+    });
+    return handleResponse(response);
+  },
+  updateDonationRegister: async (id, data) => {
+    const response = await fetch(`${API_BASE_URL}/donation-registers/${id}`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify(data)
+    });
+    return handleResponse(response);
+  },
+  deleteDonationRegister: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/donation-registers/${id}`, {
+      method: 'DELETE',
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  },
+  getDonationRegisterById: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/admin/donation-registers/${id}`, {
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  }
+};
+
+// Matching API
+export const matchingAPI = {
+  getAllMatchings: async () => {
+    const response = await fetch(`${API_BASE_URL}/admin/matching`, {
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  }
+};
   
     

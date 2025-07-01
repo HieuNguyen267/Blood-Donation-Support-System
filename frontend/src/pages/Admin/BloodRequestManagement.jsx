@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../../components/admin/Header";
 import Sidebar from "../../components/admin/Sidebar";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
 import { validateRequest, getUrgencyBadge, getStatusBadge, getStatusStyle } from './utils';
+import { bloodRequestAPI } from "../../services/api";
 
 const urgencyLevels = ["routine", "urgent", "emergency", "critical"];
 const statuses = ["Chờ duyệt", "Đang xử lý", "Đang yêu cầu máu khẩn cấp", "Hoàn thành"];
@@ -396,7 +397,7 @@ const requestDataInit = [
 const PAGE_SIZE = 5;
 
 export default function BloodRequestManagement() {
-  const [requests, setRequests] = useState(requestDataInit);
+  const [requests, setRequests] = useState([]);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("Tất cả");
   const [page, setPage] = useState(1);
@@ -406,6 +407,31 @@ export default function BloodRequestManagement() {
   const [addMode, setAddMode] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const navigate = useNavigate();
+
+  // Fetch blood requests from backend
+  useEffect(() => {
+    bloodRequestAPI.getRequests().then(data => {
+      setRequests(data.map(r => ({
+        request_id: r.requestId || r.request_id,
+        facility_id: r.facilityId || r.facility_id,
+        facility_name: r.facilityName || r.facility_name,
+        blood_group_id: r.bloodGroupId || r.blood_group_id,
+        blood_group: r.bloodGroup || r.blood_group,
+        quantity_requested: r.quantityRequested || r.quantity_requested,
+        urgency_level: r.urgencyLevel || r.urgency_level,
+        patient_info: r.patientInfo || r.patient_info,
+        required_by: r.requiredBy || r.required_by,
+        quantity_fulfilled: r.quantityFulfilled || r.quantity_fulfilled,
+        request_status: r.requestStatus || r.request_status,
+        special_requirements: r.specialRequirements || r.special_requirements,
+        contact_person: r.contactPerson || r.contact_person,
+        contact_phone: r.contactPhone || r.contact_phone,
+        notes: r.notes,
+        manager: r.manager,
+        delivery_person: r.deliveryPerson || r.delivery_person
+      })));
+    });
+  }, []);
 
   // Filter và sort data
   const filtered = requests.filter(r => 
@@ -438,18 +464,41 @@ export default function BloodRequestManagement() {
     setEditData({...filtered[idx]});
     setValidationErrors({});
   };
-  const handleSaveEdit = () => {
-    const errors = validateRequestData(editData);
+  const handleSaveEdit = async () => {
+    const errors = validateRequest(editData);
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
-    const newRequests = [...requests];
-    newRequests[editIdx] = { ...editData };
-    setRequests(newRequests);
-    setEditIdx(null);
-    setEditData(null);
-    setValidationErrors({});
+    try {
+      await bloodRequestAPI.updateRequest(editData.request_id, {
+        facilityId: editData.facility_id,
+        facilityName: editData.facility_name,
+        bloodGroupId: editData.blood_group_id,
+        bloodGroup: editData.blood_group,
+        quantityRequested: editData.quantity_requested,
+        urgencyLevel: editData.urgency_level,
+        patientInfo: editData.patient_info,
+        requiredBy: editData.required_by,
+        quantityFulfilled: editData.quantity_fulfilled,
+        requestStatus: editData.request_status,
+        specialRequirements: editData.special_requirements,
+        contactPerson: editData.contact_person,
+        contactPhone: editData.contact_phone,
+        notes: editData.notes,
+        manager: editData.manager,
+        deliveryPerson: editData.delivery_person
+      });
+      const globalIdx = requests.findIndex(r => r.request_id === editData.request_id);
+      const newRequests = [...requests];
+      newRequests[globalIdx] = { ...editData };
+      setRequests(newRequests);
+      setEditIdx(null);
+      setEditData(null);
+      setValidationErrors({});
+    } catch (e) {
+      alert("Lỗi khi cập nhật yêu cầu máu: " + e.message);
+    }
   };
   const handleCancelEdit = () => {
     setEditIdx(null);
@@ -458,10 +507,16 @@ export default function BloodRequestManagement() {
   };
   // Delete logic
   const handleDelete = (idx) => { setDeleteIdx(idx); };
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     const globalIdx = requests.findIndex(r => r === filtered[deleteIdx]);
-    setRequests(requests.filter((_, i) => i !== globalIdx));
-    setDeleteIdx(null);
+    const request = filtered[deleteIdx];
+    try {
+      await bloodRequestAPI.deleteRequest(request.request_id);
+      setRequests(requests.filter((r) => r.request_id !== request.request_id));
+      setDeleteIdx(null);
+    } catch (e) {
+      alert("Lỗi khi xóa yêu cầu máu: " + e.message);
+    }
   };
   const handleCancelDelete = () => { setDeleteIdx(null); };
 
@@ -474,16 +529,38 @@ export default function BloodRequestManagement() {
     });
     setValidationErrors({});
   };
-  const handleSaveAdd = () => {
-    const errors = validateRequestData(editData);
+  const handleSaveAdd = async () => {
+    const errors = validateRequest(editData);
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
-    setRequests([{ ...editData, request_id: Date.now() }, ...requests]);
-    setAddMode(false);
-    setEditData(null);
-    setValidationErrors({});
+    try {
+      const newRequest = await bloodRequestAPI.createRequest({
+        facilityId: editData.facility_id,
+        facilityName: editData.facility_name,
+        bloodGroupId: editData.blood_group_id,
+        bloodGroup: editData.blood_group,
+        quantityRequested: editData.quantity_requested,
+        urgencyLevel: editData.urgency_level,
+        patientInfo: editData.patient_info,
+        requiredBy: editData.required_by,
+        quantityFulfilled: editData.quantity_fulfilled,
+        requestStatus: editData.request_status,
+        specialRequirements: editData.special_requirements,
+        contactPerson: editData.contact_person,
+        contactPhone: editData.contact_phone,
+        notes: editData.notes,
+        manager: editData.manager,
+        deliveryPerson: editData.delivery_person
+      });
+      setRequests([{ ...editData, request_id: newRequest.requestId }, ...requests]);
+      setAddMode(false);
+      setEditData(null);
+      setValidationErrors({});
+    } catch (e) {
+      alert("Lỗi khi thêm yêu cầu máu: " + e.message);
+    }
   };
   const handleCancelAdd = () => {
     setAddMode(false);

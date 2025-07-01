@@ -65,13 +65,14 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/", "/auth/**", "/h2-console/**", "/swagger-ui/**", "/api-docs/**", "/css/**", "/js/**", "/images/**", "/contact").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/donor/**").hasRole("DONOR")
+                .requestMatchers("/donor/**").hasAnyRole("ADMIN", "STAFF", "DONOR")
                 .requestMatchers("/medical/**").hasRole("MEDICAL_FACILITY")
                 .requestMatchers("/blood-groups").hasAnyRole("DONOR", "MEDICAL_FACILITY", "ADMIN")
                 .requestMatchers("/donor/profile/**").hasRole("DONOR")
                 .requestMatchers("/donor/register-donation/**").hasRole("DONOR")
                 .requestMatchers("/donor/donation-history/**").hasRole("DONOR")
                 .requestMatchers("/donor/survey/**").hasRole("DONOR")
+                .requestMatchers("/accounts/**").hasRole("ADMIN")
                 .anyRequest().authenticated() // Các request còn lại phải xác thực
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
