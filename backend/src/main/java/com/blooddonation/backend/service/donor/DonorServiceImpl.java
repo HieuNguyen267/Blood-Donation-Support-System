@@ -47,16 +47,14 @@ public class DonorServiceImpl implements DonorService {
     }
 
     public Donor saveOrUpdateDonorFromDTO(DonorDTO dto, Donor donor) {
-        donor.setFullName(dto.getFullName());
-        if (dto.getDateOfBirth() != null) {
-            donor.setDateOfBirth(LocalDate.parse(dto.getDateOfBirth()));
-        }
-        donor.setGender(dto.getGender());
-        donor.setAddress(dto.getAddress());
-        donor.setPhone(dto.getPhone());
-        donor.setEmail(dto.getEmail());
-        donor.setJob(dto.getJob());
-        donor.setWeight(dto.getWeight());
+        if (dto.getFullName() != null) donor.setFullName(dto.getFullName());
+        if (dto.getDateOfBirth() != null) donor.setDateOfBirth(LocalDate.parse(dto.getDateOfBirth()));
+        if (dto.getGender() != null) donor.setGender(dto.getGender());
+        if (dto.getAddress() != null) donor.setAddress(dto.getAddress());
+        if (dto.getPhone() != null) donor.setPhone(dto.getPhone());
+        if (dto.getEmail() != null) donor.setEmail(dto.getEmail());
+        if (dto.getJob() != null) donor.setJob(dto.getJob());
+        if (dto.getWeight() != null) donor.setWeight(dto.getWeight());
         if (dto.getBloodGroup() != null) {
             String bg = dto.getBloodGroup();
             String aboType = bg.replace("+", "").replace("-", "");
@@ -65,6 +63,15 @@ public class DonorServiceImpl implements DonorService {
                 .orElseThrow(() -> new RuntimeException("Blood group not found: " + bg));
             donor.setBloodGroup(bloodGroup);
         }
-        return donorRepository.save(donor);
+        System.out.println("[DEBUG] Before save: " + donor);
+        Donor saved = donorRepository.save(donor);
+        System.out.println("[DEBUG] After save: " + saved);
+        return saved;
+    }
+
+    @Override
+    public Donor updateDonor(Integer id, DonorDTO donorDTO) {
+        Donor donor = donorRepository.findById(id).orElseThrow(() -> new RuntimeException("Donor not found"));
+        return saveOrUpdateDonorFromDTO(donorDTO, donor);
     }
 } 

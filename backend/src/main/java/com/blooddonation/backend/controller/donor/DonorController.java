@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import jakarta.persistence.EntityNotFoundException;
 
@@ -41,13 +42,48 @@ public class DonorController {
     }
 
     @GetMapping
-    public List<Donor> getAllDonors() {
-        return donorService.getAllDonors();
+    public List<DonorDTO> getAllDonors() {
+        List<Donor> donors = donorService.getAllDonors();
+        return donors.stream().map(donor -> {
+            DonorDTO dto = new DonorDTO();
+            dto.setDonorId(donor.getDonorId());
+            dto.setFullName(donor.getFullName());
+            dto.setDateOfBirth(donor.getDateOfBirth() != null ? donor.getDateOfBirth().toString() : null);
+            dto.setGender(donor.getGender());
+            dto.setAddress(donor.getAddress());
+            dto.setPhone(donor.getPhone());
+            dto.setEmail(donor.getEmail());
+            dto.setJob(donor.getJob());
+            dto.setWeight(donor.getWeight());
+            if (donor.getBloodGroup() != null) {
+                dto.setBloodGroup(donor.getBloodGroup().getAboType() + donor.getBloodGroup().getRhFactor());
+            } else {
+                dto.setBloodGroup(null);
+            }
+            return dto;
+        }).toList();
     }
 
     @GetMapping("/{id}")
-    public Donor getDonorById(@PathVariable Integer id) {
-        return donorService.getDonorById(id);
+    public DonorDTO getDonorById(@PathVariable Integer id) {
+        Donor donor = donorService.getDonorById(id);
+        if (donor == null) return null;
+        DonorDTO dto = new DonorDTO();
+        dto.setDonorId(donor.getDonorId());
+        dto.setFullName(donor.getFullName());
+        dto.setDateOfBirth(donor.getDateOfBirth() != null ? donor.getDateOfBirth().toString() : null);
+        dto.setGender(donor.getGender());
+        dto.setAddress(donor.getAddress());
+        dto.setPhone(donor.getPhone());
+        dto.setEmail(donor.getEmail());
+        dto.setJob(donor.getJob());
+        dto.setWeight(donor.getWeight());
+        if (donor.getBloodGroup() != null) {
+            dto.setBloodGroup(donor.getBloodGroup().getAboType() + donor.getBloodGroup().getRhFactor());
+        } else {
+            dto.setBloodGroup(null);
+        }
+        return dto;
     }
 
     @PostMapping
@@ -220,5 +256,12 @@ public class DonorController {
 
         System.out.println("DEBUG - Trả về chi tiết lịch hẹn cho donorId: " + donor.getDonorId());
         return ResponseEntity.ok(register);
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Donor> updateDonor(@PathVariable Integer id, @RequestBody DonorDTO donorDTO) {
+        Donor updated = donorService.updateDonor(id, donorDTO);
+        return ResponseEntity.ok(updated);
     }
 }

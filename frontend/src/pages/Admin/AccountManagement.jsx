@@ -75,17 +75,11 @@ export default function AccountManagement() {
       return;
     }
     try {
-      console.log('Dữ liệu gửi lên:', {
-        username: editData.username,
-        passwordHash: editData.password_hash !== "********" ? editData.password_hash : undefined,
-        email: editData.email,
-        phone: editData.phone,
-        role: editData.role,
-        isActive: editData.is_active,
-      });
+      // Lấy account cũ từ state
+      const oldAcc = accounts.find(a => a.account_id === editData.account_id);
       const updated = await accountAPI.updateAccount(editData.account_id, {
         username: editData.username,
-        passwordHash: editData.password_hash !== "********" ? editData.password_hash : undefined,
+        passwordHash: editData.password_hash !== "********" ? editData.password_hash : oldAcc.password_hash,
         email: editData.email,
         phone: editData.phone,
         role: editData.role,
@@ -256,25 +250,25 @@ export default function AccountManagement() {
                   <div className="modal-body">
                     <div className="row g-3">
                       <div className="col-md-6">
-                        <input className={`form-control ${validationErrors.username ? 'is-invalid' : ''}`} placeholder="Tên đăng nhập*" value={editData.username || ""} onChange={e=>setEditData({...editData,username:e.target.value})} disabled={!addMode} />
+                        <input className={`form-control ${validationErrors.username ? 'is-invalid' : ''}`} placeholder="Tên đăng nhập*" value={editData.username || ""} onChange={e=>setEditData({...editData,username:e.target.value})} />
                         {validationErrors.username && <div className="invalid-feedback">{validationErrors.username}</div>}
                       </div>
                       <div className="col-md-6">
-                        <input className={`form-control ${validationErrors.email ? 'is-invalid' : ''}`} placeholder="Email*" value={editData.email || ""} onChange={e=>setEditData({...editData,email:e.target.value})} disabled={!addMode} />
+                        <input className={`form-control ${validationErrors.email ? 'is-invalid' : ''}`} placeholder="Email*" value={editData.email || ""} onChange={e=>setEditData({...editData,email:e.target.value})} />
                         {validationErrors.email && <div className="invalid-feedback">{validationErrors.email}</div>}
                       </div>
                       <div className="col-md-6">
-                        <input className="form-control" placeholder="Số điện thoại" value={editData.phone || ""} onChange={e=>setEditData({...editData,phone:e.target.value})} disabled={!addMode} />
+                        <input className="form-control" placeholder="Số điện thoại" value={editData.phone || ""} onChange={e=>setEditData({...editData,phone:e.target.value})} />
                       </div>
                       <div className="col-md-6">
-                        <select className={`form-control ${validationErrors.role ? 'is-invalid' : ''}`} value={editData.role || ""} onChange={e=>setEditData({...editData,role:e.target.value})} disabled={!addMode}>
+                        <select className={`form-control ${validationErrors.role ? 'is-invalid' : ''}`} value={editData.role || ""} onChange={e=>setEditData({...editData,role:e.target.value})} >
                           <option value="">Chọn vai trò*</option>
                           {roles.map(r=><option key={r.value} value={r.value}>{r.label}</option>)}
                         </select>
                         {validationErrors.role && <div className="invalid-feedback">{validationErrors.role}</div>}
                       </div>
                       <div className="col-md-6">
-                        <input className={`form-control ${validationErrors.password_hash ? 'is-invalid' : ''}`} placeholder="Mật khẩu*" type="password" value={editData.password_hash || ""} onChange={e=>setEditData({...editData,password_hash:e.target.value})} disabled={!addMode} />
+                        <input className={`form-control ${validationErrors.password_hash ? 'is-invalid' : ''}`} placeholder="Mật khẩu*" type="password" value={editData.password_hash || ""} onChange={e=>setEditData({...editData,password_hash:e.target.value})} />
                         {validationErrors.password_hash && <div className="invalid-feedback">{validationErrors.password_hash}</div>}
                       </div>
                       <div className="col-md-6">

@@ -77,19 +77,15 @@ export default function DonorManagement() {
     donorAPI.getAllDonors().then(data => {
       setDonors(data.map(d => ({
         id: d.donorId,
-        name: d.fullName || d.name,
+        name: d.fullName,
         gender: d.gender,
         phone: d.phone,
-        staff: d.staffName || "", // Nếu có trường staff
         address: d.address,
-        blood: d.bloodGroup ? (d.bloodGroup.aboType ? d.bloodGroup.aboType + d.bloodGroup.rhFactor : d.bloodGroup) : "",
-        age: d.age || (d.dateOfBirth ? (new Date().getFullYear() - new Date(d.dateOfBirth).getFullYear()) : ""),
+        blood: d.bloodGroup || "",
+        age: d.dateOfBirth ? (new Date().getFullYear() - new Date(d.dateOfBirth).getFullYear()) : "",
         email: d.email,
-        last: d.lastDonationDate || "",
-        amount: d.lastDonationAmount || "",
-        role: "Donor",
-        status: d.status || "Đạt chuẩn",
-        ready: d.ready || "Có"
+        job: d.job,
+        weight: d.weight
       })));
     });
   }, []);
