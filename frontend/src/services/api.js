@@ -494,7 +494,7 @@ export const donationRegisterAPI = {
     return handleResponse(response);
   },
   getDonationRegisterById: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/admin/donation-registers/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/donation-registers/${id}`, {
       headers: getHeaders()
     });
     return handleResponse(response);
