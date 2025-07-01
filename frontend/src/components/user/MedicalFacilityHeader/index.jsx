@@ -110,8 +110,8 @@ const MedicalFacilityHeader = () => {
             className="logo-title"
             onClick={() => navigate('/medical-facility')}
           >
-            <span className="logo">🏥</span>
-            <span className="system-title">Hệ thống Nhận Máu</span>
+            <span className="logo">🩸</span>
+            <span className="system-title">Hiến máu tình nguyện</span>
           </div>
           <div className="user-section">
             {showDropdown ? (

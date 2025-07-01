@@ -15,7 +15,6 @@ export default function ReceiveBloodPage() {
     quantity: '',
     dateNeeded: '',
     notes: '',
-    urgencyLevel: 'normal',
   });
 
   const handleChange = (e) => {
@@ -60,7 +59,6 @@ export default function ReceiveBloodPage() {
         contactPerson: formData.contactPerson,
         contactPhone: formData.contactPhone,
         notes: formData.notes,
-        urgencyLevel: formData.urgencyLevel,
       };
 
       await bloodRequestAPI.createRequest(requestData);
@@ -144,17 +142,6 @@ export default function ReceiveBloodPage() {
               required 
               min={new Date().toISOString().split('T')[0]}
             />
-
-            <label>Mức độ khẩn cấp</label>
-            <select
-              name="urgencyLevel"
-              value={formData.urgencyLevel}
-              onChange={handleChange}
-              required
-            >
-              <option value="normal">Bình thường</option>
-              <option value="urgent">Khẩn cấp</option>
-            </select>
 
             <label>Ghi chú thêm</label>
             <textarea 

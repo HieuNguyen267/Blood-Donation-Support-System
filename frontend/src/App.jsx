@@ -63,6 +63,8 @@ import AboutPage from './pages/donor/AboutPage';
 
 import ActivityPage from './pages/donor/ActivityPage';
 
+import MedicalFacilityLayout from './pages/medicalfacility/MedicalFacilityLayout';
+
 function AppContent() {
   return (
     <>
@@ -88,13 +90,15 @@ function AppContent() {
         <Route path="/verify-password" element={<VerifyPassword />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/booking-antd" element={<BookingAntdForm />} />
-        <Route path="/medical-facility" element={<MedicalFacilityHome />} />
-        <Route path="/medical-facility/profile" element={<MedicalFacilityProfile />} />
-        <Route path="/medical-facility/receive-blood" element={<MedicalFacilityReceiveBlood />} />
-        <Route path="/medical-facility/request-history" element={<MedicalFacilityRequestHistory />} />
-        <Route path="/medical-facility/request-history/:id" element={<MedicalFacilityRequestDetail />} />
-        <Route path="/medical-facility/emergency-request" element={<MedicalFacilityEmergencyRequest />} />
-        <Route path="/medical-facility/contact" element={<MedicalFacilityContact />} />
+        <Route path="/medical-facility" element={<MedicalFacilityLayout />}>
+          <Route index element={<MedicalFacilityHome />} />
+          <Route path="profile" element={<MedicalFacilityProfile />} />
+          <Route path="receive-blood" element={<MedicalFacilityReceiveBlood />} />
+          <Route path="request-history" element={<MedicalFacilityRequestHistory />} />
+          <Route path="request-history/:id" element={<MedicalFacilityRequestDetail />} />
+          <Route path="emergency-request" element={<MedicalFacilityEmergencyRequest />} />
+          <Route path="contact" element={<MedicalFacilityContact />} />
+        </Route>
         <Route path="/" element={<Navigate to="/admin" replace />} />
         <Route path="/admin" element={<Navigate to="/admin/statistics" replace />} />
         <Route path="/admin/donors" element={<DonorManagement />} />

@@ -13,7 +13,7 @@ const newsDataInit = [
     author: "Lữ Phước Nhật Tú", 
     date: "2024-07-01", 
     status: "Công khai",
-    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80"
+    image: "/images/z6758844071397_c4dce00bce3e5234e29795f4668b3eec.jpg"
   },
   { 
     title: "Ngày hội hiến máu toàn quốc", 
@@ -22,7 +22,7 @@ const newsDataInit = [
     author: "Nguyễn Gia Triệu", 
     date: "2024-06-20", 
     status: "Công khai",
-    image: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80"
+    image: "/images/z6758856043908_bb04d851bb979fe5ea93fb2e1d32eb8a.jpg"
   },
   { 
     title: "Thông báo lịch hiến máu tháng 8", 

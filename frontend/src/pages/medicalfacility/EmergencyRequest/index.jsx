@@ -3,6 +3,7 @@ import { Form, Input, Button, Typography, Select, InputNumber, Card } from "antd
 import { Link, useNavigate } from "react-router-dom";
 import { Dropdown } from 'antd';
 import { UserCircle } from 'lucide-react';
+import MedicalFacilityHeader from '../../../components/user/MedicalFacilityHeader';
 import Footer from "../../../components/user/Footer";
 import "./index.css";
 
@@ -112,36 +113,7 @@ export default function EmergencyRequest() {
   return (
     <>
       {/* Header Component */}
-      <div className="header-wrapper">
-        <div className="header-top">
-          <div className="logo-title" style={{ cursor: 'pointer' }} onClick={() => navigate('/medical-facility') }>
-            <span className="logo">🏥</span>
-            <span className="system-title">Hệ thống Nhận Máu</span>
-          </div>
-          <div className="user-section">
-          {showDropdown ? (
-            <Dropdown overlay={menu} trigger={["click"]}>
-              <div className="login-link" style={{ cursor: "pointer" }}>
-                <UserCircle size={20} />
-                <span>{userName} ▾</span>
-              </div>
-            </Dropdown>
-          ) : (
-            <Link to="/loginpage" className="login-link">
-              <UserCircle size={20} />
-              <span>Đăng nhập</span>
-            </Link>
-          )}
-        </div>
-        </div>
-        <nav className="header-nav">
-          <a href="/medical-facility">TRANG CHỦ</a>
-          <a href="/receiveblood">YÊU CẦU MÁU</a>
-          <a href="/medical-facility/history">LỊCH SỬ YÊU CẦU</a>
-          <a href="#">TIN TỨC</a>
-          <a href="/contact">LIÊN HỆ</a>
-        </nav>
-      </div>
+      <MedicalFacilityHeader />
 
       <div className="emergency-wrapper">
         <Card className="emergency-card" variant="outlined">
