@@ -1,0 +1,28 @@
+.profile-page {
+  min-height: 100vh;
+  background: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 0 48px 0;
+  flex: 1 0 auto;
+}
+
+.profile-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 12px #0001;
+  margin-top: 32px;
+}
+
+@media (max-width: 600px) {
+  .profile-container {
+    padding: 12px 0 24px 0;
+  }
+  .profile-card {
+    margin-top: 16px;
+  }
+} 

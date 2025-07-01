@@ -1,0 +1,524 @@
+/* Reset & base */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f2f8f6;
+  color: #222;
+}
+
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f2f8f6;
+}
+
+main {
+  flex: 1;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+  background: none;
+  box-shadow: none;
+}
+
+/* Header & Navbar */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 32px;
+  background: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.header-right a {
+  color: #1976d2;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.navbar {
+  background: #7cc47f;
+  padding: 0 32px;
+  display: flex;
+  gap: 32px;
+  height: 40px;
+  align-items: center;
+}
+
+.navbar a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 16px;
+  padding: 0 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.navbar a.active, .navbar a:hover {
+  background: #388e3c;
+}
+
+/* Banner full width */
+.banner-img {
+  width: 100%;
+  height: 350px;
+  display: flex;
+  border-radius: 0;
+  margin-bottom: 24px;
+  object-fit: contain;
+  background: #fff6fa;
+}
+
+/* Điều kiện hiến máu */
+.blood-condition {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: 24px;
+  margin: 0 auto 32px auto;
+  max-width: 950px; /* 🔁 tăng từ 800px lên 1200px */
+  padding: 0 16px;    /* 🔁 thêm padding giống .important-list */
+  box-sizing: border-box;
+}
+
+
+.condition-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px #0001;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0;
+  min-width: 260px;
+  box-sizing: border-box;
+}
+
+.condition-col:first-child {
+  padding: 12px 0 0 0;
+}
+
+.condition-col:last-child {
+  padding: 18px 18px 12px 18px;
+  align-items: flex-start;
+}
+
+.condition-guide-link {
+  display: block;
+  width: fit-content;
+  /*margin-left: 360px; /* hoặc giá trị phù hợp để thẳng với box bên dưới */
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #388e3c;
+  font-size: 16px;
+  text-decoration: underline;
+}
+
+.condition-img {
+  width: 100%;
+  max-width: 100%; /* 🔁 để nó dãn ra toàn khung chứa */
+  height: auto;
+  object-fit: contain;
+}
+
+
+.condition-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.condition-search label {
+  font-size: 15px;
+  margin-right: 8px;
+  color: #444;
+}
+
+.condition-search input[type="date"],
+.condition-search .search-btn {
+  padding: 8px 12px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  height: 40px; /* Set a fixed height */
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+.condition-search .search-btn {
+  background-color: #4caf50;
+  color: #fff !important;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 13px !important;
+  min-width: 90px;
+  padding: 0 24px;
+  height: 40px;
+  border-radius: 6px;
+  transition: background 0.3s, color 0.2s;
+  letter-spacing: 1px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.condition-search .search-btn:hover {
+  background-color: #388e3c;
+  color: #fff;
+}
+
+/* Lưu ý quan trọng */
+.important-title {
+  color: #e53935;
+  font-weight: bold;
+  text-align: center;
+  margin: 32px 0 24px 0;
+  font-size: 32px;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 8px #ffebee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.important-list {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  justify-content: space-between; /* để các box trải đều ra */
+  margin: 0 auto 32px auto;
+  max-width: 1200px;
+  padding: 0 16px; /* giống container */
+  box-sizing: border-box;
+}
+
+
+.important-box {
+  background: #fff7ee;
+  border-radius: 10px;
+  border: 1.5px solid #ffd8b0;
+  flex: 1 1 320px;
+  max-width: 370px;
+  min-width: 260px;
+  padding: 18px;
+  margin-bottom: 0;
+  box-shadow: 0 2px 8px #0001;
+}
+
+
+.important-header {
+  font-weight: 600;
+  color: #e65100;
+  margin-bottom: 8px;
+  font-size: 17px;
+}
+
+.important-box ol {
+  margin: 0 0 0 18px;
+  padding: 0;
+  color: #444;
+  font-size: 15px;
+}
+
+.important-box li {
+  margin-bottom: 4px;
+}
+
+/* Lời khuyên trước/sau khi hiến máu */
+.tips-section {
+  background: #f3fff3;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.06);
+  padding: 28px 32px 24px 32px;
+  margin: 0 auto 32px auto;
+  max-width: 1200px;
+}
+
+
+.tips-title {
+  color: #009e3c;
+  font-size: 23px;
+  font-weight: bold;
+  text-align: left;
+  margin-bottom: 24px;
+  letter-spacing: 1px;
+}
+
+.tips-grid {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.tips-box {
+  flex: 1;
+  min-width: 240px;
+  background: #fff;
+  border-radius: 10px;
+  border: 1.5px solid #c6e6c6;
+  box-shadow: 0 2px 8px #0001;
+  padding: 18px 18px 12px 18px;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
+}
+
+.tips-box.should {
+  border-color: #b6e6b6;
+  background: #eaffea;
+}
+
+.tips-box.should-not {
+  border-color: #ffd6d6;
+  background: #fff6f6;
+}
+
+.tips-box.warning {
+  border-color: #ffe0b2;
+  background: #fff8ee;
+}
+
+.tips-header {
+  font-weight: 600;
+  font-size: 17px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.icon-check {
+  color: #009e3c;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.icon-x {
+  color: #e53935;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.icon-warning {
+  color: #ff9800;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.tips-box ul {
+  margin: 0 0 8px 18px;
+  padding: 0;
+  color: #444;
+  font-size: 15px;
+}
+
+.tips-footer {
+  font-size: 13px;
+  color: #888;
+  margin-top: auto;
+  margin-bottom: 0;
+  text-align: right;
+  font-style: italic;
+}
+
+/* Các hoạt động hiến máu */
+.activities {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.06);
+  padding: 28px 32px 32px 32px;
+  margin-bottom: 32px;
+}
+
+.activities-title {
+  color: #222;
+  font-size: 22px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 24px;
+  letter-spacing: 1px;
+}
+
+.activities-gallery {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+}
+
+.gallery-card {
+  max-width: 900px;
+  width: 100%;
+}
+
+.gallery-title {
+  background: #1976d2;
+  color: #fff;
+  font-weight: 600;
+  font-size: 16px;
+  padding: 10px 12px 4px 12px;
+  border-radius: 10px 10px 0 0;
+}
+
+.gallery-date {
+  color: #fff;
+  background: #1976d2;
+  font-size: 13px;
+  padding: 0 12px 8px 12px;
+  border-radius: 0 0 0 0;
+}
+
+.gallery-card img {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+  border-radius: 0 0 10px 10px;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .blood-condition {
+    flex-direction: column !important;
+    /* XÓA dòng display: block !important; */
+  }
+  .important-list, .tips-grid, .activities-gallery {
+    flex-direction: column !important;
+    display: block !important;
+  }
+  .blood-condition, .important, .tips-section, .activities {
+    padding: 18px 8px;
+  }
+  .gallery-card img {
+    height: 120px;
+  }
+  .container {
+    padding: 16px 2px 0 2px;
+  }
+  .activities-gallery {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .banner-title {
+    font-size: 24px;
+  }
+  .banner-subtitle {
+    font-size: 18px;
+  }
+  .important-title, .tips-title, .activities-title {
+    font-size: 17px;
+  }
+}
+
+.important-list-row {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 28px;
+  margin-top: 24px;
+}
+
+.important-card {
+  flex: 1 1 320px;
+  background: linear-gradient(135deg, #fff3e0 80%, #ffe0b2 100%);
+  border-radius: 18px;
+  padding: 28px 24px 22px 24px;
+  min-width: 260px;
+  box-shadow: 0 4px 18px #ffd8b044, 0 2px 8px #ffecb344;
+  border-left: 7px solid #ffb300;
+  position: relative;
+  transition: box-shadow 0.3s, border-color 0.3s, transform 0.2s;
+  margin-bottom: 0;
+}
+.important-card:hover {
+  box-shadow: 0 8px 32px #ffb30044, 0 4px 16px #ffecb344;
+  border-left: 7px solid #e53935;
+  transform: translateY(-4px) scale(1.02);
+}
+.important-header {
+  font-weight: 700;
+  color: #e65100;
+  margin-bottom: 12px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.important-card ol {
+  margin: 0 0 0 18px;
+  padding: 0;
+  color: #444;
+  font-size: 16px;
+}
+.important-card li {
+  margin-bottom: 6px;
+  line-height: 1.6;
+}
+@media (max-width: 900px) {
+  .important-list-row {
+    flex-direction: column;
+    gap: 18px;
+  }
+  .important-card {
+    min-width: 0;
+    padding: 18px 10px 14px 16px;
+    font-size: 15px;
+  }
+  .important-title {
+    font-size: 20px;
+  }
+}
+
+/* No need for the complex grid anymore, simplifying */
+.activity-single-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  height: 450px; /* Adjust height as needed */
+  display: block;
+}
+
+.activity-single-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.activity-single-item:hover img {
+  transform: scale(1.05);
+}
+
+/* Re-using and simplifying the overlay style */
+.activity-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  color: white;
+  padding: 20px;
+}
+
+.activity-overlay h3 {
+  margin: 0;
+  font-size: 24px;
+}
