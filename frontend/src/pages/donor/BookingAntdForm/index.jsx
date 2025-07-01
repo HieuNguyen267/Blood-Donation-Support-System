@@ -31,13 +31,13 @@ export default function BookingAntdForm() {
         phone: data.phone,
         email: data.email,
         bloodGroup: data.bloodGroup,
-        lastDonationDate: data.lastDonationDate,
+        lastDonationDate: data.lastDonationDate ? moment(data.lastDonationDate, ["YYYY-MM-DD", "DD/MM/YYYY"]) : null,
       });
     });
     // Tự động điền appointment_date nếu có
     const appointDate = location.state?.appoint_date || localStorage.getItem('selectedBookingDate');
     if (appointDate) {
-      form.setFieldsValue({ appointment_date: appointDate });
+      form.setFieldsValue({ appointment_date: moment(appointDate, ["YYYY-MM-DD", "DD/MM/YYYY"]) });
     }
   }, [form, location]);
 
@@ -62,10 +62,10 @@ export default function BookingAntdForm() {
         email: values.email,
         address: values.address,
         bloodGroup: values.sampleGroup,
-        lastDonationDate: values.donateLast ? moment(values.donateLast).format("YYYY-MM-DD") : null,
+        lastDonationDate: values.lastDonationDate ? values.lastDonationDate.format("YYYY-MM-DD") : null,
         readyTimeRange: values.readyTimeRange ? values.readyTimeRange.map(d => moment(d).format("YYYY-MM-DD")) : null,
         healthStatus: values.status,
-        appointment_date: values.appointment_date,
+        appointment_date: values.appointment_date ? values.appointment_date.format("YYYY-MM-DD") : null,
         timeSlot: values.timeSlot,
       };
       // Gửi dữ liệu lên backend và lấy registerId trả về
@@ -88,12 +88,12 @@ export default function BookingAntdForm() {
         address: values.address,
         sampleGroup: values.sampleGroup,
         sampleQuantity: values.sampleQuantity,
-        donateLast: values.donateLast ? moment(values.donateLast).format("DD/MM/YYYY") : null,
-        sendDate: values.appointment_date ? moment(values.appointment_date).format("DD/MM/YYYY") : null,
+        donateLast: values.lastDonationDate ? values.lastDonationDate.format("DD/MM/YYYY") : null,
+        sendDate: values.appointment_date ? values.appointment_date.format("DD/MM/YYYY") : null,
         donationTimeSlot: values.timeSlot,
         healthStatus: values.status,
         readyTimeRange: values.readyTimeRange || null,
-        appointment_date: values.appointment_date,
+        appointment_date: values.appointment_date ? values.appointment_date.format("DD/MM/YYYY") : null,
         timeSlot: values.timeSlot,
       };
       // Lưu vào localStorage sau khi đăng ký thành công
@@ -167,6 +167,13 @@ export default function BookingAntdForm() {
                 <Input readOnly placeholder="Email" />
               </Form.Item>
               <Form.Item
+                label={<span><EnvironmentOutlined style={{ color: '#43a047' }} /> Nhóm máu muốn hiến</span>}
+                name="bloodGroup"
+                rules={[{ required: true, message: 'Vui lòng chọn nhóm máu!' }]}
+              >
+                <Input readOnly placeholder="Nhóm máu" />
+              </Form.Item>
+              <Form.Item
                 label="Cân nặng (kg)"
                 name="weight"
                 rules={[{ required: true, message: 'Vui lòng nhập cân nặng!' },
@@ -183,13 +190,6 @@ export default function BookingAntdForm() {
                 <Input placeholder="Nhập cân nặng (kg)" type="number" min={30} max={200} step={1} />
               </Form.Item>
               <Form.Item
-                label={<span><EnvironmentOutlined style={{ color: '#43a047' }} /> Nhóm máu muốn hiến</span>}
-                name="bloodGroup"
-                rules={[{ required: true, message: 'Vui lòng chọn nhóm máu!' }]}
-              >
-                <Input readOnly placeholder="Nhóm máu" />
-              </Form.Item>
-              <Form.Item
                 label={<span><ClockCircleOutlined style={{ color: '#43a047' }} /> Khung giờ hiến máu</span>}
                 name="timeSlot"
                 rules={[{ required: true, message: 'Vui lòng chọn khung giờ!' }]}
@@ -201,17 +201,47 @@ export default function BookingAntdForm() {
                 </Select>
               </Form.Item>
               <Form.Item
-                label="Lần hiến máu gần nhất"
-                name="lastDonationDate"
-              >
-                <Input readOnly placeholder="Lần hiến máu gần nhất" />
-              </Form.Item>
-              <Form.Item
                 label="Ngày hẹn hiến máu"
                 name="appointment_date"
-                rules={[{ required: true, message: 'Vui lòng chọn ngày hẹn!' }]}
+                rules={[
+                  { required: true, message: 'Vui lòng chọn ngày hẹn!' }
+                ]}
               >
-                <Input type="date" min={new Date().toISOString().split('T')[0]} />
+                <DatePicker
+                  style={{ width: '100%' }}
+                  format="DD/MM/YYYY"
+                  placeholder="Chọn ngày hẹn hiến máu"
+                  allowClear={false}
+                  disabledDate={current =>
+                    current && (current < moment().startOf('day') || current > moment().add(1, 'year').endOf('day'))
+                  }
+                />
+              </Form.Item>
+              <Form.Item
+                label="Lần hiến máu gần nhất"
+                name="lastDonationDate"
+                rules={[
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      const appointment = getFieldValue('appointment_date');
+                      if (value && value > moment().endOf('day')) {
+                        return Promise.reject('Lần hiến máu gần nhất không được vượt quá ngày hiện tại!');
+                      }
+                      if (!value || !appointment) return Promise.resolve();
+                      if (appointment.isAfter(moment(value).add(0, 'day')))
+                        return Promise.resolve();
+                      return Promise.reject('Ngày hẹn hiến máu phải sau lần hiến máu gần nhất ít nhất 1 ngày!');
+                    }
+                  })
+                ]}
+              >
+                <DatePicker
+                  style={{ width: '100%' }}
+                  format="DD/MM/YYYY"
+                  placeholder="Chọn ngày hiến máu gần nhất"
+                  allowClear
+                  disabledDate={current => current && current > moment().endOf('day')}
+                />
               </Form.Item>
               <Form.Item
                 label="Ghi chú thêm"

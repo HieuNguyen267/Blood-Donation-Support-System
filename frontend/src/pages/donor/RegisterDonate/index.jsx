@@ -86,6 +86,9 @@ export default function RegisterDonate() {
         lastDonationDate: values.donateLast ? moment(values.donateLast).format("YYYY-MM-DD") : null,
         readyTimeRange: values.readyTimeRange ? values.readyTimeRange.map(d => moment(d).format("YYYY-MM-DD")) : null,
         healthStatus: values.status,
+        appointmentDate: values.appointmentDate ? moment(values.appointmentDate).format("YYYY-MM-DD") : null,
+        preDonationSurvey: values.preDonationSurvey || "Không có triệu chứng bất thường",
+        timeSlot: values.donationTimeSlot || values.timeSlot || null
       };
       const newRegister = await donorAPI.registerDonation(payload);
       // Lưu vào localStorage sau khi đăng ký thành công
@@ -167,6 +170,12 @@ export default function RegisterDonate() {
               />
             </Form.Item>
             <Form.Item label="Tình trạng sức khỏe" name="status"> <Input.TextArea rows={4} /> </Form.Item>
+            <Form.Item label="Ngày hẹn hiến máu" name="appointmentDate" rules={[{ required: true, message: "Vui lòng chọn ngày hẹn hiến máu" }]}> 
+              <DatePicker style={{ width: "100%" }} suffixIcon={<CalendarOutlined />} />
+            </Form.Item>
+            <Form.Item label="Khảo sát trước hiến máu" name="preDonationSurvey" rules={[{ required: true, message: "Vui lòng nhập khảo sát trước hiến máu" }]}> 
+              <Input.TextArea rows={3} placeholder="Nhập nội dung khảo sát..." />
+            </Form.Item>
             <Form.Item>
               <Button type="primary" htmlType="submit" block className="green-button">
                 Đăng ký

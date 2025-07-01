@@ -1,5 +1,4 @@
 package com.blooddonation.backend.dto.auth;
-
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 

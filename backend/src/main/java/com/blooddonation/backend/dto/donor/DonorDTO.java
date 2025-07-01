@@ -1,12 +1,10 @@
 package com.blooddonation.backend.dto.donor;
-
 import java.math.BigDecimal;
 
 public class DonorDTO {
     private Integer donorId;
     private String fullName;
     private String dateOfBirth;
-
     private String gender;
     private String address;
     private String bloodGroup;

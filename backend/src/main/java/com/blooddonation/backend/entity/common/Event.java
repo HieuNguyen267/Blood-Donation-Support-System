@@ -1,5 +1,4 @@
 package com.blooddonation.backend.entity.common;
-
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;

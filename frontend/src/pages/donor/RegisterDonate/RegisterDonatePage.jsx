@@ -4,7 +4,7 @@ import Header from "../../../components/user/Header";
 import Footer from "../../../components/user/Footer";
 import StepProgress from "../../../components/user/StepProgress";
 import { donorAPI } from "../../../services/api";
-import { message, Form, Input, Button } from "antd";
+import { message, Form, Input, Button, DatePicker } from "antd";
 import moment from "moment";
 import "./RegisterDonatePage.css";
 
@@ -131,7 +131,30 @@ export default function RegisterDonatePage () {
     }
   };
 
-
+  // Hàm lấy ngày hẹn hiến máu ưu tiên từ localStorage
+  const getAppointmentDate = () => {
+    return (
+      latestAppointment?.sendDate ||
+      latestAppointment?.appointment_date ||
+      donationFormData?.appointment_date ||
+      bookingData?.appointment_date ||
+      donationFormData?.sendDate ||
+      bookingData?.sendDate ||
+      null
+    );
+  };
+  // Hàm lấy khung giờ hiến máu ưu tiên từ localStorage
+  const getTimeSlot = () => {
+    return (
+      latestAppointment?.donationTimeSlot ||
+      latestAppointment?.timeSlot ||
+      donationFormData?.donationTimeSlot ||
+      bookingData?.donationTimeSlot ||
+      donationFormData?.timeSlot ||
+      bookingData?.timeSlot ||
+      null
+    );
+  };
 
   if (loading) {
     return (
@@ -190,6 +213,8 @@ export default function RegisterDonatePage () {
               <div className="donate-phieucontent">
                 <div className="donate-appointment-info" style={{marginBottom: 16}}>
                   <div><b>Địa điểm hiến máu:</b> 466 Nguyễn Thị Minh Khai Phường 02, Quận 3, Tp Hồ Chí Minh</div>
+                  <div><b>Ngày hẹn hiến máu:</b> {renderDate(getAppointmentDate())}</div>
+                  <div><b>Khung giờ hiến máu:</b> {renderItem(getTimeSlot())}</div>
                 </div>
               </div>
             </div>
@@ -215,11 +240,6 @@ export default function RegisterDonatePage () {
           ) : (
             <div className="donate-phieubox">
               <div className="donate-phieutitle">Bạn chưa thực hiện khảo sát sức khỏe</div>
-              <div className="donate-phieucontent">
-                <Link to="/blooddonationeligibility">
-                  <Button type="primary">Thực hiện khảo sát ngay</Button>
-                </Link>
-              </div>
             </div>
           )}
 
@@ -252,7 +272,7 @@ export default function RegisterDonatePage () {
       {/* Nút đăng ký hiến máu chỉ hiển thị khi chưa có đơn đăng ký */}
       {!latestAppointment && (
         <div className="center-btn">
-          <Button type="primary" className="green-button" style={{ minWidth: 240, fontWeight: 600, fontSize: 18 }} onClick={() => navigate('/registerdonateform')}>
+          <Button type="primary" className="green-button" style={{ minWidth: 240, fontWeight: 600, fontSize: 18 }} onClick={() => navigate('/booking-antd')}>
             Đăng ký hiến máu
           </Button>
         </div>

@@ -26,6 +26,7 @@ public class DonationRegisterDTO {
     private String address;
     private String eventName;
     private String eventLocation;
+    private String timeSlot;
 
     public Integer getRegisterId() { return registerId; }
     public void setRegisterId(Integer registerId) { this.registerId = registerId; }
@@ -86,4 +87,7 @@ public class DonationRegisterDTO {
 
     public String getEventLocation() { return eventLocation; }
     public void setEventLocation(String eventLocation) { this.eventLocation = eventLocation; }
+
+    public String getTimeSlot() { return timeSlot; }
+    public void setTimeSlot(String timeSlot) { this.timeSlot = timeSlot; }
 } 

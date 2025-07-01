@@ -1,11 +1,8 @@
 package com.blooddonation.backend.entity.common;
-
-import com.blooddonation.backend.entity.admin.Staff;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
 
 @Entity

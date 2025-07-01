@@ -1,7 +1,5 @@
 package com.blooddonation.backend.security.jwt;
-
 import org.springframework.stereotype.Service;
-
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -21,6 +19,6 @@ public class JwtBlacklistService {
     public void cleanupExpiredTokens() {
         int currentTime = (int) System.currentTimeMillis();
         blacklistedTokens.entrySet().removeIf(entry -> 
-            currentTime - entry.getValue() > 24 * 60 * 60 * 1000); // 24 hours
+            currentTime - entry.getValue() > 24 * 60 * 60 * 1000);
     }
 } 

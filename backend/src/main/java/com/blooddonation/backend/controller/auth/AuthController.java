@@ -21,14 +21,6 @@ public class AuthController {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
     
-    @GetMapping("/ping")
-    public ResponseEntity<?> ping() {
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Auth API hoạt động bình thường");
-        response.put("timestamp", String.valueOf(System.currentTimeMillis()));
-        return ResponseEntity.ok(response);
-    }
-    
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignupRequest signupRequest) {
         try {

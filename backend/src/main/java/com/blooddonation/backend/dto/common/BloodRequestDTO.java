@@ -1,5 +1,4 @@
 package com.blooddonation.backend.dto.common;
-
 import lombok.Data;
 import java.time.LocalDateTime;
 

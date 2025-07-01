@@ -1,5 +1,4 @@
 package com.blooddonation.backend.service.donor;
-
 import com.blooddonation.backend.entity.donor.Donor;
 import com.blooddonation.backend.repository.donor.DonorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +7,6 @@ import com.blooddonation.backend.dto.donor.DonorDTO;
 import com.blooddonation.backend.entity.admin.BloodGroup;
 import com.blooddonation.backend.repository.admin.BloodGroupRepository;
 import java.time.LocalDate;
-
 import java.util.List;
 
 @Service

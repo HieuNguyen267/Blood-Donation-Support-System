@@ -55,6 +55,9 @@ public class DonationRegister {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "time_slot", length = 20)
+    private String timeSlot;
+
     public Integer getRegisterId() { return registerId; }
     public void setRegisterId(Integer registerId) { this.registerId = registerId; }
 
@@ -93,4 +96,7 @@ public class DonationRegister {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public String getTimeSlot() { return timeSlot; }
+    public void setTimeSlot(String timeSlot) { this.timeSlot = timeSlot; }
 } 

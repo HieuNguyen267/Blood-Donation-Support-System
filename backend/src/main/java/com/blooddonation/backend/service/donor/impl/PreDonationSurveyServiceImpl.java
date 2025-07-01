@@ -1,5 +1,4 @@
 package com.blooddonation.backend.service.donor.impl;
-
 import com.blooddonation.backend.dto.donor.PreDonationSurveyDTO;
 import com.blooddonation.backend.entity.donor.Donor;
 import com.blooddonation.backend.entity.donor.PreDonationSurvey;
@@ -10,9 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.core.context.SecurityContextHolder;
-import com.blooddonation.backend.repository.common.AccountRepository;
-import com.blooddonation.backend.entity.common.Account;
-
 import java.time.LocalDateTime;
 
 @Service
@@ -24,16 +20,12 @@ public class PreDonationSurveyServiceImpl implements PreDonationSurveyService {
     @Autowired
     private DonorRepository donorRepository;
 
-    @Autowired
-    private AccountRepository accountRepository;
-
     @Override
     @Transactional
     public PreDonationSurveyDTO createSurvey(PreDonationSurveyDTO surveyDTO) {
-        // Lấy email của người dùng đang đăng nhập
+
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        
-        // Tìm donor từ email
+
         Donor donor = donorRepository.findByEmail(userEmail)
             .orElseThrow(() -> new RuntimeException("Donor not found"));
 
@@ -64,6 +56,12 @@ public class PreDonationSurveyServiceImpl implements PreDonationSurveyService {
         return surveyRepository.findTopByDonorDonorIdOrderByCreatedAtDesc(donorId)
             .map(this::convertToDTO)
             .orElse(null);
+    }
+
+    @Override
+    @Transactional
+    public void deleteSurveysByDonorId(Integer donorId) {
+        surveyRepository.deleteByDonorDonorId(donorId);
     }
 
     private PreDonationSurveyDTO convertToDTO(PreDonationSurvey survey) {

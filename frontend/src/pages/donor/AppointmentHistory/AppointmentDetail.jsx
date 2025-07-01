@@ -5,7 +5,6 @@ import Footer from '../../../components/user/Footer';
 import { donorAPI } from '../../../services/api';
 import { Typography, Tag, Button } from 'antd';
 import './AppointmentDetail.css';
-import moment from 'moment';
 import { FileTextOutlined } from '@ant-design/icons';
 
 const { Title, Text } = Typography;
@@ -24,7 +23,7 @@ export default function AppointmentDetail() {
         ]);
         setUserInfo(profile || {});
         setAppointment(apiAppointment || null);
-      } catch (e) {
+      } catch {
         // fallback nếu cần
       }
     }
@@ -71,7 +70,7 @@ export default function AppointmentDetail() {
           <Title level={4} className="info-card-title">Thông tin hiến máu</Title>
           <div className="info-grid">
             <div className="info-row"><Text className="info-label">Ngày hiến máu:</Text> <Text className="info-value">{appointment.appointmentDate || '-'}</Text></div>
-            <div className="info-row"><Text className="info-label">Địa điểm:</Text> <Text className="info-value">{appointment.address || '-'}</Text></div>
+            <div className="info-row"><Text className="info-label">Địa điểm:</Text> <Text className="info-value">{appointment.address || '466 Nguyễn Thị Minh Khai Phường 02, Quận 3, Tp Hồ Chí Minh'}</Text></div>
             <div className="info-row"><Text className="info-label">Khung giờ:</Text> <Text className="info-value">{appointment.donationTimeSlot || appointment.timeSlot || '-'}</Text></div>
             <div className="info-row"><Text className="info-label">Ghi chú:</Text> <Text className="info-value">{appointment.note || '-'}</Text></div>
             {/* Thêm các trường khác nếu có */}

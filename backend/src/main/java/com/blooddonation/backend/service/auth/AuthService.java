@@ -1,5 +1,4 @@
 package com.blooddonation.backend.service.auth;
-
 import com.blooddonation.backend.dto.auth.LoginRequest;
 import com.blooddonation.backend.dto.auth.JwtResponse;
 import com.blooddonation.backend.entity.common.Account;
@@ -42,10 +41,10 @@ public class AuthService {
                     jwt,
                     account.getAccountId(),
                     account.getEmail(),
-                    null, // firstName nếu có
-                    null, // lastName nếu có
+                    null, 
+                    null, 
                     account.getRole(),
-                    null // facilityId: null cho các tài khoản không phải cơ sở y tế
+                    null 
             );
         } catch (Exception e) {
             throw new RuntimeException("Invalid email or password", e);

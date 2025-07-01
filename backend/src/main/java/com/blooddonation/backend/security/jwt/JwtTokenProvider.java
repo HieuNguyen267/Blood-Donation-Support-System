@@ -1,5 +1,4 @@
 package com.blooddonation.backend.security.jwt;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -9,12 +8,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
-
 import com.blooddonation.backend.repository.common.AccountRepository;
 import com.blooddonation.backend.entity.common.Account;
 
@@ -39,11 +36,8 @@ public class JwtTokenProvider {
     
     public String generateToken(Authentication authentication) {
         UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
-        
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
-        
-        // Lấy role từ Account
         Account account = accountRepository.findByEmail(userPrincipal.getUsername()).orElse(null);
         String role = account != null ? account.getRole() : "";
 

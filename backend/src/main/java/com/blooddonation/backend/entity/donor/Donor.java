@@ -1,5 +1,4 @@
 package com.blooddonation.backend.entity.donor;
-
 import jakarta.persistence.*;
 import lombok.Data;
 import java.math.BigDecimal;

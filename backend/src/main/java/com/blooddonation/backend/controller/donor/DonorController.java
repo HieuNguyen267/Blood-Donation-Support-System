@@ -1,5 +1,4 @@
 package com.blooddonation.backend.controller.donor;
-
 import com.blooddonation.backend.entity.donor.Donor;
 import com.blooddonation.backend.dto.donor.DonorDTO;
 import com.blooddonation.backend.service.donor.DonorService;
@@ -11,6 +10,7 @@ import com.blooddonation.backend.entity.common.Account;
 import com.blooddonation.backend.dto.admin.DonationRegisterDTO;
 import com.blooddonation.backend.service.admin.DonationRegisterService;
 import com.blooddonation.backend.dto.common.MatchingBloodDTO;
+import com.blooddonation.backend.service.donor.PreDonationSurveyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -18,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import jakarta.persistence.EntityNotFoundException;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -32,12 +31,14 @@ public class DonorController {
     private final BloodGroupRepository bloodGroupRepository;
     private final AccountRepository accountRepository;
     private final DonationRegisterService donationRegisterService;
+    private final PreDonationSurveyService preDonationSurveyService;
 
-    public DonorController(DonorService donorService, BloodGroupRepository bloodGroupRepository, AccountRepository accountRepository, DonationRegisterService donationRegisterService) {
+    public DonorController(DonorService donorService, BloodGroupRepository bloodGroupRepository, AccountRepository accountRepository, DonationRegisterService donationRegisterService, PreDonationSurveyService preDonationSurveyService) {
         this.donorService = donorService;
         this.bloodGroupRepository = bloodGroupRepository;
         this.accountRepository = accountRepository;
         this.donationRegisterService = donationRegisterService;
+        this.preDonationSurveyService = preDonationSurveyService;
     }
 
     @GetMapping
@@ -176,6 +177,8 @@ public class DonorController {
         try {
             logger.info("[DELETE] Bắt đầu xóa đơn: registerId={}", registerId);
             donationRegisterService.deleteDonationRegister(registerId);
+            // Xóa luôn khảo sát sức khỏe liên quan
+            preDonationSurveyService.deleteSurveysByDonorId(donor.getDonorId());
             logger.info("[DELETE] Đã xóa thành công đơn: registerId={}", registerId);
         } catch (Exception ex) {
             logger.error("[DELETE] Lỗi khi xóa đơn: registerId={}, lỗi: {}", registerId, ex.getMessage(), ex);
@@ -220,5 +223,11 @@ public class DonorController {
 
         System.out.println("DEBUG - Trả về chi tiết lịch hẹn cho donorId: " + donor.getDonorId());
         return ResponseEntity.ok(register);
+    }
+
+    @DeleteMapping("/survey/delete-by-register/{registerId}")
+    public ResponseEntity<?> deleteSurveyByRegister(@PathVariable Integer registerId) {
+        preDonationSurveyService.deleteSurveysByDonorId(registerId);
+        return ResponseEntity.ok("Đã xóa khảo sát sức khỏe liên quan");
     }
 }

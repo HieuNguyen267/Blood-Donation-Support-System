@@ -1,5 +1,4 @@
 package com.blooddonation.backend.dto.common;
-
 import  lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -65,7 +64,6 @@ public class MatchingBloodDTO {
     public String getBloodType() { return bloodType; }
     public void setBloodType(String bloodType) { this.bloodType = bloodType; }
 
-    // Mapping from entity to DTO
     public static MatchingBloodDTO fromEntity(com.blooddonation.backend.entity.common.MatchingBlood entity) {
         MatchingBloodDTO dto = new MatchingBloodDTO();
         dto.setMatchingId(entity.getMatchingId());
@@ -98,7 +96,6 @@ public class MatchingBloodDTO {
         return dto;
     }
 
-    // Mapping from DTO to entity
     public com.blooddonation.backend.entity.common.MatchingBlood toEntity() {
         com.blooddonation.backend.entity.common.MatchingBlood entity = new com.blooddonation.backend.entity.common.MatchingBlood();
         entity.setMatchingId(this.getMatchingId());

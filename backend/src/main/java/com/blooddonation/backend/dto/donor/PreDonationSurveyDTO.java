@@ -1,5 +1,4 @@
 package com.blooddonation.backend.dto.donor;
-
 import com.blooddonation.backend.entity.donor.PreDonationSurvey.*;
 import lombok.Data;
 

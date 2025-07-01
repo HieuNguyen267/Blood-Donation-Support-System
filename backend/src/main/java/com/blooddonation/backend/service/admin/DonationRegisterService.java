@@ -14,6 +14,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.blooddonation.backend.service.donor.PreDonationSurveyService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,6 +38,9 @@ public class DonationRegisterService {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private PreDonationSurveyService preDonationSurveyService;
 
     public DonationRegisterDTO createDonationRegister(DonationRegisterDTO dto) {
         // Validate donor
@@ -69,6 +73,7 @@ public class DonationRegisterService {
         register.setDonationStatus(dto.getDonationStatus() != null ? dto.getDonationStatus() : "registered");
         register.setStatus(dto.getStatus() != null ? dto.getStatus() : "scheduled");
         register.setStaffNotes(dto.getStaffNotes());
+        register.setTimeSlot(dto.getTimeSlot());
         register.setCreatedAt(LocalDateTime.now());
         register.setUpdatedAt(LocalDateTime.now());
 
@@ -123,6 +128,9 @@ public class DonationRegisterService {
         if (dto.getStaffNotes() != null) {
             existingRegister.setStaffNotes(dto.getStaffNotes());
         }
+        if (dto.getTimeSlot() != null) {
+            existingRegister.setTimeSlot(dto.getTimeSlot());
+        }
 
         existingRegister.setUpdatedAt(LocalDateTime.now());
         
@@ -130,10 +138,12 @@ public class DonationRegisterService {
         return convertToDTO(updatedRegister);
     }
 
+    @Transactional
     public void deleteDonationRegister(Integer id) {
-        if (!donationRegisterRepository.existsById(id)) {
-            throw new EntityNotFoundException("Donation register not found with id: " + id);
-        }
+        DonationRegister register = donationRegisterRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Donation register not found with id: " + id));
+        Integer donorId = register.getDonor().getDonorId();
+        preDonationSurveyService.deleteSurveysByDonorId(donorId);
         donationRegisterRepository.deleteById(id);
     }
 
@@ -207,6 +217,7 @@ public class DonationRegisterService {
         dto.setStaffNotes(register.getStaffNotes());
         dto.setCreatedAt(register.getCreatedAt());
         dto.setUpdatedAt(register.getUpdatedAt());
+        dto.setTimeSlot(register.getTimeSlot());
 
         // Bổ sung thông tin người hiến
         Donor donor = register.getDonor();

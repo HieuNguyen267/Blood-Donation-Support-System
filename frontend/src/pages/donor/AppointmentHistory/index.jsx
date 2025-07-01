@@ -6,29 +6,33 @@ import { Link } from "react-router-dom";
 import { EnvironmentOutlined, ClockCircleOutlined, FileTextOutlined } from "@ant-design/icons";
 import "./index.css";
 import { donorAPI } from '../../../services/api';
+import moment from "moment";
 
 const { Title, Text } = Typography;
 
 export default function AppointmentHistory() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [bloodGroup, setBloodGroup] = useState('-');
+  const [bookingData, setBookingData] = useState(null);
+  const [donationFormData, setDonationFormData] = useState(null);
 
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      donorAPI.getDonationHistory(),
-      donorAPI.getProfile()
+      donorAPI.getDonationHistory()
     ])
-      .then(([history, profile]) => {
+      .then(([history]) => {
         setAppointments(history || []);
-        setBloodGroup(profile?.bloodGroup || '-');
       })
       .catch(() => {
         setAppointments([]);
-        setBloodGroup('-');
       })
       .finally(() => setLoading(false));
+    // Lấy dữ liệu localStorage giống RegisterDonatePage
+    const booking = localStorage.getItem('bookingFormData');
+    if (booking) setBookingData(JSON.parse(booking));
+    const donationForm = localStorage.getItem('donationFormData');
+    if (donationForm) setDonationFormData(JSON.parse(donationForm));
   }, []);
 
   const handleDelete = async (registerId) => {
@@ -37,9 +41,44 @@ export default function AppointmentHistory() {
       // Sau khi xóa thành công, gọi lại API để cập nhật danh sách
       const data = await donorAPI.getDonationHistory();
       setAppointments(data || []);
+      // Xóa dữ liệu localStorage liên quan
+      localStorage.removeItem('bookingFormData');
+      localStorage.removeItem('donationFormData');
+      localStorage.removeItem('healthCheckAnswers');
+      const email = localStorage.getItem('email');
+      if (email) localStorage.removeItem('appointmentHistory_' + email);
     } catch {
       // Nếu lỗi thì không làm gì
     }
+  };
+
+  const renderDate = (date) => date ? moment(date).format('DD/MM/YYYY') : '-';
+  // Lấy ngày hẹn hiến máu ưu tiên giống RegisterDonatePage
+  const getAppointmentDate = (app) => {
+    return (
+      app?.sendDate ||
+      app?.appointment_date ||
+      donationFormData?.appointment_date ||
+      bookingData?.appointment_date ||
+      donationFormData?.sendDate ||
+      bookingData?.sendDate ||
+      app?.appointmentDate ||
+      app?.date ||
+      '-'
+    );
+  };
+  // Lấy khung giờ hiến máu ưu tiên giống RegisterDonatePage
+  const getTimeSlot = (app) => {
+    return (
+      app?.donationTimeSlot ||
+      app?.timeSlot ||
+      donationFormData?.donationTimeSlot ||
+      bookingData?.donationTimeSlot ||
+      donationFormData?.timeSlot ||
+      bookingData?.timeSlot ||
+      app?.appointmentTime ||
+      '-'
+    );
   };
 
   if (loading) {
@@ -74,20 +113,14 @@ export default function AppointmentHistory() {
                   <Text strong>Hiến máu</Text>
                 </div>
                 <div className="card-main">
-                  <Title level={4} className="location-title">
+                  <Text className="location-title" style={{fontWeight: 'normal', fontSize: 18}}>
                     {'466 Nguyễn Thị Minh Khai Phường 02, Quận 3, Tp Hồ Chí Minh'}
-                  </Title>
-                  <Text className="appointment-details">
-                    <EnvironmentOutlined /> 466 Nguyễn Thị Minh Khai Phường 02, Quận 3, Tp Hồ Chí Minh
                   </Text>
                   <Text className="appointment-details">
-                    Ngày hiến máu: {app.appointmentDate || app.date || app.sendDate || '-'}
+                    Ngày hẹn: {renderDate(getAppointmentDate(app))}
                   </Text>
                   <Text className="appointment-details">
-                    <ClockCircleOutlined /> {app.appointmentTime || app.timeSlot || app.donationTimeSlot || '-'}
-                  </Text>
-                  <Text className="appointment-details">
-                    Nhóm máu: {bloodGroup}
+                    Khung giờ: {getTimeSlot(app)}
                   </Text>
                 </div>
                 <div className="card-right">
