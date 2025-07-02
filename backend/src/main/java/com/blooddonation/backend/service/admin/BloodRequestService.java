@@ -57,7 +57,6 @@ public class BloodRequestService {
     }
 
     public BloodRequestDTO createBloodRequest(BloodRequestDTO requestDTO) {
-        System.out.println("[DEBUG] facilityId nhận được: " + requestDTO.getFacilityId());
         BloodRequest bloodRequest = convertToEntity(requestDTO);
         bloodRequest.setCreatedAt(LocalDateTime.now());
         bloodRequest.setUpdatedAt(LocalDateTime.now());

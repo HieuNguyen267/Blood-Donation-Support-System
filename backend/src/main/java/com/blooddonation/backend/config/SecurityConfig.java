@@ -18,15 +18,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    
-    private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
     
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -63,7 +59,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/", "/auth/**", "/h2-console/**", "/swagger-ui/**", "/api-docs/**", "/css/**", "/js/**", "/images/**", "/contact").permitAll()
+                .requestMatchers("/", "/auth/**", "/h2-console/**", "/swagger-ui/**", "/api-docs/**", "/css/**", "/js/**", "/images/**", "/contact", "/emergency", "/api/contact").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/donor/**").hasAnyRole("ADMIN", "STAFF", "DONOR")
                 .requestMatchers("/medical/**").hasRole("MEDICAL_FACILITY")
@@ -73,20 +69,11 @@ public class SecurityConfig {
                 .requestMatchers("/donor/donation-history/**").hasRole("DONOR")
                 .requestMatchers("/donor/survey/**").hasRole("DONOR")
                 .requestMatchers("/accounts/**").hasRole("ADMIN")
+                .requestMatchers("/emergency/**").hasAnyRole("STAFF", "MEDICAL_FACILITY", "ADMIN")
+                .requestMatchers("/contact/**").permitAll()
                 .anyRequest().authenticated() // Các request còn lại phải xác thực
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
-        // Thêm filter để log thông tin Authentication
-        http.addFilterAfter((request, response, chain) -> {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication != null) {
-                log.debug("[DEBUG] Principal: {} | Authorities: {} | Authenticated: {}", authentication.getPrincipal(), authentication.getAuthorities(), authentication.isAuthenticated());
-            } else {
-                log.debug("[DEBUG] No authentication in context");
-            }
-            chain.doFilter(request, response);
-        }, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

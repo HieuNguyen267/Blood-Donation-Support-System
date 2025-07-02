@@ -21,57 +21,86 @@ export default function BookingAntdForm() {
   const [form] = Form.useForm();
   const [profile, setProfile] = useState({});
   const location = useLocation();
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
+    if (isInitialized) return;
     donorAPI.getProfile().then((data) => {
       setProfile(data);
+      const currentValues = form.getFieldsValue(['appointment_date', 'lastDonationDate', 'fullName', 'gender', 'phone', 'email', 'bloodGroup']);
+      let appointment = currentValues.appointment_date;
+      let lastDonation = currentValues.lastDonationDate;
+      if (!appointment) {
+        const appointDateState = location.state?.appoint_date;
+        const appointDateStorage = localStorage.getItem('selectedBookingDate');
+        console.log('appointDateState:', appointDateState);
+        console.log('appointDateStorage:', appointDateStorage);
+        if (appointDateState) {
+          appointment = moment(appointDateState, ["YYYY-MM-DD", "DD/MM/YYYY"]);
+        } else if (appointDateStorage) {
+          appointment = moment(appointDateStorage, ["YYYY-MM-DD", "DD/MM/YYYY"]);
+        }
+      }
+      if (data.lastDonationDate) {
+        lastDonation = moment(data.lastDonationDate, ["YYYY-MM-DD", "DD/MM/YYYY"]);
+      }
       form.setFieldsValue({
-        fullName: data.fullName,
-        gender: data.gender,
-        phone: data.phone,
-        email: data.email,
-        bloodGroup: data.bloodGroup,
-        lastDonationDate: data.lastDonationDate ? moment(data.lastDonationDate, ["YYYY-MM-DD", "DD/MM/YYYY"]) : null,
+        appointment_date: appointment,
+        lastDonationDate: lastDonation,
+        fullName: currentValues.fullName || data.fullName,
+        gender: currentValues.gender || data.gender,
+        phone: currentValues.phone || data.phone,
+        email: currentValues.email || data.email,
+        bloodGroup: currentValues.bloodGroup || data.bloodGroup,
       });
+      setIsInitialized(true);
     });
-    // Tự động điền appointment_date nếu có
-    const appointDate = location.state?.appoint_date || localStorage.getItem('selectedBookingDate');
-    if (appointDate) {
-      form.setFieldsValue({ appointment_date: moment(appointDate, ["YYYY-MM-DD", "DD/MM/YYYY"]) });
-    }
-  }, [form, location]);
+    // Chỉ chạy 1 lần khi mount
+    // eslint-disable-next-line
+  }, []);
 
   const handleSubmit = async (values) => {
+    // Ép về moment object trước khi so sánh
+    const appoint = values.appointment_date ? moment(values.appointment_date, ["YYYY-MM-DD", "DD/MM/YYYY"]) : null;
+    const last = values.lastDonationDate ? moment(values.lastDonationDate, ["YYYY-MM-DD", "DD/MM/YYYY"]) : null;
+    if (
+      appoint && last &&
+      appoint.isSame(last, 'day')
+    ) {
+      window.alert('Ngày hẹn hiến máu không được trùng với lần hiến máu gần nhất!');
+      return;
+    }
+    console.log('Giá trị thực tế khi submit:', values.appointment_date?.format('YYYY-MM-DD'), values.lastDonationDate?.format('YYYY-MM-DD'));
     try {
-      // Cập nhật weight vào donor trước
       const donorId = profile.id || profile.donorId || profile.donor_id;
-      await donorAPI.updateProfile({ weight: values.weight });
-
+      // Cập nhật lastDonationDate và weight vào donor nếu có
+      if (values.lastDonationDate) {
+        await donorAPI.updateProfile({ lastDonationDate: values.lastDonationDate.format('YYYY-MM-DD') });
+      }
+      if (values.weight) {
+        await donorAPI.updateProfile({ weight: values.weight });
+      }
       // Địa chỉ mặc định
       const DEFAULT_ADDRESS = '466 Nguyễn Thị Minh Khai Phường 02, Quận 3, Tp Hồ Chí Minh';
       values.address = DEFAULT_ADDRESS;
-      // Lấy lịch sử cũ từ localStorage
       const email = profile.email || localStorage.getItem('email');
       const existingHistory = JSON.parse(localStorage.getItem(`appointmentHistory_${email}`)) || [];
-
-      // Payload đăng ký hiến máu (không có weight)
+      // Payload đăng ký hiến máu (KHÔNG gửi lastDonationDate)
       const payload = {
         donorId,
         fullName: values.fullName,
         phone: values.phone,
         email: values.email,
         address: values.address,
-        bloodGroup: values.sampleGroup,
-        lastDonationDate: values.lastDonationDate ? values.lastDonationDate.format("YYYY-MM-DD") : null,
-        readyTimeRange: values.readyTimeRange ? values.readyTimeRange.map(d => moment(d).format("YYYY-MM-DD")) : null,
-        healthStatus: values.status,
-        appointment_date: values.appointment_date ? values.appointment_date.format("YYYY-MM-DD") : null,
+        bloodGroup: values.bloodGroup,
+        appointment_date: values.appointment_date ? values.appointment_date.format('YYYY-MM-DD') : null,
         timeSlot: values.timeSlot,
+        // các trường khác nếu cần
       };
+      console.log('Payload gửi lên:', payload);
       // Gửi dữ liệu lên backend và lấy registerId trả về
       const newRegister = await donorAPI.registerDonation(payload);
       console.log('Kết quả trả về từ backend:', newRegister);
-      // Gán registerId vào dữ liệu lưu localStorage
       const registerId = newRegister && (newRegister.registerId || newRegister.id);
       if (!registerId) {
         window.alert('Không nhận được mã đơn đăng ký từ hệ thống! Vui lòng thử lại.');
@@ -86,14 +115,14 @@ export default function BookingAntdForm() {
         phone: values.phone,
         email: values.email,
         address: values.address,
-        sampleGroup: values.sampleGroup,
+        sampleGroup: values.bloodGroup,
         sampleQuantity: values.sampleQuantity,
-        donateLast: values.lastDonationDate ? values.lastDonationDate.format("DD/MM/YYYY") : null,
-        sendDate: values.appointment_date ? values.appointment_date.format("DD/MM/YYYY") : null,
+        donateLast: values.lastDonationDate ? values.lastDonationDate.format('DD/MM/YYYY') : null,
+        sendDate: values.appointment_date ? values.appointment_date.format('DD/MM/YYYY') : null,
         donationTimeSlot: values.timeSlot,
         healthStatus: values.status,
         readyTimeRange: values.readyTimeRange || null,
-        appointment_date: values.appointment_date ? values.appointment_date.format("DD/MM/YYYY") : null,
+        appointment_date: values.appointment_date ? values.appointment_date.format('DD/MM/YYYY') : null,
         timeSlot: values.timeSlot,
       };
       // Lưu vào localStorage sau khi đăng ký thành công
@@ -107,6 +136,8 @@ export default function BookingAntdForm() {
       window.alert('Đăng ký lên hệ thống thất bại: ' + (error.message || error));
     }
   };
+
+  console.log('Form values:', form.getFieldsValue());
 
   return (
     <>
@@ -203,44 +234,27 @@ export default function BookingAntdForm() {
               <Form.Item
                 label="Ngày hẹn hiến máu"
                 name="appointment_date"
-                rules={[
-                  { required: true, message: 'Vui lòng chọn ngày hẹn!' }
-                ]}
               >
                 <DatePicker
                   style={{ width: '100%' }}
                   format="DD/MM/YYYY"
                   placeholder="Chọn ngày hẹn hiến máu"
                   allowClear={false}
-                  disabledDate={current =>
-                    current && (current < moment().startOf('day') || current > moment().add(1, 'year').endOf('day'))
-                  }
+                  disabledDate={current => current && current < moment().startOf('day')}
+                  onChange={() => {}}
                 />
               </Form.Item>
               <Form.Item
                 label="Lần hiến máu gần nhất"
                 name="lastDonationDate"
-                rules={[
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      const appointment = getFieldValue('appointment_date');
-                      if (value && value > moment().endOf('day')) {
-                        return Promise.reject('Lần hiến máu gần nhất không được vượt quá ngày hiện tại!');
-                      }
-                      if (!value || !appointment) return Promise.resolve();
-                      if (appointment.isAfter(moment(value).add(0, 'day')))
-                        return Promise.resolve();
-                      return Promise.reject('Ngày hẹn hiến máu phải sau lần hiến máu gần nhất ít nhất 1 ngày!');
-                    }
-                  })
-                ]}
               >
                 <DatePicker
                   style={{ width: '100%' }}
                   format="DD/MM/YYYY"
-                  placeholder="Chọn ngày hiến máu gần nhất"
+                  placeholder="Chọn ngày hiến máu gần nhất (không bắt buộc)"
                   allowClear
                   disabledDate={current => current && current > moment().endOf('day')}
+                  onChange={() => {}}
                 />
               </Form.Item>
               <Form.Item

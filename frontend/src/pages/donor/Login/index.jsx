@@ -32,8 +32,6 @@ export default function Login() {
         password: values.password
       });
       
-      console.log('Login response:', response); // Debug log
-
       if (!response.token) {
         throw new Error('Token không hợp lệ');
       }
@@ -43,35 +41,52 @@ export default function Login() {
       
       // Kiểm tra token đã được lưu
       const savedToken = localStorage.getItem('token');
-      console.log('Saved token:', savedToken); // Debug log
       
       if (!savedToken) {
         throw new Error('Token không được lưu');
       }
 
-      // Lấy profile ngay sau khi login
-      try {
-        const profile = await donorAPI.getProfile();
-        console.log('Profile response:', profile); // Debug log
-        
-        if (profile) {
-          localStorage.setItem('userInfo', JSON.stringify(profile));
+      if (response.role?.toUpperCase() === 'MEDICAL_FACILITY') {
+        // Gọi API lấy facility theo email
+        const res = await fetch(`http://localhost:8080/medical-facilities`, {
+          headers: { Authorization: `Bearer ${response.token}` }
+        });
+        const facilities = await res.json();
+        const facility = facilities.find(f => f.email === response.email);
+        if (facility) {
+          localStorage.setItem('userInfo', JSON.stringify({
+            ...response,
+            facilityId: facility.facilityId
+          }));
         } else {
+          localStorage.setItem('userInfo', JSON.stringify({
+            ...response,
+            facilityId: null
+          }));
+        }
+        window.dispatchEvent(new Event('storage'));
+      } else {
+        // Lấy profile như cũ cho các role khác
+        try {
+          const profile = await donorAPI.getProfile();
+          if (profile) {
+            localStorage.setItem('userInfo', JSON.stringify(profile));
+          } else {
+            localStorage.setItem('userInfo', JSON.stringify({
+              email: response.email,
+              role: response.role,
+              fullName: 'Người dùng'
+            }));
+          }
+          window.dispatchEvent(new Event('storage'));
+        } catch (profileError) {
           localStorage.setItem('userInfo', JSON.stringify({
             email: response.email,
             role: response.role,
             fullName: 'Người dùng'
           }));
+          window.dispatchEvent(new Event('storage'));
         }
-        window.dispatchEvent(new Event('storage'));
-      } catch (profileError) {
-        console.error('Get profile error:', profileError);
-        localStorage.setItem('userInfo', JSON.stringify({
-          email: response.email,
-          role: response.role,
-          fullName: 'Người dùng'
-        }));
-        window.dispatchEvent(new Event('storage'));
       }
 
       message.success('Đăng nhập thành công!');
@@ -88,7 +103,6 @@ export default function Login() {
         navigate('/', { replace: true });
       }
     } catch (error) {
-      console.error('Login error:', error);
       message.error(error.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
       // Xóa token nếu có lỗi
       setAuthToken(null);

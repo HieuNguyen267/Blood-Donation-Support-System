@@ -12,6 +12,7 @@ public class DonorDTO {
     private String phone;
     private String email;
     private BigDecimal weight;
+    private String lastDonationDate;
 
     public Integer getDonorId() {
         return donorId;
@@ -73,5 +74,11 @@ public class DonorDTO {
     }
     public void setWeight(BigDecimal weight) {
         this.weight = weight;
+    }
+    public String getLastDonationDate() {
+        return lastDonationDate;
+    }
+    public void setLastDonationDate(String lastDonationDate) {
+        this.lastDonationDate = lastDonationDate;
     }
 } 

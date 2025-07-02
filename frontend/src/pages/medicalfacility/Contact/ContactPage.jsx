@@ -4,10 +4,27 @@ import Footer from '../../../components/user/Footer';
 import './ContactPage.css'; 
 
 const MedicalFacilityContactPage = () => {
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert('Cảm ơn bạn đã gửi lời nhắn. Chúng tôi sẽ sớm liên hệ lại với bạn!');
-    // Ở đây có thể thêm logic gửi email hoặc lưu vào backend
+    const form = e.target;
+    const email = form.email.value;
+    const message = form.message.value;
+    // Gửi dữ liệu lên backend
+    try {
+      const res = await fetch('http://localhost:8080/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, message })
+      });
+      if (res.ok) {
+        alert('Cảm ơn bạn đã gửi lời nhắn. Chúng tôi sẽ sớm liên hệ lại với bạn!');
+        form.reset();
+      } else {
+        alert('Gửi liên hệ thất bại!');
+      }
+    } catch {
+      alert('Gửi liên hệ thất bại!');
+    }
   };
 
   return (

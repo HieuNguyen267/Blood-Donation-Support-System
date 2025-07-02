@@ -43,9 +43,6 @@ export const authAPI = {
       body: JSON.stringify(credentials)
     });
     const data = await handleResponse(response);
-    console.log('Login response data:', data); // Debug log
-    console.log('Email from response:', data.email); // Debug log
-    console.log('Role from response:', data.role); // Debug log
     setAuthToken(data.token, data.email, data.role);
     return data;
   },
@@ -146,7 +143,7 @@ export const donorAPI = {
   },
 
   deleteDonationRegister: async (registerId) => {
-    const response = await fetch(`${API_BASE_URL}/donor/register-donation/${registerId}`, {
+    const response = await fetch(`${API_BASE_URL}/donation-registers/${registerId}`, {
       method: 'DELETE',
       headers: getHeaders()
     });
@@ -154,11 +151,7 @@ export const donorAPI = {
   },
 
   createSurvey: async (surveyData) => {
-    console.log('Current role:', localStorage.getItem('role'));
-    console.log('Is logged in:', localStorage.getItem('isLoggedIn'));
-    console.log('Token:', localStorage.getItem('token'));
     const headers = getHeaders();
-    console.log('Request headers:', headers);
     const response = await fetch(`${API_BASE_URL}/donor/survey/create`, {
       method: 'POST',
       headers: getHeaders(),

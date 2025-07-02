@@ -3,6 +3,7 @@ package com.blooddonation.backend.dto.admin;
 import lombok.Data;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Data
 public class DonationRegisterDTO {
@@ -10,6 +11,7 @@ public class DonationRegisterDTO {
     private Integer donorId;
     private Integer eventId;
     private Integer staffId;
+    @JsonProperty("appointment_date")
     private LocalDate appointmentDate;
     private String preDonationSurvey;
     private String healthCheckResult;

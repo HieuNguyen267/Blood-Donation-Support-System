@@ -52,7 +52,11 @@ export default function AppointmentHistory() {
     }
   };
 
-  const renderDate = (date) => date ? moment(date).format('DD/MM/YYYY') : '-';
+  const renderDate = (date) => {
+    // Nếu date null, undefined, rỗng hoặc moment(date) không hợp lệ thì trả về "-"
+    if (!date || !moment(date).isValid()) return "-";
+    return moment(date).format("DD/MM/YYYY");
+  };
   // Lấy ngày hẹn hiến máu ưu tiên giống RegisterDonatePage
   const getAppointmentDate = (app) => {
     return (

@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Form, Input, Button, Typography, Select, InputNumber, Card } from "antd";
-import { Link, useNavigate } from "react-router-dom";
 import { Dropdown } from 'antd';
 import { UserCircle } from 'lucide-react';
 import MedicalFacilityHeader from '../../../components/user/MedicalFacilityHeader';
 import Footer from "../../../components/user/Footer";
 import "./index.css";
 import { FaTint, FaPhoneAlt } from 'react-icons/fa';
+import { useNavigate } from "react-router-dom";
 
 const { Title, Text } = Typography;
 
@@ -30,85 +30,52 @@ const components = [
   { label: "Huyết tương", value: "huyettuong" },
 ];
 
+const bloodGroupMap = {
+  "A+": 1,
+  "A-": 2,
+  "B+": 3,
+  "B-": 4,
+  "AB+": 5,
+  "AB-": 6,
+  "O+": 7,
+  "O-": 8
+};
+
 export default function EmergencyRequest() {
   const [form] = Form.useForm();
-  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') === 'true');
-  const navigate = useNavigate();
 
-  const handleLogout = () => {
-    localStorage.clear();
-    setIsLoggedIn(false);
-    navigate('/'); 
-  };
-
-  useEffect(() => {
-    const checkLoginStatus = () => {
-      setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true');
-    };
-
-    window.addEventListener('storage', checkLoginStatus);
-    checkLoginStatus();
-
-    return () => {
-      window.removeEventListener('storage', checkLoginStatus);
-    };
-  }, []);
-
-  // Lấy họ tên từ localStorage nếu đã đăng nhập
-  let userName = 'Đăng nhập';
-  let showDropdown = false;
-  if (isLoggedIn) {
+  const onFinish = async (values) => {
     try {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      if (userInfo && userInfo.fullName) {
-        userName = userInfo.fullName;
-        showDropdown = true;
+      const payload = {
+        facilityId: 1, // hoặc lấy từ context/user nếu có
+        requesterName: values.patient,
+        contactPerson: values.contact,
+        contactPhone: values.phone,
+        bloodGroupId: bloodGroupMap[values.bloodGroup],
+        facilityName: values.hospital,
+        quantityRequested: values.amount,
+        component: values.component,
+        notes: values.desc,
+        requiredBy: values.dateNeeded ? values.dateNeeded + 'T00:00:00' : null,
+      };
+      const token = localStorage.getItem('token');
+      const response = await fetch("http://localhost:8080/emergency", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(payload),
+      });
+      if (response.ok) {
+        alert("Gửi yêu cầu thành công!");
+        form.resetFields();
       } else {
-        userName = 'Người dùng';
-        showDropdown = true;
+        alert("Gửi yêu cầu thất bại!");
       }
     } catch {
-      userName = 'Người dùng';
-      showDropdown = true;
+      alert("Gửi yêu cầu thất bại!");
     }
-  }
-
-  const menu = (
-    <div style={{ 
-      background: 'white', 
-      border: '1px solid #d9d9d9', 
-      borderRadius: '6px', 
-      padding: '4px 0',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-    }}>
-      <div 
-        style={{ 
-          padding: '8px 16px', 
-          cursor: 'pointer',
-          borderBottom: '1px solid #f0f0f0'
-        }}
-        onClick={() => navigate('/medical-facility/profile')}
-      >
-        Thông tin cơ sở
-      </div>
-      <div 
-        style={{ 
-          padding: '8px 16px', 
-          cursor: 'pointer',
-          color: '#ff4d4f'
-        }}
-        onClick={handleLogout}
-      >
-        Đăng xuất
-      </div>
-    </div>
-  );
-
-  const onFinish = (values) => {
-    // Xử lý gửi yêu cầu ở đây
-    // eslint-disable-next-line no-alert
-    alert("Yêu cầu của bạn đã được gửi! Chúng tôi sẽ liên hệ hỗ trợ sớm nhất.");
-    form.resetFields();
   };
 
   return (
@@ -168,6 +135,10 @@ export default function EmergencyRequest() {
             </div>
             <Form.Item name="desc" label={<b>Mô tả tình trạng khẩn cấp (tùy chọn)</b>} className="emergency-item">
               <Input.TextArea rows={4} placeholder="Mô tả tình trạng khẩn cấp (nếu có)" />
+            </Form.Item>
+            <Form.Item name="dateNeeded" label={<b>Ngày cần máu</b>} rules={[{ required: true, message: "Vui lòng chọn ngày cần máu" }]}
+              className="emergency-item">
+              <Input type="date" />
             </Form.Item>
             <Form.Item>
               <Button type="primary" htmlType="submit" className="emergency-btn">

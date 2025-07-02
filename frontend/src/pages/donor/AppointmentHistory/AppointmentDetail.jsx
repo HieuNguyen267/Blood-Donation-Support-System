@@ -6,6 +6,7 @@ import { donorAPI } from '../../../services/api';
 import { Typography, Tag, Button } from 'antd';
 import './AppointmentDetail.css';
 import { FileTextOutlined } from '@ant-design/icons';
+import moment from 'moment';
 
 const { Title, Text } = Typography;
 
@@ -69,8 +70,27 @@ export default function AppointmentDetail() {
         <div className="info-card">
           <Title level={4} className="info-card-title">Thông tin hiến máu</Title>
           <div className="info-grid">
-            <div className="info-row"><Text className="info-label">Ngày hiến máu:</Text> <Text className="info-value">{appointment.appointmentDate || '-'}</Text></div>
-            <div className="info-row"><Text className="info-label">Địa điểm:</Text> <Text className="info-value">{appointment.address || '466 Nguyễn Thị Minh Khai Phường 02, Quận 3, Tp Hồ Chí Minh'}</Text></div>
+            <div className="info-row">
+              <Text className="info-label">Ngày hẹn hiến máu:</Text>
+              <Text className="info-value">
+                {appointment.appointmentDate
+                  ? moment(appointment.appointmentDate).format('DD/MM/YYYY')
+                  : (appointment.appointment_date
+                      ? moment(appointment.appointment_date).format('DD/MM/YYYY')
+                      : '-')}
+              </Text>
+            </div>
+            <div className="info-row">
+              <Text className="info-label">Lần hiến máu gần nhất:</Text>
+              <Text className="info-value">
+                {userInfo.lastDonationDate
+                  ? moment(userInfo.lastDonationDate).format('DD/MM/YYYY')
+                  : (userInfo.last_donation_date
+                      ? moment(userInfo.last_donation_date).format('DD/MM/YYYY')
+                      : '-')}
+              </Text>
+            </div>
+            <div className="info-row"><Text className="info-label">Địa điểm:</Text> <Text className="info-value">466 Nguyễn Thị Minh Khai Phường 02, Quận 3, Tp Hồ Chí Minh</Text></div>
             <div className="info-row"><Text className="info-label">Khung giờ:</Text> <Text className="info-value">{appointment.donationTimeSlot || appointment.timeSlot || '-'}</Text></div>
             <div className="info-row"><Text className="info-label">Ghi chú:</Text> <Text className="info-value">{appointment.note || '-'}</Text></div>
             {/* Thêm các trường khác nếu có */}

@@ -90,6 +90,11 @@ public class DonorController {
         } else {
             dto.setBloodGroup(null);
         }
+        if (donor.getLastDonationDate() != null) {
+            dto.setLastDonationDate(donor.getLastDonationDate().toString());
+        } else {
+            dto.setLastDonationDate(null);
+        }
         logger.info("DonorDTO after mapping: {}", dto);
         return ResponseEntity.ok(dto);
     }
@@ -137,6 +142,9 @@ public class DonorController {
             } catch (NumberFormatException e) {
                 logger.warn("Invalid weight format: {}", body.get("weight"));
             }
+        }
+        if (body.get("lastDonationDate") != null) {
+            existing.setLastDonationDate(java.time.LocalDate.parse((String) body.get("lastDonationDate")));
         }
         // Thêm các trường khác nếu cần
 
@@ -198,30 +206,22 @@ public class DonorController {
     @GetMapping("/donation-detail/{id}")
     public ResponseEntity<?> getDonationDetail(@PathVariable Integer id, Authentication authentication) {
         String email = authentication.getName();
-        System.out.println("DEBUG - Email từ token: " + email);
-
         Donor donor = donorService.getDonorByEmail(email);
         if (donor == null) {
-            System.out.println("DEBUG - Không tìm thấy donor với email: " + email);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Donor not found");
         }
-        System.out.println("DEBUG - donorId từ token: " + donor.getDonorId());
 
         DonationRegisterDTO register;
         try {
             register = donationRegisterService.getDonationRegister(id);
         } catch (EntityNotFoundException e) {
-            System.out.println("DEBUG - Không tìm thấy lịch hẹn id: " + id);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy lịch hẹn");
         }
-        System.out.println("DEBUG - donorId của lịch hẹn: " + register.getDonorId());
 
         if (!register.getDonorId().equals(donor.getDonorId())) {
-            System.out.println("DEBUG - Không trùng donorId, trả về 403");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Bạn không có quyền xem lịch hẹn này");
         }
 
-        System.out.println("DEBUG - Trả về chi tiết lịch hẹn cho donorId: " + donor.getDonorId());
         return ResponseEntity.ok(register);
     }
 

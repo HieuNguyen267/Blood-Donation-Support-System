@@ -147,7 +147,9 @@ export default function RegisterDonate() {
             >
               <Input readOnly />
             </Form.Item>
-            <Form.Item label="Lần hiến máu gần nhất" name="donateLast"> <DatePicker style={{ width: "100%" }} suffixIcon={<CalendarOutlined />} disabled /> </Form.Item>
+            <Form.Item label="Lần hiến máu gần nhất" name="donateLast">
+              <DatePicker style={{ width: "100%" }} suffixIcon={<CalendarOutlined />} allowClear disabledDate={current => current && current > moment().endOf('day')} />
+            </Form.Item>
             <Form.Item
               label="Thời điểm sẵn sàng hiến máu"
               name="readyTimeRange"

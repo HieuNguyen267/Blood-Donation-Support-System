@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/contact")
+@RequestMapping("/contact")
 @CrossOrigin(origins = "*")
 public class ContactController {
     @Autowired
@@ -18,6 +18,7 @@ public class ContactController {
 
     @PostMapping
     public ResponseEntity<?> sendContactMessage(@RequestBody Map<String, String> body) {
+        System.out.println("Received contact request: " + body);
         String email = body.get("email");
         String message = body.get("message");
         if (email == null || message == null) {

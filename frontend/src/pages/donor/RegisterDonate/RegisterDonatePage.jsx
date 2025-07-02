@@ -15,35 +15,24 @@ export default function RegisterDonatePage () {
   const [loading, setLoading] = useState(true);
   const [bookingData, setBookingData] = useState(null);
   const [donationFormData, setDonationFormData] = useState(null);
-  const [form] = Form.useForm();
+  const [lastDonationDate, setLastDonationDate] = useState();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Giữ lại logic load profile nếu cần
-    const loadProfile = async () => {
-      try {
-        const profile = await donorAPI.getProfile();
-        setUserInfo(profile);
-        console.log("userInfo:", profile);
-        form.setFieldsValue({
-          fullName: profile.fullName,
-          gender: profile.gender,
-          phone: profile.phone,
-          email: profile.email,
-          bloodGroup: profile.bloodGroup,
-        });
-
-        // Lấy kết quả khảo sát mới nhất từ backend
-        const latestSurvey = await donorAPI.getLatestSurvey(profile.donorId);
-        if (latestSurvey) {
-          setHealthAnswers(latestSurvey);
-          localStorage.setItem('healthCheckAnswers', JSON.stringify(latestSurvey));
-        }
-      } catch (error) {
-        console.error('Load profile error:', error?.message || error);
+    donorAPI.getProfile().then((profile) => {
+      setUserInfo(profile);
+      console.log("userInfo:", profile);
+      if (profile.donorId) {
+        donorAPI.getLatestSurvey(profile.donorId)
+          .then((latestSurvey) => {
+            if (latestSurvey) {
+              setHealthAnswers(latestSurvey);
+              localStorage.setItem('healthCheckAnswers', JSON.stringify(latestSurvey));
+            }
+          })
+          .catch(() => {});
       }
-    };
-    loadProfile();
+    });
 
     const booking = localStorage.getItem('bookingFormData');
     if (booking) {
@@ -85,7 +74,7 @@ export default function RegisterDonatePage () {
       });
 
     setLoading(false);
-  }, [form]);
+  }, []);
 
   const renderItem = (value) => value || '-';
   const renderDate = (date) => date ? moment(date).format('DD/MM/YYYY') : '-';
@@ -195,7 +184,6 @@ export default function RegisterDonatePage () {
               <div className="donate-inforow"><label>Giới tính:</label> <span>{renderItem(userInfo.gender)}</span></div>
               <div className="donate-inforow"><label>Nghề nghiệp:</label> <span>{renderItem(userInfo.job)}</span></div>
               <div className="donate-inforow"><label>Nhóm máu:</label> <span>{renderItem(userInfo.bloodGroup)}</span></div>
-              <div className="donate-inforow"><label>Cân nặng:</label> <span>{renderItem(userInfo.weight)} kg</span></div>
             </div>
 
             <div className="donate-infocard">

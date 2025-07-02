@@ -15,6 +15,9 @@ export default function ReceiveBloodPage() {
     quantity: '',
     dateNeeded: '',
     notes: '',
+    patientInfo: '',
+    facilityName: '',
+    component: '',
   });
 
   const handleChange = (e) => {
@@ -27,6 +30,7 @@ export default function ReceiveBloodPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Đã gọi handleSubmit", formData);
     setLoading(true);
 
     // Kiểm tra ngày cần máu không được là quá khứ
@@ -43,15 +47,13 @@ export default function ReceiveBloodPage() {
       // Lấy facilityId từ thông tin đăng nhập
       const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
       const facilityId = userInfo.facilityId;
-      console.log('DEBUG userInfo:', userInfo);
-      console.log('DEBUG facilityId:', facilityId);
 
       if (!facilityId) {
         alert('Không tìm thấy thông tin cơ sở y tế. Vui lòng đăng nhập lại.');
         return;
       }
 
-      const requestData = {
+      const payload = {
         facilityId: facilityId,
         bloodGroupId: Number(formData.bloodGroupId),
         quantityRequested: Number(formData.quantity),
@@ -59,9 +61,13 @@ export default function ReceiveBloodPage() {
         contactPerson: formData.contactPerson,
         contactPhone: formData.contactPhone,
         notes: formData.notes,
+        patientInfo: formData.patientInfo || '',
+        facilityName: formData.facilityName || '',
+        component: formData.component || '',
+        urgencyLevel: 'routine',
       };
 
-      await bloodRequestAPI.createRequest(requestData);
+      await bloodRequestAPI.createRequest(payload);
       alert('Đã gửi yêu cầu nhận máu thành công!');
       navigate('/medical-facility/request-history');
     } catch (err) {
@@ -142,6 +148,40 @@ export default function ReceiveBloodPage() {
               required 
               min={new Date().toISOString().split('T')[0]}
             />
+
+            <label>Tên bệnh nhân</label>
+            <input 
+              type="text" 
+              name="patientInfo" 
+              placeholder="Nhập tên bệnh nhân" 
+              value={formData.patientInfo} 
+              onChange={handleChange} 
+              required 
+            />
+
+            <label>Tên cơ sở y tế</label>
+            <input 
+              type="text" 
+              name="facilityName" 
+              placeholder="Nhập tên cơ sở y tế" 
+              value={formData.facilityName} 
+              onChange={handleChange} 
+              required 
+            />
+
+            <label>Thành phần máu</label>
+            <select 
+              name="component" 
+              value={formData.component} 
+              onChange={handleChange} 
+              required
+            >
+              <option value="">Chọn thành phần</option>
+              <option value="toanphan">Toàn phần</option>
+              <option value="hongcau">Hồng cầu</option>
+              <option value="tieucau">Tiểu cầu</option>
+              <option value="huyettuong">Huyết tương</option>
+            </select>
 
             <label>Ghi chú thêm</label>
             <textarea 

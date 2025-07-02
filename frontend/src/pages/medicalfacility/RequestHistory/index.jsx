@@ -5,7 +5,7 @@ import MedicalFacilityHeader from '../../../components/user/MedicalFacilityHeade
 import { Typography, Button, message, Spin } from "antd";
 import { EnvironmentOutlined, ClockCircleOutlined, FileTextOutlined } from "@ant-design/icons";
 import "../../donor/AppointmentHistory/index.css";
-import { bloodRequestAPI } from '../../../services/api';
+import { bloodRequestAPI, donorAPI } from '../../../services/api';
 
 const { Title, Text } = Typography;
 
@@ -41,7 +41,6 @@ const RequestHistory = () => {
       const donateData = await res2.json();
       setDonateRequests(donateData || []);
     } catch (error) {
-      console.error('Error fetching requests:', error);
       message.error('Không thể tải lịch sử yêu cầu');
       setReceiveRequests([]);
       setDonateRequests([]);
@@ -60,7 +59,6 @@ const RequestHistory = () => {
       message.success('Đã hủy yêu cầu');
       fetchAllRequests(); // Tải lại danh sách sau khi hủy
     } catch (error) {
-      console.error('Error canceling request:', error);
       message.error('Không thể hủy yêu cầu');
     }
   };
@@ -72,8 +70,17 @@ const RequestHistory = () => {
       message.success('Đã hủy yêu cầu nhận máu');
       fetchAllRequests();
     } catch (error) {
-      console.error('Error canceling receive request:', error);
       message.error('Không thể hủy yêu cầu nhận máu');
+    }
+  };
+
+  const handleCancelDonateRequest = async (registerId) => {
+    try {
+      await donorAPI.deleteDonationRegister(registerId);
+      message.success('Đã hủy đăng ký hiến máu');
+      fetchAllRequests();
+    } catch (error) {
+      message.error('Không thể hủy đăng ký hiến máu');
     }
   };
 
@@ -157,7 +164,7 @@ const RequestHistory = () => {
                       Đã hủy
                     </Button>
                   ) : (
-                    <Button className="status-btn yellow-btn" onClick={() => handleCancelRequest(req.id)}>
+                    <Button className="status-btn yellow-btn" onClick={() => handleCancelDonateRequest(req.registerId)}>
                       Hủy yêu cầu
                     </Button>
                   )}

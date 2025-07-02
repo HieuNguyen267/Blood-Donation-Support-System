@@ -57,6 +57,20 @@ public class BloodRequestController {
         }
     }
 
+    @PostMapping("/emergency")
+    public ResponseEntity<BloodRequestDTO> createEmergencyBloodRequest(@RequestBody BloodRequestDTO requestDTO) {
+        try {
+            requestDTO.setUrgencyLevel("emergency");
+            if (requestDTO.getRequestStatus() == null) {
+                requestDTO.setRequestStatus("pending");
+            }
+            BloodRequestDTO createdRequest = bloodRequestService.createBloodRequest(requestDTO);
+            return ResponseEntity.ok(createdRequest);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<BloodRequestDTO> updateBloodRequest(@PathVariable Integer id, @RequestBody BloodRequestDTO requestDTO) {
         BloodRequestDTO updatedRequest = bloodRequestService.updateBloodRequest(id, requestDTO);
