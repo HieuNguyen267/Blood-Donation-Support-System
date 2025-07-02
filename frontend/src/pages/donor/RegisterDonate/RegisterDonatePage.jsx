@@ -4,7 +4,7 @@ import Header from "../../../components/user/Header";
 import Footer from "../../../components/user/Footer";
 import StepProgress from "../../../components/user/StepProgress";
 import { donorAPI } from "../../../services/api";
-import { message, Form, Input, Button, DatePicker } from "antd";
+import { message, Form, Input, Button, DatePicker, Modal } from "antd";
 import moment from "moment";
 import "./RegisterDonatePage.css";
 
@@ -80,44 +80,52 @@ export default function RegisterDonatePage () {
   const renderDate = (date) => date ? moment(date).format('DD/MM/YYYY') : '-';
   
   const handleDelete = async () => {
-    const email = localStorage.getItem('email');
-    let registerId = null;
-    if (bookingData && bookingData.registerId) registerId = bookingData.registerId;
-    else if (latestAppointment && latestAppointment.registerId) registerId = latestAppointment.registerId;
-    else if (donationFormData && donationFormData.registerId) registerId = donationFormData.registerId;
-    if (!registerId) {
-      message.error('Không tìm thấy mã đơn đăng ký để xóa trên hệ thống!');
-      return;
-    }
-    try {
-      await donorAPI.deleteDonationRegister(registerId);
-      // Nếu backend trả về 200 hoặc message "Xóa thành công" thì luôn báo thành công
-      localStorage.removeItem(`appointmentHistory_${email}`);
-      localStorage.removeItem("healthCheckAnswers");
-      localStorage.removeItem("donationFormData");
-      localStorage.removeItem("bookingFormData");
-      setHealthAnswers(null);
-      setLatestAppointment(null);
-      setBookingData(null);
-      setDonationFormData(null);
-      message.success('Đã xóa đơn đăng ký khỏi hệ thống');
-      navigate('/registerdonate');
-    } catch (err) {
-      if (err.message && (err.message.includes('403') || err.message.includes('404'))) {
-        localStorage.removeItem(`appointmentHistory_${email}`);
-        localStorage.removeItem("healthCheckAnswers");
-        localStorage.removeItem("donationFormData");
-        localStorage.removeItem("bookingFormData");
-        setHealthAnswers(null);
-        setLatestAppointment(null);
-        setBookingData(null);
-        setDonationFormData(null);
-        message.success('Đã xóa đơn đăng ký khỏi hệ thống');
-        navigate('/registerdonate');
-      } else {
-        message.error('Xóa đơn đăng ký thất bại!');
+    Modal.confirm({
+      title: 'Xác nhận xóa đơn đăng ký',
+      content: 'Bạn có muốn xóa đơn đăng ký này không?',
+      okText: 'Xác nhận',
+      cancelText: 'Hủy',
+      okButtonProps: { style: { backgroundColor: '#10b981', borderColor: '#10b981' } },
+      onOk: async () => {
+        const email = localStorage.getItem('email');
+        let registerId = null;
+        if (bookingData && bookingData.registerId) registerId = bookingData.registerId;
+        else if (latestAppointment && latestAppointment.registerId) registerId = latestAppointment.registerId;
+        else if (donationFormData && donationFormData.registerId) registerId = donationFormData.registerId;
+        if (!registerId) {
+          message.error('Không tìm thấy mã đơn đăng ký để xóa trên hệ thống!');
+          return;
+        }
+        try {
+          await donorAPI.deleteDonationRegister(registerId);
+          localStorage.removeItem(`appointmentHistory_${email}`);
+          localStorage.removeItem("healthCheckAnswers");
+          localStorage.removeItem("donationFormData");
+          localStorage.removeItem("bookingFormData");
+          setHealthAnswers(null);
+          setLatestAppointment(null);
+          setBookingData(null);
+          setDonationFormData(null);
+          message.success('Đã xóa đơn đăng ký khỏi hệ thống');
+          navigate('/registerdonate');
+        } catch (err) {
+          if (err.message && (err.message.includes('403') || err.message.includes('404'))) {
+            localStorage.removeItem(`appointmentHistory_${email}`);
+            localStorage.removeItem("healthCheckAnswers");
+            localStorage.removeItem("donationFormData");
+            localStorage.removeItem("bookingFormData");
+            setHealthAnswers(null);
+            setLatestAppointment(null);
+            setBookingData(null);
+            setDonationFormData(null);
+            message.success('Đã xóa đơn đăng ký khỏi hệ thống');
+            navigate('/registerdonate');
+          } else {
+            message.error('Xóa đơn đăng ký thất bại!');
+          }
+        }
       }
-    }
+    });
   };
 
   // Hàm lấy ngày hẹn hiến máu ưu tiên từ localStorage

@@ -43,15 +43,19 @@ import MedicalFacilityRequestDetail from './pages/medicalfacility/RequestHistory
 import MedicalFacilityEmergencyRequest from './pages/medicalfacility/EmergencyRequest/index';
 import MedicalFacilityContact from './pages/medicalfacility/Contact/ContactPage';
 
+import AdminDashBoard from './pages/Admin/dashBoard';
 import Statistics from './pages/Admin/Statistics';
 import DonorManagement from './pages/Admin/DonorManagement';
 import BloodStorageManagement from './pages/Admin/BloodStorageManagement';
 import DonationManagement from './pages/Admin/DonationManagement';
+import DonationProcessManagement from './pages/Admin/DonationProcessManagement';
+import DonationProcessDetail from './pages/Admin/DonationProcessDetail';
 import DonationDetail from './pages/Admin/DonationDetail';
+import BloodTestManagement from './pages/Admin/BloodTestManagement';
 import NewsManagement from './pages/Admin/NewsManagement';
 import BloodRequestManagement from './pages/Admin/BloodRequestManagement';
 import EmergencyDonorMatching from './pages/Admin/EmergencyDonorMatching';
-import EmergencyProcess from './pages/Admin/EmergencyProcess';
+import EmergencyProcess from './pages/medicalfacility/EmergencyRequest/EmergencyProcess';
 import MedicalFacilityManagement from './pages/Admin/MedicalFacilityManagement';
 import AccountManagement from './pages/Admin/AccountManagement';
 import AccountProfile from './pages/Admin/AccountProfile';
@@ -97,13 +101,17 @@ function AppContent() {
           <Route path="request-history" element={<MedicalFacilityRequestHistory />} />
           <Route path="request-history/:id" element={<MedicalFacilityRequestDetail />} />
           <Route path="emergency-request" element={<MedicalFacilityEmergencyRequest />} />
+          <Route path="emergency-process/:requestId" element={<EmergencyProcess />} />
           <Route path="contact" element={<MedicalFacilityContact />} />
+          <Route path="bloodgroup-info" element={<BloodGroupInfo />} />
         </Route>
-        <Route path="/" element={<Navigate to="/admin" replace />} />
-        <Route path="/admin" element={<Navigate to="/admin/statistics" replace />} />
+        <Route path="/admin" element={<AdminDashBoard />} />
         <Route path="/admin/donors" element={<DonorManagement />} />
         <Route path="/admin/blood-storage" element={<BloodStorageManagement />} />
         <Route path="/admin/donations" element={<DonationManagement />} />
+        <Route path="/admin/donation-process" element={<DonationProcessManagement />} />
+        <Route path="/admin/donation-process/:id" element={<DonationProcessDetail />} />
+        <Route path="/admin/blood-test" element={<BloodTestManagement />} />
         <Route path="/admin/donations/:id" element={<DonationDetail />} />
         <Route path="/admin/news" element={<NewsManagement />} />
         <Route path="/admin/blood-requests" element={<BloodRequestManagement />} />
@@ -119,6 +127,8 @@ function AppContent() {
 
         <Route path="/activities" element={<ActivityPage />} />
         <Route path="/news" element={<News />} />
+
+        <Route path="/medical-facility" element={<MedicalFacilityLayout />} />
       </Routes>
     </>
   );

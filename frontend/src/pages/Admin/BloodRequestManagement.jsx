@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Header from "../../components/admin/Header";
 import Sidebar from "../../components/admin/Sidebar";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
 import { validateRequest, getUrgencyBadge, getStatusBadge, getStatusStyle } from './utils';
-import { bloodRequestAPI } from "../../services/api";
+import { bloodRequestAPI } from '../../services/api';
 
 const urgencyLevels = ["routine", "urgent", "emergency", "critical"];
 const statuses = ["Chờ duyệt", "Đang xử lý", "Đang yêu cầu máu khẩn cấp", "Hoàn thành"];
@@ -408,29 +408,37 @@ export default function BloodRequestManagement() {
   const [validationErrors, setValidationErrors] = useState({});
   const navigate = useNavigate();
 
-  // Fetch blood requests from backend
-  useEffect(() => {
-    bloodRequestAPI.getRequests().then(data => {
-      setRequests(data.map(r => ({
-        request_id: r.requestId || r.request_id,
-        facility_id: r.facilityId || r.facility_id,
-        facility_name: r.facilityName || r.facility_name,
-        blood_group_id: r.bloodGroupId || r.blood_group_id,
-        blood_group: r.bloodGroup || r.blood_group,
-        quantity_requested: r.quantityRequested || r.quantity_requested,
-        urgency_level: r.urgencyLevel || r.urgency_level,
-        patient_info: r.patientInfo || r.patient_info,
-        required_by: r.requiredBy || r.required_by,
-        quantity_fulfilled: r.quantityFulfilled || r.quantity_fulfilled,
-        request_status: r.requestStatus || r.request_status,
-        special_requirements: r.specialRequirements || r.special_requirements,
-        contact_person: r.contactPerson || r.contact_person,
-        contact_phone: r.contactPhone || r.contact_phone,
-        notes: r.notes,
-        manager: r.manager,
-        delivery_person: r.deliveryPerson || r.delivery_person
-      })));
-    });
+  // Fetch data from API
+  React.useEffect(() => {
+    const fetchRequests = async () => {
+      try {
+        const data = await bloodRequestAPI.getRequests();
+        setRequests(data.map(r => ({
+          request_id: r.requestId || r.request_id || r.id,
+          facility_id: r.facilityId || r.facility_id,
+          facility_name: r.facilityName || r.facility_name || '',
+          blood_group_id: r.bloodGroupId || r.blood_group_id,
+          blood_group: r.bloodGroup || r.blood_group || '',
+          quantity_requested: r.quantityRequested || r.quantity_requested || 0,
+          urgency_level: r.urgencyLevel || r.urgency_level || 'routine',
+          patient_info: r.patientInfo || r.patient_info || '',
+          required_by: r.requiredBy || r.required_by || '',
+          quantity_fulfilled: r.quantityFulfilled || r.quantity_fulfilled || 0,
+          request_status: r.requestStatus || r.request_status || 'Chờ duyệt',
+          special_requirements: r.specialRequirements || r.special_requirements || '',
+          contact_person: r.contactPerson || r.contact_person || '',
+          contact_phone: r.contactPhone || r.contact_phone || '',
+          notes: r.notes || '',
+          manager: r.manager || '',
+          delivery_person: r.deliveryPerson || r.delivery_person || ''
+        })));
+      } catch (error) {
+        console.error('Error fetching blood requests:', error);
+        // Fallback to mock data if API fails
+        setRequests(requestDataInit);
+      }
+    };
+    fetchRequests();
   }, []);
 
   // Filter và sort data
@@ -464,41 +472,18 @@ export default function BloodRequestManagement() {
     setEditData({...filtered[idx]});
     setValidationErrors({});
   };
-  const handleSaveEdit = async () => {
-    const errors = validateRequest(editData);
+  const handleSaveEdit = () => {
+    const errors = validateRequestData(editData);
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
-    try {
-      await bloodRequestAPI.updateRequest(editData.request_id, {
-        facilityId: editData.facility_id,
-        facilityName: editData.facility_name,
-        bloodGroupId: editData.blood_group_id,
-        bloodGroup: editData.blood_group,
-        quantityRequested: editData.quantity_requested,
-        urgencyLevel: editData.urgency_level,
-        patientInfo: editData.patient_info,
-        requiredBy: editData.required_by,
-        quantityFulfilled: editData.quantity_fulfilled,
-        requestStatus: editData.request_status,
-        specialRequirements: editData.special_requirements,
-        contactPerson: editData.contact_person,
-        contactPhone: editData.contact_phone,
-        notes: editData.notes,
-        manager: editData.manager,
-        deliveryPerson: editData.delivery_person
-      });
-      const globalIdx = requests.findIndex(r => r.request_id === editData.request_id);
-      const newRequests = [...requests];
-      newRequests[globalIdx] = { ...editData };
-      setRequests(newRequests);
-      setEditIdx(null);
-      setEditData(null);
-      setValidationErrors({});
-    } catch (e) {
-      alert("Lỗi khi cập nhật yêu cầu máu: " + e.message);
-    }
+    const newRequests = [...requests];
+    newRequests[editIdx] = { ...editData };
+    setRequests(newRequests);
+    setEditIdx(null);
+    setEditData(null);
+    setValidationErrors({});
   };
   const handleCancelEdit = () => {
     setEditIdx(null);
@@ -507,16 +492,10 @@ export default function BloodRequestManagement() {
   };
   // Delete logic
   const handleDelete = (idx) => { setDeleteIdx(idx); };
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = () => {
     const globalIdx = requests.findIndex(r => r === filtered[deleteIdx]);
-    const request = filtered[deleteIdx];
-    try {
-      await bloodRequestAPI.deleteRequest(request.request_id);
-      setRequests(requests.filter((r) => r.request_id !== request.request_id));
-      setDeleteIdx(null);
-    } catch (e) {
-      alert("Lỗi khi xóa yêu cầu máu: " + e.message);
-    }
+    setRequests(requests.filter((_, i) => i !== globalIdx));
+    setDeleteIdx(null);
   };
   const handleCancelDelete = () => { setDeleteIdx(null); };
 
@@ -529,38 +508,16 @@ export default function BloodRequestManagement() {
     });
     setValidationErrors({});
   };
-  const handleSaveAdd = async () => {
-    const errors = validateRequest(editData);
+  const handleSaveAdd = () => {
+    const errors = validateRequestData(editData);
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
-    try {
-      const newRequest = await bloodRequestAPI.createRequest({
-        facilityId: editData.facility_id,
-        facilityName: editData.facility_name,
-        bloodGroupId: editData.blood_group_id,
-        bloodGroup: editData.blood_group,
-        quantityRequested: editData.quantity_requested,
-        urgencyLevel: editData.urgency_level,
-        patientInfo: editData.patient_info,
-        requiredBy: editData.required_by,
-        quantityFulfilled: editData.quantity_fulfilled,
-        requestStatus: editData.request_status,
-        specialRequirements: editData.special_requirements,
-        contactPerson: editData.contact_person,
-        contactPhone: editData.contact_phone,
-        notes: editData.notes,
-        manager: editData.manager,
-        deliveryPerson: editData.delivery_person
-      });
-      setRequests([{ ...editData, request_id: newRequest.requestId }, ...requests]);
-      setAddMode(false);
-      setEditData(null);
-      setValidationErrors({});
-    } catch (e) {
-      alert("Lỗi khi thêm yêu cầu máu: " + e.message);
-    }
+    setRequests([{ ...editData, request_id: Date.now() }, ...requests]);
+    setAddMode(false);
+    setEditData(null);
+    setValidationErrors({});
   };
   const handleCancelAdd = () => {
     setAddMode(false);
@@ -629,18 +586,145 @@ export default function BloodRequestManagement() {
                       <span style={getStatusStyle(r.request_status)}>● {r.request_status}</span>
                     </td>
                     <td className="text-center">
-                      <button className="btn btn-sm btn-outline-primary me-1" title="Sửa" onClick={() => handleEdit(i)}><span className="donor-action edit">✏️</span></button>
-                      <button className="btn btn-sm btn-outline-danger me-1" title="Xóa" onClick={() => handleDelete(i)}><span className="donor-action delete">🗑️</span></button>
-                      {( (r.urgency_level === 'urgent' || r.urgency_level === 'emergency' || r.urgency_level === 'critical') && r.quantity_fulfilled < r.quantity_requested && r.request_status !== 'Đang yêu cầu máu khẩn cấp' ) && (
-                        <button className="btn btn-sm btn-warning" title="Yêu cầu máu khẩn cấp" onClick={() => navigate(`/admin/emergency-donor-matching/${r.request_id}`, { state: { request: r } })}>
-                          🚨 Yêu cầu máu khẩn cấp
+                      <div style={{display: 'flex', gap: '6px', justifyContent: 'center', flexWrap: 'wrap'}}>
+                        <button 
+                          onClick={() => handleEdit(i)}
+                          title="Chỉnh sửa"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '32px',
+                            height: '32px',
+                            backgroundColor: '#059669',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease-in-out',
+                            boxShadow: '0 1px 3px rgba(5, 150, 105, 0.2)'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = '#047857';
+                            e.target.style.transform = 'translateY(-1px)';
+                            e.target.style.boxShadow = '0 2px 6px rgba(5, 150, 105, 0.3)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = '#059669';
+                            e.target.style.transform = 'translateY(0)';
+                            e.target.style.boxShadow = '0 1px 3px rgba(5, 150, 105, 0.2)';
+                          }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                          </svg>
                         </button>
-                      )}
-                      {r.request_status === 'Đang yêu cầu máu khẩn cấp' && (
-                        <button className="btn btn-sm btn-info text-white" title="Xem quá trình yêu cầu máu khẩn cấp" onClick={() => navigate(`/admin/emergency-process/${r.request_id}`, { state: { request: r } })}>
-                          📊 Xem quá trình
+                        
+                        <button 
+                          onClick={() => handleDelete(i)}
+                          title="Xóa"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '32px',
+                            height: '32px',
+                            backgroundColor: '#dc2626',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease-in-out',
+                            boxShadow: '0 1px 3px rgba(220, 38, 38, 0.2)'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = '#b91c1c';
+                            e.target.style.transform = 'translateY(-1px)';
+                            e.target.style.boxShadow = '0 2px 6px rgba(220, 38, 38, 0.3)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = '#dc2626';
+                            e.target.style.transform = 'translateY(0)';
+                            e.target.style.boxShadow = '0 1px 3px rgba(220, 38, 38, 0.2)';
+                          }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polyline points="3,6 5,6 21,6"></polyline>
+                            <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2V6"></path>
+                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                          </svg>
                         </button>
-                      )}
+                        
+                        {( (r.urgency_level === 'urgent' || r.urgency_level === 'emergency' || r.urgency_level === 'critical') && r.quantity_fulfilled < r.quantity_requested && r.request_status !== 'Đang yêu cầu máu khẩn cấp' ) && (
+                          <button 
+                            onClick={() => navigate(`/admin/emergency-donor-matching/${r.request_id}`, { state: { request: r } })}
+                            title="Yêu cầu máu khẩn cấp"
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              padding: '6px 10px',
+                              backgroundColor: '#f59e0b',
+                              color: '#ffffff',
+                              border: 'none',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease-in-out',
+                              boxShadow: '0 1px 3px rgba(245, 158, 11, 0.2)',
+                              fontSize: '12px',
+                              fontWeight: '500'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.target.style.backgroundColor = '#d97706';
+                              e.target.style.transform = 'translateY(-1px)';
+                              e.target.style.boxShadow = '0 2px 6px rgba(245, 158, 11, 0.3)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.target.style.backgroundColor = '#f59e0b';
+                              e.target.style.transform = 'translateY(0)';
+                              e.target.style.boxShadow = '0 1px 3px rgba(245, 158, 11, 0.2)';
+                            }}
+                          >
+                            🚨 Khẩn cấp
+                          </button>
+                        )}
+                        
+                        {r.request_status === 'Đang yêu cầu máu khẩn cấp' && (
+                          <button 
+                            onClick={() => navigate(`/admin/emergency-process/${r.request_id}`, { state: { request: r } })}
+                            title="Xem quá trình yêu cầu máu khẩn cấp"
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              padding: '6px 10px',
+                              backgroundColor: '#2563eb',
+                              color: '#ffffff',
+                              border: 'none',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease-in-out',
+                              boxShadow: '0 1px 3px rgba(37, 99, 235, 0.2)',
+                              fontSize: '12px',
+                              fontWeight: '500'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.target.style.backgroundColor = '#1d4ed8';
+                              e.target.style.transform = 'translateY(-1px)';
+                              e.target.style.boxShadow = '0 2px 6px rgba(37, 99, 235, 0.3)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.target.style.backgroundColor = '#2563eb';
+                              e.target.style.transform = 'translateY(0)';
+                              e.target.style.boxShadow = '0 1px 3px rgba(37, 99, 235, 0.2)';
+                            }}
+                          >
+                            📊 Xem quá trình
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -678,7 +762,27 @@ export default function BloodRequestManagement() {
                         {validationErrors.blood_group && <div className="invalid-feedback">{validationErrors.blood_group}</div>}
                       </div>
                       <div className="col-md-6">
-                        <input className={`form-control ${validationErrors.quantity_requested ? 'is-invalid' : ''}`} placeholder="Số lượng (ml)*" type="number" min={1} value={editData.quantity_requested} onChange={e=>setEditData({...editData,quantity_requested:e.target.value})} />
+                        <div style={{position: 'relative'}}>
+                          <input 
+                            className={`form-control ${validationErrors.quantity_requested ? 'is-invalid' : ''}`} 
+                            placeholder="Số lượng*" 
+                            type="number" 
+                            min="100" 
+                            max="10000" 
+                            value={editData.quantity_requested || ''} 
+                            onChange={e=>setEditData({...editData,quantity_requested:e.target.value})} 
+                            style={{paddingRight: '40px'}}
+                          />
+                          <span style={{
+                            position: 'absolute',
+                            right: '12px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            color: '#6b7280',
+                            fontWeight: '500',
+                            pointerEvents: 'none'
+                          }}>ml</span>
+                        </div>
                         {validationErrors.quantity_requested && <div className="invalid-feedback">{validationErrors.quantity_requested}</div>}
                       </div>
                       <div className="col-md-6">

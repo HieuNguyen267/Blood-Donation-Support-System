@@ -1,0 +1,49 @@
+.mf-bloodgroup-root {
+  max-width: 1100px;
+  margin: 32px auto;
+  padding: 0 16px;
+}
+.mf-bloodgroup-title {
+  color: #43a047;
+  text-align: center;
+  margin-bottom: 32px;
+  font-weight: 700;
+  font-size: 28px;
+}
+.mf-bloodgroup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+}
+.mf-bloodgroup-card {
+  background: #ffe9dc;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px #0001;
+  padding: 20px;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.mf-bloodgroup-name {
+  font-weight: 700;
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+.mf-bloodgroup-label {
+  font-weight: 500;
+  margin-bottom: 6px;
+  margin-top: 8px;
+}
+.mf-bloodgroup-value {
+  margin-bottom: 4px;
+}
+@media (max-width: 600px) {
+  .mf-bloodgroup-title {
+    font-size: 20px;
+  }
+  .mf-bloodgroup-card {
+    padding: 12px;
+    font-size: 15px;
+  }
+} 

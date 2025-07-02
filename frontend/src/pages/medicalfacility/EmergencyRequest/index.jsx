@@ -1,12 +1,12 @@
-import React from "react";
-import { Form, Input, Button, Typography, Select, InputNumber, Card } from "antd";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Form, Input, Button, Typography, Select, InputNumber, Card, message } from "antd";
 import { Dropdown } from 'antd';
 import { UserCircle } from 'lucide-react';
+import { FaTint, FaPhoneAlt } from 'react-icons/fa';
 import MedicalFacilityHeader from '../../../components/user/MedicalFacilityHeader';
 import Footer from "../../../components/user/Footer";
 import "./index.css";
-import { FaTint, FaPhoneAlt } from 'react-icons/fa';
-import { useNavigate } from "react-router-dom";
 
 const { Title, Text } = Typography;
 
@@ -43,21 +43,32 @@ const bloodGroupMap = {
 
 export default function EmergencyRequest() {
   const [form] = Form.useForm();
+  const navigate = useNavigate();
 
   const onFinish = async (values) => {
     try {
+      // Lấy thông tin cơ sở y tế từ localStorage
+      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      const facilityId = userInfo.facilityId;
+
+      if (!facilityId) {
+        alert('Không tìm thấy thông tin cơ sở y tế. Vui lòng đăng nhập lại.');
+        return;
+      }
+
       const payload = {
-        facilityId: 1, // hoặc lấy từ context/user nếu có
-        requesterName: values.patient,
+        facilityId: facilityId,
+        bloodGroupId: bloodGroupMap[values.bloodGroup],
+        quantityRequested: values.amount,
+        urgencyLevel: "urgent",
         contactPerson: values.contact,
         contactPhone: values.phone,
-        bloodGroupId: bloodGroupMap[values.bloodGroup],
-        facilityName: values.hospital,
-        quantityRequested: values.amount,
-        component: values.component,
         notes: values.desc,
+        patientInfo: values.patient,
+        facilityName: values.hospital,
         requiredBy: values.dateNeeded ? values.dateNeeded + 'T00:00:00' : null,
       };
+
       const token = localStorage.getItem('token');
       const response = await fetch("http://localhost:8080/emergency", {
         method: "POST",
@@ -67,14 +78,21 @@ export default function EmergencyRequest() {
         },
         body: JSON.stringify(payload),
       });
+
       if (response.ok) {
-        alert("Gửi yêu cầu thành công!");
+        const data = await response.json();
+        alert("Gửi yêu cầu khẩn cấp thành công!");
         form.resetFields();
+        // Chuyển hướng đến trang theo dõi quá trình
+        navigate(`/medical-facility/emergency-process/${data.requestId}`, { 
+          state: { request: data } 
+        });
       } else {
-        alert("Gửi yêu cầu thất bại!");
+        alert("Gửi yêu cầu thất bại! Vui lòng thử lại sau.");
       }
-    } catch {
-      alert("Gửi yêu cầu thất bại!");
+    } catch (error) {
+      console.error('Lỗi:', error);
+      alert("Có lỗi xảy ra khi gửi yêu cầu. Vui lòng thử lại sau.");
     }
   };
 
@@ -88,12 +106,11 @@ export default function EmergencyRequest() {
           <div style={{display:'flex',justifyContent:'center',alignItems:'center',gap:12,marginBottom:8}}>
             <FaTint style={{color:'#e53935',fontSize:36,filter:'drop-shadow(0 2px 8px #ffebee)'}}/>
             <Title level={3} className="emergency-title" style={{margin:0}}>
-              Yêu cầu nhận máu khẩn cấp
+              🚨 Yêu cầu máu khẩn cấp
             </Title>
           </div>
           <Text className="emergency-sub">
-            Bạn đang cần máu gấp?<br />
-            Hãy điền thông tin bên dưới để được hỗ trợ nhanh nhất
+            Vui lòng điền đầy đủ thông tin để gửi yêu cầu máu khẩn cấp
           </Text>
           <Form
             form={form}
@@ -102,47 +119,43 @@ export default function EmergencyRequest() {
             className="emergency-form"
           >
             <div className="emergency-row">
-              <Form.Item name="patient" label={<b>Họ và tên bệnh nhân</b>} rules={[{ required: true, message: "Vui lòng nhập họ tên bệnh nhân" }]}
+              <Form.Item name="patient" label={<b>Tên bệnh nhân</b>} rules={[{ required: true, message: "Vui lòng nhập tên bệnh nhân" }]}
                 className="emergency-item">
-                <Input placeholder="Nhập họ tên bệnh nhân" />
+                <Input placeholder="Nhập tên bệnh nhân" />
               </Form.Item>
-              <Form.Item name="contact" label={<b>Người liên lạc</b>} rules={[{ required: true, message: "Vui lòng nhập tên người liên lạc" }]}
+              <Form.Item name="contact" label={<b>Người liên hệ</b>} rules={[{ required: true, message: "Vui lòng nhập tên người liên hệ" }]}
                 className="emergency-item">
-                <Input placeholder="Người liên lạc" />
+                <Input placeholder="Nhập tên người liên hệ" />
               </Form.Item>
               <Form.Item name="phone" label={<b>Số điện thoại</b>} rules={[{ required: true, message: "Vui lòng nhập số điện thoại" }]}
                 className="emergency-item">
-                <Input placeholder="Số điện thoại" />
+                <Input placeholder="Nhập số điện thoại" />
               </Form.Item>
-              <Form.Item name="bloodGroup" label={<b>Nhóm máu</b>} rules={[{ required: true, message: "Chọn nhóm máu" }]}
+              <Form.Item name="bloodGroup" label={<b>Nhóm máu cần</b>} rules={[{ required: true, message: "Chọn nhóm máu" }]}
                 className="emergency-item">
                 <Select placeholder="Chọn nhóm máu" options={bloodGroups} />
               </Form.Item>
             </div>
             <div className="emergency-row">
-              <Form.Item name="hospital" label={<b>Cơ sở y tế</b>} rules={[{ required: true, message: "Nhập cơ sở y tế" }]}
+              <Form.Item name="hospital" label={<b>Tên cơ sở y tế</b>} rules={[{ required: true, message: "Vui lòng nhập tên cơ sở y tế" }]}
                 className="emergency-item">
-                <Input placeholder="Tên bệnh viện/cơ sở y tế" />
+                <Input placeholder="Nhập tên cơ sở y tế" />
               </Form.Item>
-              <Form.Item name="amount" label={<b>Số lượng (ml)</b>} rules={[{ required: true, message: "Nhập số lượng" }]}
+              <Form.Item name="amount" label={<b>Số lượng cần (ml)</b>} rules={[{ required: true, message: "Vui lòng nhập số lượng máu cần" }]}
                 className="emergency-item">
-                <InputNumber min={100} max={10000} step={50} style={{ width: '100%' }} placeholder="Số lượng (ml)" />
+                <InputNumber min={1} max={5000} step={1} style={{ width: '100%' }} placeholder="Nhập số lượng (ml)" />
               </Form.Item>
-              <Form.Item name="component" label={<b>Thành phần</b>} rules={[{ required: true, message: "Chọn thành phần" }]}
+              <Form.Item name="dateNeeded" label={<b>Ngày cần</b>} rules={[{ required: true, message: "Vui lòng chọn ngày cần máu" }]}
                 className="emergency-item">
-                <Select placeholder="Chọn thành phần" options={components} />
+                <Input type="date" />
               </Form.Item>
             </div>
-            <Form.Item name="desc" label={<b>Mô tả tình trạng khẩn cấp (tùy chọn)</b>} className="emergency-item">
-              <Input.TextArea rows={4} placeholder="Mô tả tình trạng khẩn cấp (nếu có)" />
-            </Form.Item>
-            <Form.Item name="dateNeeded" label={<b>Ngày cần máu</b>} rules={[{ required: true, message: "Vui lòng chọn ngày cần máu" }]}
-              className="emergency-item">
-              <Input type="date" />
+            <Form.Item name="desc" label={<b>Ghi chú</b>} className="emergency-item">
+              <Input.TextArea rows={4} placeholder="Nhập thông tin bổ sung nếu cần..." />
             </Form.Item>
             <Form.Item>
-              <Button type="primary" htmlType="submit" className="emergency-btn">
-                <FaTint style={{marginRight:8,marginBottom:2}}/> Gửi yêu cầu
+              <Button type="primary" danger htmlType="submit" className="emergency-btn">
+                <FaTint style={{marginRight:8,marginBottom:2}}/> Gửi yêu cầu khẩn cấp
               </Button>
             </Form.Item>
           </Form>

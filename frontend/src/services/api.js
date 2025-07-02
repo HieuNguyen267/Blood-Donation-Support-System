@@ -415,6 +415,13 @@ export const medicalFacilityAPI = {
 
 // Account API
 export const accountAPI = {
+  getAllAccounts: async () => {
+    const response = await fetch(`${API_BASE_URL}/accounts`, {
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  },
+
   getAccounts: async () => {
     const response = await fetch(`${API_BASE_URL}/accounts`, {
       headers: getHeaders()

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Header from "../../../components/user/Header";
 import Footer from "../../../components/user/Footer";
-import { Typography, Button, Spin } from "antd";
+import { Typography, Button, Spin, Modal } from "antd";
 import { Link } from "react-router-dom";
 import { EnvironmentOutlined, ClockCircleOutlined, FileTextOutlined } from "@ant-design/icons";
 import "./index.css";
@@ -36,20 +36,29 @@ export default function AppointmentHistory() {
   }, []);
 
   const handleDelete = async (registerId) => {
-    try {
-      await donorAPI.deleteDonationRegister(registerId);
-      // Sau khi xóa thành công, gọi lại API để cập nhật danh sách
-      const data = await donorAPI.getDonationHistory();
-      setAppointments(data || []);
-      // Xóa dữ liệu localStorage liên quan
-      localStorage.removeItem('bookingFormData');
-      localStorage.removeItem('donationFormData');
-      localStorage.removeItem('healthCheckAnswers');
-      const email = localStorage.getItem('email');
-      if (email) localStorage.removeItem('appointmentHistory_' + email);
-    } catch {
-      // Nếu lỗi thì không làm gì
-    }
+    Modal.confirm({
+      title: 'Xác nhận hủy lịch',
+      content: 'Bạn có muốn hủy lịch này không?',
+      okText: 'Xác nhận',
+      cancelText: 'Hủy',
+      okButtonProps: { style: { backgroundColor: '#10b981', borderColor: '#10b981' } },
+      onOk: async () => {
+        try {
+          await donorAPI.deleteDonationRegister(registerId);
+          // Sau khi xóa thành công, gọi lại API để cập nhật danh sách
+          const data = await donorAPI.getDonationHistory();
+          setAppointments(data || []);
+          // Xóa dữ liệu localStorage liên quan
+          localStorage.removeItem('bookingFormData');
+          localStorage.removeItem('donationFormData');
+          localStorage.removeItem('healthCheckAnswers');
+          const email = localStorage.getItem('email');
+          if (email) localStorage.removeItem('appointmentHistory_' + email);
+        } catch {
+          // Nếu lỗi thì không làm gì
+        }
+      }
+    });
   };
 
   const renderDate = (date) => {

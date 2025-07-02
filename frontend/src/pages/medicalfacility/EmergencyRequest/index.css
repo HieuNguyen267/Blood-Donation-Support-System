@@ -214,4 +214,76 @@
       font-size: 1rem;
       padding: 8px 0;
     }
-  } 
+  }
+
+.emergency-request-container {
+  min-height: calc(100vh - 64px - 200px);
+  padding: 2rem;
+  background-color: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.emergency-form-card {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.emergency-form-card .ant-card-body {
+  padding: 2rem;
+}
+
+.description {
+  display: block;
+  text-align: center;
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.ant-form-item-label > label {
+  font-weight: 500;
+  color: #333;
+}
+
+.ant-input,
+.ant-input-number,
+.ant-select-selector,
+.ant-input-textarea {
+  border-radius: 6px;
+}
+
+.ant-input:hover,
+.ant-input-number:hover,
+.ant-select-selector:hover,
+.ant-input-textarea:hover {
+  border-color: #ff4d4f;
+}
+
+.ant-input:focus,
+.ant-input-number:focus,
+.ant-select-selector:focus,
+.ant-input-textarea:focus {
+  border-color: #ff4d4f;
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2);
+}
+
+.ant-btn-primary.ant-btn-dangerous {
+  height: 48px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .emergency-request-container {
+    padding: 1rem;
+  }
+
+  .emergency-form-card .ant-card-body {
+    padding: 1.5rem;
+  }
+} 

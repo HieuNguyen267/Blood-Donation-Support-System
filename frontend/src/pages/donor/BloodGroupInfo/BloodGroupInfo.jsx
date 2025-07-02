@@ -1,5 +1,7 @@
 import React from "react";
+import { useLocation } from "react-router-dom";
 import Header from "../../../components/user/Header";
+import MedicalFacilityHeader from "../../../components/user/MedicalFacilityHeader";
 import Footer from "../../../components/user/Footer";
 
 const bloodGroups = [
@@ -131,9 +133,11 @@ const infoBoxes = [
 ];
 
 export default function BloodGroupInfo() {
+  const location = useLocation();
+  const isMedicalFacility = location.pathname.startsWith('/medical-facility');
   return (
     <>
-      <Header />
+      {isMedicalFacility ? <MedicalFacilityHeader /> : <Header />}
       <div style={{ maxWidth: 1100, margin: "32px auto", padding: "0 16px" }}>
         <h2 style={{ color: "#43a047", textAlign: "center", marginBottom: 32, fontWeight: 700, fontSize: 28 }}>
           CÁC NHÓM MÁU

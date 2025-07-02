@@ -135,6 +135,7 @@ const MedicalFacilityHeader = () => {
           <Link to="/medical-facility">TRANG CHỦ</Link>
           <Link to="/medical-facility/receive-blood">YÊU CẦU MÁU</Link>
           <Link to="/medical-facility/request-history">LỊCH SỬ YÊU CẦU</Link>
+          <Link to="/medical-facility/emergency-process/123">QUÁ TRÌNH NHẬN MÁU KHẨN CẤP</Link>
           <Link to="/medical-facility/contact">LIÊN HỆ</Link>
         </nav>
       </div>

@@ -17,7 +17,6 @@ export default function ReceiveBloodPage() {
     notes: '',
     patientInfo: '',
     facilityName: '',
-    component: '',
   });
 
   const handleChange = (e) => {
@@ -63,7 +62,6 @@ export default function ReceiveBloodPage() {
         notes: formData.notes,
         patientInfo: formData.patientInfo || '',
         facilityName: formData.facilityName || '',
-        component: formData.component || '',
         urgencyLevel: 'routine',
       };
 
@@ -168,20 +166,6 @@ export default function ReceiveBloodPage() {
               onChange={handleChange} 
               required 
             />
-
-            <label>Thành phần máu</label>
-            <select 
-              name="component" 
-              value={formData.component} 
-              onChange={handleChange} 
-              required
-            >
-              <option value="">Chọn thành phần</option>
-              <option value="toanphan">Toàn phần</option>
-              <option value="hongcau">Hồng cầu</option>
-              <option value="tieucau">Tiểu cầu</option>
-              <option value="huyettuong">Huyết tương</option>
-            </select>
 
             <label>Ghi chú thêm</label>
             <textarea 

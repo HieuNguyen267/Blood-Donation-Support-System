@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Header from "../../components/admin/Header";
 import Sidebar from "../../components/admin/Sidebar";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './BloodStorageManagement.css';
 import { validateBloodStorage, getStatusStyle } from './utils';
-import { bloodStockAPI, bloodGroupAPI } from "../../services/api";
+import { bloodStockAPI } from '../../services/api';
 
 const bloodDataInit = [
   { code: "BP001", group: "Rh NULL", collect: "11/4/2024, 10:30", expire: "11/4/2027, 09:30", amount: 12, status: "Mới", quality: "Tốt", temp: "2 -6 °C" },
@@ -31,8 +31,7 @@ const qualities = ["Tốt", "Đã tiêu huỷ", "Đã đông"];
 const PAGE_SIZE = 8;
 
 export default function BloodStorageManagement() {
-  const [data, setData] = useState([]);
-  const [bloodGroupsList, setBloodGroupsList] = useState([]);
+  const [data, setData] = useState(bloodDataInit);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [editIdx, setEditIdx] = useState(null);
@@ -41,25 +40,28 @@ export default function BloodStorageManagement() {
   const [addMode, setAddMode] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
 
-  // Fetch blood stock & blood groups from backend
-  useEffect(() => {
-    bloodStockAPI.getStock().then(stock => {
-      setData(stock.map(item => ({
-        id: item.id || item.bloodStockId,
-        code: item.code || item.bloodStockCode || item.id || item.bloodStockId,
-        group: item.bloodGroupName || (item.bloodGroup ? (item.bloodGroup.aboType ? item.bloodGroup.aboType + item.bloodGroup.rhFactor : item.bloodGroup) : ""),
-        collect: item.collectionDate || item.collect || "",
-        expire: item.expiryDate || item.expire || "",
-        amount: item.amount || item.quantity || item.volume || "",
-        status: item.status || "Mới",
-        quality: item.quality || "Tốt",
-        temp: item.temperatureRange || item.temp || ""
-      })));
-    });
-    // Fetch danh sách nhóm máu
-    bloodGroupAPI.getBloodGroups().then(groups => {
-      setBloodGroupsList(groups);
-    });
+  React.useEffect(() => {
+    const fetchBloodStock = async () => {
+      try {
+        const stock = await bloodStockAPI.getStock();
+        // Map dữ liệu backend về đúng format nếu cần
+        setData(stock.map(s => ({
+          id: s.bloodStockId || s.id,
+          code: s.code || '',
+          group: s.bloodGroup ? (s.bloodGroup.aboType + s.bloodGroup.rhFactor) : s.group,
+          collect: s.collectionDateTime || '',
+          expire: s.expiryDateTime || '',
+          amount: s.amount || '',
+          status: s.status || 'Mới',
+          quality: s.quality || 'Tốt',
+          temp: s.temperatureRange || '',
+        })));
+      } catch (error) {
+        // Nếu lỗi thì fallback về dữ liệu mẫu
+        setData(bloodDataInit);
+      }
+    };
+    fetchBloodStock();
   }, []);
 
   // Filter logic (chỉ search theo nhóm máu)
@@ -74,27 +76,16 @@ export default function BloodStorageManagement() {
     setEditData({...filtered[idx]});
     setValidationErrors({});
   };
-  const handleSaveEdit = async () => {
+  const handleSaveEdit = () => {
     const errors = validateBloodStorage(editData);
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
-    // Gọi API cập nhật
-    await bloodStockAPI.updateStock({ ...editData, id: editData.id });
-    // Fetch lại danh sách
-    const stock = await bloodStockAPI.getStock();
-    setData(stock.map(item => ({
-      id: item.id || item.bloodStockId,
-      code: item.code || item.bloodStockCode || item.id || item.bloodStockId,
-      group: item.bloodGroupName || (item.bloodGroup ? (item.bloodGroup.aboType ? item.bloodGroup.aboType + item.bloodGroup.rhFactor : item.bloodGroup) : ""),
-      collect: item.collectionDate || item.collect || "",
-      expire: item.expiryDate || item.expire || "",
-      amount: item.amount || item.quantity || item.volume || "",
-      status: item.status || "Mới",
-      quality: item.quality || "Tốt",
-      temp: item.temperatureRange || item.temp || ""
-    })));
+    const globalIdx = data.findIndex(d => d === filtered[editIdx]);
+    const newData = [...data];
+    newData[globalIdx] = editData;
+    setData(newData);
     setEditIdx(null);
     setEditData(null);
     setValidationErrors({});
@@ -107,24 +98,9 @@ export default function BloodStorageManagement() {
   
   // Delete logic
   const handleDelete = (idx) => { setDeleteIdx(idx); };
-  const handleConfirmDelete = async () => {
-    // Gọi API xóa
+  const handleConfirmDelete = () => {
     const globalIdx = data.findIndex(d => d === filtered[deleteIdx]);
-    const delId = filtered[deleteIdx].id;
-    await bloodStockAPI.deleteStock(delId);
-    // Fetch lại danh sách
-    const stock = await bloodStockAPI.getStock();
-    setData(stock.map(item => ({
-      id: item.id || item.bloodStockId,
-      code: item.code || item.bloodStockCode || item.id || item.bloodStockId,
-      group: item.bloodGroupName || (item.bloodGroup ? (item.bloodGroup.aboType ? item.bloodGroup.aboType + item.bloodGroup.rhFactor : item.bloodGroup) : ""),
-      collect: item.collectionDate || item.collect || "",
-      expire: item.expiryDate || item.expire || "",
-      amount: item.amount || item.quantity || item.volume || "",
-      status: item.status || "Mới",
-      quality: item.quality || "Tốt",
-      temp: item.temperatureRange || item.temp || ""
-    })));
+    setData(data.filter((_, i) => i !== globalIdx));
     setDeleteIdx(null);
   };
   const handleCancelDelete = () => { setDeleteIdx(null); };
@@ -134,42 +110,17 @@ export default function BloodStorageManagement() {
     setAddMode(true);
     setEditIdx(null);
     setEditData({
-      code: '', group: bloodGroupsList[0]?.name || 'A+', collect: '', expire: '', amount: '', status: 'Mới', quality: 'Tốt', temp: ''
+      code: '', group: 'A+', collect: '', expire: '', amount: '', status: 'Mới', quality: 'Tốt', temp: ''
     });
     setValidationErrors({});
   };
-  const handleSaveAdd = async () => {
+  const handleSaveAdd = () => {
     const errors = validateBloodStorage(editData);
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
-    // Map tên nhóm máu sang id
-    const selectedGroup = bloodGroupsList.find(bg => bg.name === editData.group);
-    // Mapping lại dữ liệu đúng format backend
-    const mappedData = {
-      bloodGroupId: selectedGroup ? selectedGroup.id : null,
-      collectionDate: editData.collect ? editData.collect.split(",")[0].split("/").reverse().join("-") : null, // Chuyển dd/MM/yyyy thành yyyy-MM-dd
-      expiryDate: editData.expire ? editData.expire.split(",")[0].split("/").reverse().join("-") : null,
-      volume: parseInt(editData.amount),
-      status: editData.status,
-      // Có thể bổ sung các trường khác nếu cần
-    };
-    console.log('Dữ liệu gửi lên:', mappedData);
-    await bloodStockAPI.addStock(mappedData);
-    // Fetch lại danh sách
-    const stock = await bloodStockAPI.getStock();
-    setData(stock.map(item => ({
-      id: item.id || item.bloodStockId,
-      code: item.code || item.bloodStockCode || item.id || item.bloodStockId,
-      group: item.bloodGroupName || (item.bloodGroup ? (item.bloodGroup.aboType ? item.bloodGroup.aboType + item.bloodGroup.rhFactor : item.bloodGroup) : ""),
-      collect: item.collectionDate || item.collect || "",
-      expire: item.expiryDate || item.expire || "",
-      amount: item.amount || item.quantity || item.volume || "",
-      status: item.status || "Mới",
-      quality: item.quality || "Tốt",
-      temp: item.temperatureRange || item.temp || ""
-    })));
+    setData([editData, ...data]);
     setAddMode(false);
     setEditData(null);
     setValidationErrors({});
@@ -233,8 +184,77 @@ export default function BloodStorageManagement() {
                     <td className="text-center">{d.temp}</td>
                     <td className="text-center"><span role="img" aria-label="temp">🌡️</span></td>
                     <td className="text-center">
-                      <button className="btn btn-sm btn-outline-primary me-1" title="Sửa" onClick={()=>handleEdit(i)}><span className="donor-action edit">✏️</span></button>
-                      <button className="btn btn-sm btn-outline-danger" title="Xóa" onClick={()=>handleDelete(i)}><span className="donor-action delete">🗑️</span></button>
+                      <div style={{display: 'flex', gap: '6px', justifyContent: 'center'}}>
+                        <button 
+                          onClick={() => handleEdit(i)}
+                          title="Chỉnh sửa"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '32px',
+                            height: '32px',
+                            backgroundColor: '#059669',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease-in-out',
+                            boxShadow: '0 1px 3px rgba(5, 150, 105, 0.2)'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = '#047857';
+                            e.target.style.transform = 'translateY(-1px)';
+                            e.target.style.boxShadow = '0 2px 6px rgba(5, 150, 105, 0.3)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = '#059669';
+                            e.target.style.transform = 'translateY(0)';
+                            e.target.style.boxShadow = '0 1px 3px rgba(5, 150, 105, 0.2)';
+                          }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                          </svg>
+                        </button>
+                        
+                        <button 
+                          onClick={() => handleDelete(i)}
+                          title="Xóa"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '32px',
+                            height: '32px',
+                            backgroundColor: '#dc2626',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease-in-out',
+                            boxShadow: '0 1px 3px rgba(220, 38, 38, 0.2)'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = '#b91c1c';
+                            e.target.style.transform = 'translateY(-1px)';
+                            e.target.style.boxShadow = '0 2px 6px rgba(220, 38, 38, 0.3)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = '#dc2626';
+                            e.target.style.transform = 'translateY(0)';
+                            e.target.style.boxShadow = '0 1px 3px rgba(220, 38, 38, 0.2)';
+                          }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polyline points="3,6 5,6 21,6"></polyline>
+                            <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2V6"></path>
+                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                          </svg>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -266,7 +286,7 @@ export default function BloodStorageManagement() {
                       </div>
                       <div className="col-md-6">
                         <select className="form-control" value={editData.group} onChange={e=>setEditData({...editData,group:e.target.value})}>
-                          {bloodGroupsList.map(bg => <option key={bg.id} value={bg.name}>{bg.name}</option>)}
+                          {bloodGroups.map(b=><option key={b}>{b}</option>)}
                         </select>
                       </div>
                       <div className="col-md-6">
@@ -288,12 +308,30 @@ export default function BloodStorageManagement() {
                         {validationErrors.expire && <div className="invalid-feedback">{validationErrors.expire}</div>}
                       </div>
                       <div className="col-md-6">
-                        <input 
-                          className={`form-control ${validationErrors.amount ? 'is-invalid' : ''}`} 
-                          placeholder="Số lượng trong kho*" 
-                          value={editData.amount} 
-                          onChange={e=>setEditData({...editData,amount:e.target.value})} 
-                        />
+                        <div style={{position: 'relative'}}>
+                          <input 
+                            className={`form-control ${validationErrors.amount ? 'is-invalid' : ''}`} 
+                            placeholder="Số lượng trong kho*" 
+                            type="number" 
+                            min="0" 
+                            max="10000" 
+                            value={editData.amount ? editData.amount.replace(' ml', '') : ''} 
+                            onChange={e => {
+                              const value = e.target.value;
+                              setEditData({...editData, amount: value ? `${value} ml` : ''});
+                            }} 
+                            style={{paddingRight: '40px'}}
+                          />
+                          <span style={{
+                            position: 'absolute',
+                            right: '12px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            color: '#6b7280',
+                            fontWeight: '500',
+                            pointerEvents: 'none'
+                          }}>ml</span>
+                        </div>
                         {validationErrors.amount && <div className="invalid-feedback">{validationErrors.amount}</div>}
                       </div>
                       <div className="col-md-6">

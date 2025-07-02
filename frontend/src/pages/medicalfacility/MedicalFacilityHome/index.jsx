@@ -31,6 +31,12 @@ const MedicalFacilityHome = () => {
           </div>
         </div>
       </div>
+      {/* Link nhóm máu */}
+      <div style={{ display: 'flex', justifyContent: 'center', margin: '24px 0 0 0' }}>
+        <Link to="/medical-facility/bloodgroup-info" style={{ color: '#198754', fontWeight: 500, fontSize: 17, textDecoration: 'underline', textAlign: 'center' }}>
+          Thông tin chi tiết về các nhóm máu
+        </Link>
+      </div>
       {/* Important Notes Section */}
       <div className="mf-important-section">
         <h2 className="mf-important-title">LƯU Ý QUAN TRỌNG</h2>
