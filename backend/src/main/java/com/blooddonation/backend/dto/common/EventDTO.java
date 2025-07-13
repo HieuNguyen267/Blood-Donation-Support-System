@@ -1,5 +1,4 @@
 package com.blooddonation.backend.dto.common;
-
 import lombok.Data;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -9,10 +8,7 @@ public class EventDTO {
     private Integer eventId;
     private String eventName;
     private String description;
-    private LocalDate startDate;
-    private LocalDate endDate;
-    private LocalTime startTime;
-    private LocalTime endTime;
+    private LocalDate date;
     private Integer targetDonors;
     private Integer registeredDonors;
     private Integer actualDonors;
@@ -25,10 +21,8 @@ public class EventDTO {
     public void setEventId(Integer eventId) { this.eventId = eventId; }
     public void setEventName(String eventName) { this.eventName = eventName; }
     public void setDescription(String description) { this.description = description; }
-    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
-    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
-    public void setStartTime(LocalTime startTime) { this.startTime = startTime; }
-    public void setEndTime(LocalTime endTime) { this.endTime = endTime; }
+    public void setDate(LocalDate date) { this.date = date; }
+    public LocalDate getDate() { return date; }
     public void setTargetDonors(Integer targetDonors) { this.targetDonors = targetDonors; }
     public void setRegisteredDonors(Integer registeredDonors) { this.registeredDonors = registeredDonors; }
     public void setActualDonors(Integer actualDonors) { this.actualDonors = actualDonors; }

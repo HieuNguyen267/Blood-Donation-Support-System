@@ -1,14 +1,20 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import './dashboard.css';
 import Sidebar from "../../components/admin/Sidebar";
 import Header from "../../components/admin/Header";
-import StatCard from "../../Component/Admin/StatCard";
-import ChartPlaceholder from "../../Component/Admin/ChartPlaceholder";
-import SummaryCard from "../../Component/Admin/SummaryCard";
-import DonationStats from "../../Component/Admin/DonationStats";
-import Table from "../../Component/Admin/Table";
+import StatCard from "../../components/admin/StatCard";
+import ChartPlaceholder from "../../components/admin/ChartPlaceholder";
+import SummaryCard from "../../components/admin/SummaryCard";
+import DonationStats from "../../components/admin/DonationStats";
+import Table from "../../components/admin/Table";
+import { useAdmin } from '../../contexts/AdminContext';
 
 export default function AdminDashBoard() {
+  const { adminInfo, loading } = useAdmin();
+
+  // Debug log
+  console.log('Dashboard adminInfo from context:', adminInfo);
+
   return (
     <div className="dashboard-root">
       <Header />

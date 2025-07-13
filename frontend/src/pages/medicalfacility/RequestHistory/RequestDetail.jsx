@@ -9,14 +9,39 @@ const RequestDetail = () => {
   const [request, setRequest] = useState(null);
 
   useEffect(() => {
-    const storedRequests = JSON.parse(localStorage.getItem('medicalRequests')) || [];
-    const foundRequest = storedRequests.find(req => req.id === Number(id));
-    
-    if (foundRequest) {
-      setRequest(foundRequest);
-    } else {
+    async function fetchDetail() {
+      try {
+        const token = localStorage.getItem('token');
+        // Thử lấy chi tiết yêu cầu nhận máu trước
+        let response = await fetch(`http://localhost:8080/blood-requests/${id}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setRequest({ ...data, _type: 'receive' });
+          return;
+        }
+        // Nếu không có, thử lấy chi tiết hiến máu
+        response = await fetch(`http://localhost:8080/donation-registers/${id}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setRequest({ ...data, _type: 'donate' });
+          return;
+        }
+      } catch {}
+      // fallback localStorage nếu cần
+      setRequest(null);
       navigate('/medical-facility/request-history');
     }
+    fetchDetail();
   }, [id, navigate]);
 
   const handleCancelRequest = () => {
@@ -33,19 +58,6 @@ const RequestDetail = () => {
     setRequest(prevRequest => ({ ...prevRequest, status: 'Đã hủy' }));
   };
 
-  const getStatusStyle = (status) => {
-    switch (status) {
-      case 'Đang chờ xác nhận':
-        return { color: '#f0ad4e', fontWeight: 'bold' };
-      case 'Đã hủy':
-        return { color: '#777', fontWeight: 'bold' };
-      case 'Đã xác nhận':
-        return { color: '#5cb85c', fontWeight: 'bold' };
-      default:
-        return { fontWeight: 'bold' };
-    }
-  };
-
   if (!request) {
     return <p>Đang tải...</p>;
   }
@@ -55,18 +67,34 @@ const RequestDetail = () => {
       <MedicalFacilityHeader />
       <main className="container">
         <div style={{ flexGrow: 1, maxWidth: '800px', margin: '2rem auto', padding: '2rem' }}>
-          <h2 style={{ textAlign: 'center', color: '#c80000' }}>Chi tiết yêu cầu máu</h2>
+          <h2 style={{ textAlign: 'center', color: '#c80000' }}>
+            {request._type === 'receive' ? 'Chi tiết yêu cầu nhận máu' : 'Chi tiết hiến máu'}
+          </h2>
           <div>
-            <p><strong>ID Yêu cầu:</strong> {request.id}</p>
-            <p><strong>Tên cơ sở:</strong> {request.facilityName}</p>
-            <p><strong>Người liên hệ:</strong> {request.contactPerson}</p>
-            <p><strong>Số điện thoại:</strong> {request.contactPhone}</p>
-            <p><strong>Nhóm máu cần:</strong> {request.bloodType}</p>
-            <p><strong>Số lượng (ml):</strong> {request.quantity}</p>
-            <p><strong>Ngày cần máu:</strong> {request.dateNeeded}</p>
-            <p><strong>Mục đích:</strong> {request.purpose}</p>
-            <p><strong>Ghi chú:</strong> {request.notes}</p>
-            <p><strong>Trạng thái:</strong> <span style={getStatusStyle(request.status)}>{request.status}</span></p>
+            {request._type === 'receive' ? (
+              <>
+                <p><strong>ID Yêu cầu:</strong> {request.requestId}</p>
+                <p><strong>Tên cơ sở:</strong> {request.facilityName}</p>
+                <p><strong>Người liên hệ:</strong> {request.contactPerson}</p>
+                <p><strong>Số điện thoại:</strong> {request.contactPhone}</p>
+                <p><strong>Nhóm máu:</strong> {request.bloodGroupName || '-'}</p>
+                <p><strong>Số lượng nhận (ml):</strong> {request.quantityRequested || '-'}</p>
+                <p><strong>Ngày cần máu:</strong> {request.requiredBy ? request.requiredBy.split('T')[0] : '-'}</p>
+                <p><strong>Mức độ khẩn cấp:</strong> {request.urgencyLevel === 'urgent' ? 'Khẩn cấp' : 'Bình thường'}</p>
+                <p><strong>Ghi chú:</strong> {request.notes || '-'}</p>
+              </>
+            ) : (
+              <>
+                <p><strong>ID Đăng ký:</strong> {request.registerId || request.id}</p>
+                <p><strong>Tên cơ sở:</strong> {request.facilityName}</p>
+                <p><strong>Người liên hệ:</strong> {request.contactPerson}</p>
+                <p><strong>Số điện thoại:</strong> {request.contactPhone}</p>
+                <p><strong>Nhóm máu:</strong> {request.bloodGroup || request.bloodType || '-'}</p>
+                <p><strong>Số lượng hiến (ml):</strong> {request.quantity || '-'}</p>
+                <p><strong>Ngày đăng ký:</strong> {request.appointmentDate || '-'}</p>
+                <p><strong>Ghi chú của nhân viên:</strong> {request.staffNotes || '-'}</p>
+              </>
+            )}
           </div>
           <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center', gap: '1rem' }}>
               <button onClick={() => navigate('/medical-facility/request-history')} style={{ padding: '10px 20px', cursor: 'pointer', background: '#6c757d', color: 'white', border: 'none', borderRadius: '5px' }}>

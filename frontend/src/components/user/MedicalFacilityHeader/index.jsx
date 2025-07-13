@@ -3,16 +3,21 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Dropdown } from 'antd';
 import { UserCircle } from 'lucide-react';
 import './index.css';
+import { medicalFacilitiesAPI } from '../../../services/api';
 
 const MedicalFacilityHeader = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(
     localStorage.getItem('isLoggedIn') === 'true'
   );
+  const [healthAnswers, setHealthAnswers] = useState([]);
+  const [facilityName, setFacilityName] = useState(null);
 
   const handleLogout = () => {
+    localStorage.removeItem('token');
     localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('userInfo');
+    localStorage.removeItem('email');
+    localStorage.removeItem('role');
     setIsLoggedIn(false);
     navigate('/');
   };
@@ -28,20 +33,81 @@ const MedicalFacilityHeader = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const storedHealthAnswers = localStorage.getItem("healthCheckAnswers");
+    if (storedHealthAnswers) {
+      setHealthAnswers(JSON.parse(storedHealthAnswers));
+    }
+  }, []);
+
+  useEffect(() => {
+    async function fetchFacilityName() {
+      try {
+        let userInfo = null;
+        try {
+          userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        } catch {}
+        let accountId = userInfo?.accountId || localStorage.getItem('accountId');
+        let facilityId = userInfo?.facilityId || localStorage.getItem('facilityId');
+        let role = userInfo?.role || localStorage.getItem('role');
+        if (role && role.toLowerCase() === 'medical_facility') {
+          if (facilityId) {
+            const facility = await medicalFacilitiesAPI.getFacilityById(facilityId);
+            if (facility && facility.facilityName) {
+              setFacilityName(facility.facilityName);
+            } else {
+              setFacilityName(null);
+              alert('Không tìm thấy tên cơ sở y tế! Vui lòng kiểm tra lại thông tin tài khoản.');
+            }
+          } else if (accountId) {
+            const facility = await medicalFacilitiesAPI.getFacilityByAccountId(accountId);
+            if (facility && facility.facilityId) {
+              setFacilityName(facility.facilityName);
+              // Lưu lại facilityId vào localStorage cho lần sau
+              localStorage.setItem('facilityId', facility.facilityId);
+              if (userInfo) {
+                userInfo.facilityId = facility.facilityId;
+                localStorage.setItem('userInfo', JSON.stringify(userInfo));
+              }
+            } else {
+              setFacilityName(null);
+              alert('Không tìm thấy thông tin cơ sở y tế! Vui lòng liên hệ quản trị viên.');
+            }
+          } else {
+            setFacilityName(null);
+            alert('Không tìm thấy facilityId/accountId! Vui lòng đăng nhập lại.');
+          }
+        }
+      } catch (err) {
+        setFacilityName(null);
+        alert('Lỗi khi lấy tên cơ sở y tế: ' + (err.message || 'Không xác định'));
+        console.log('DEBUG fetchFacilityName error:', err);
+      }
+    }
+    fetchFacilityName();
+  }, [isLoggedIn]);
+
   let userName = 'Đăng nhập';
   let showDropdown = false;
   if (isLoggedIn) {
     try {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      if (userInfo && userInfo.fullName) {
+      let userInfo = null;
+      try {
+        userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      } catch {}
+      let role = userInfo?.role || localStorage.getItem('role');
+      if (role && role.toLowerCase() === 'medical_facility' && facilityName) {
+        userName = facilityName;
+        showDropdown = true;
+      } else if (userInfo && userInfo.fullName) {
         userName = userInfo.fullName;
         showDropdown = true;
       } else {
-        userName = 'Người dùng';
+        userName = localStorage.getItem('email') || 'Người dùng';
         showDropdown = true;
       }
     } catch {
-      userName = 'Người dùng';
+      userName = localStorage.getItem('email') || 'Người dùng';
       showDropdown = true;
     }
   }
@@ -79,6 +145,19 @@ const MedicalFacilityHeader = () => {
     </div>
   );
 
+  const getHeaders = () => {
+    const token = localStorage.getItem('token');
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    };
+    console.log('Request headers:', headers);
+    return headers;
+  };
+
+  console.log('Token:', localStorage.getItem('token'))
+  console.log('Headers:', getHeaders())
+
   return (
     <>
       <div className="header-wrapper">
@@ -87,8 +166,8 @@ const MedicalFacilityHeader = () => {
             className="logo-title"
             onClick={() => navigate('/medical-facility')}
           >
-            <span className="logo">🏥</span>
-            <span className="system-title">Hệ thống Nhận Máu</span>
+            <span className="logo">🩸</span>
+            <span className="system-title">Hiến máu tình nguyện</span>
           </div>
           <div className="user-section">
             {showDropdown ? (
@@ -99,7 +178,7 @@ const MedicalFacilityHeader = () => {
                 </div>
               </Dropdown>
             ) : (
-              <Link to="/loginpage" className="login-link">
+              <Link to="/login" className="login-link">
                 <UserCircle size={20} />
                 <span>Đăng nhập</span>
               </Link>

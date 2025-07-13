@@ -2,31 +2,49 @@ import React, { useState } from 'react';
 import { Card, Typography, Switch, Button, Divider, Form, Input, Modal, message } from 'antd';
 import Header from '../../../components/user/Header';
 import Footer from '../../../components/user/Footer';
+import { authAPI } from '../../../services/api';
+import { useNavigate } from 'react-router-dom';
 
 const { Title } = Typography;
 
 export default function Settings() {
-  const [smsNotify, setSmsNotify] = useState(true);
   const [emailNotify, setEmailNotify] = useState(true);
   const [changePwdModal, setChangePwdModal] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
   const [form] = Form.useForm();
+  const navigate = useNavigate();
 
   const handleSave = () => {
     message.success('Lưu thay đổi thành công!');
   };
 
-  const handleChangePwd = (values) => {
-    // Thực tế: gọi API đổi mật khẩu
-    message.success('Đổi mật khẩu thành công! (giả lập)');
-    setChangePwdModal(false);
-    form.resetFields();
+  const handleChangePwd = async (values) => {
+    try {
+      const email = localStorage.getItem('email');
+      await authAPI.changePassword({
+        email,
+        oldPassword: values.oldPassword,
+        newPassword: values.newPassword,
+        confirmNewPassword: values.confirmPassword
+      });
+      message.success('Đổi mật khẩu thành công!');
+      setChangePwdModal(false);
+      form.resetFields();
+    } catch (err) {
+      message.error(err.message || 'Đổi mật khẩu thất bại!');
+    }
   };
 
-  const handleDeleteAccount = () => {
-    // Thực tế: gọi API xóa tài khoản
-    message.success('Tài khoản đã bị xóa! (giả lập)');
-    setDeleteModal(false);
+  const handleDeleteAccount = async () => {
+    try {
+      await authAPI.deleteAccount();
+      message.success('Tài khoản đã bị xóa!');
+      setDeleteModal(false);
+      localStorage.clear();
+      navigate('/signup');
+    } catch (err) {
+      message.error(err.message || 'Xóa tài khoản thất bại!');
+    }
   };
 
   return (
@@ -38,9 +56,6 @@ export default function Settings() {
           <div style={{ marginBottom: 24 }}>
             <b>Quản lý thông báo</b>
             <div style={{ marginTop: 12 }}>
-              <Switch checked={smsNotify} onChange={setSmsNotify} style={{ marginRight: 8 }} /> Tin nhắn (SMS)
-            </div>
-            <div style={{ marginTop: 8 }}>
               <Switch checked={emailNotify} onChange={setEmailNotify} style={{ marginRight: 8 }} /> Email
             </div>
           </div>

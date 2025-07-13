@@ -40,11 +40,6 @@ public class AnalyticsController {
         return ResponseEntity.ok(analyticsService.getRequestStatistics(startDate, endDate));
     }
 
-    @GetMapping("/facility-performance")
-    public ResponseEntity<Map<String, Object>> getFacilityPerformance() {
-        return ResponseEntity.ok(analyticsService.getFacilityPerformance());
-    }
-
     @GetMapping("/donor-demographics")
     public ResponseEntity<Map<String, Object>> getDonorDemographics() {
         return ResponseEntity.ok(analyticsService.getDonorDemographics());

@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Routes, Route, BrowserRouter, useLocation, Navigate } from 'react-router-dom';
+import React from 'react';
+import { Routes, Route, BrowserRouter, Navigate } from 'react-router-dom';
+import { AdminProvider } from './contexts/AdminContext';
 import HomePage from './pages/donor/HomePage';
 
 import RegisterDonate from './pages/donor/RegisterDonate/RegisterDonatePage';
@@ -11,7 +12,8 @@ import AppointmentDetail from './pages/donor/AppointmentHistory/AppointmentDetai
 import Faq from './pages/donor/Faq/FaqPage'; // Thêm trang FAQ nếu cần
 
 import CertificatePage from "./pages/donor/AddCertificate/CertificatePage";
-import CertificatePageform from "./pages/donor/AddCertificate/index";
+import CertificateDetail from "./pages/donor/AddCertificate/CertificateDetail";
+// import CertificatePageform from "./pages/donor/AddCertificate/index";
 
 import ReceiveBloodPage from './pages/donor/ReceiveBlood/ReceiveBloodPage';
 
@@ -21,9 +23,9 @@ import ContactPage from './pages/donor/Contact/ContactPage';
 import EmergencyButton from './components/user/EmergencyButton';
 
 // Thêm lại các import cho các trang mới
-import RegisterPage from './pages/donor/RegisterPage';
-import LoginPage from './pages/donor/Loginpage';
-import EmergencyRequest from './pages/donor/EmergencyRequest';
+import Signup from './pages/donor/Signup';
+import LoginPage from './pages/donor/Login';
+import EmergencyRequest from './pages/medicalfacility/EmergencyRequest/index';
 
 import UserInfoForm from './pages/donor/UserInfoForm';
 import ProfilePage from './pages/donor/Profile';
@@ -31,6 +33,11 @@ import BloodDonationEligibility from './pages/donor/BloodDonationEligibility';
 import ForgotPasswordPage from './pages/donor/ForgotPasswordPage';
 import Settings from './pages/donor/Settings';
 import VerifyPassword from './pages/donor/VerifyPassword';
+
+import News from './pages/donor/News/News';
+
+// Emergency Request Detail for Donors
+import EmergencyRequestDetail from './pages/donor/EmergencyRequestDetail';
 
 // Medical Facility Pages
 import MedicalFacilityHome from './pages/medicalfacility/MedicalFacilityHome/index';
@@ -54,36 +61,25 @@ import MedicalFacilityManagement from './pages/Admin/MedicalFacilityManagement';
 import AccountManagement from './pages/Admin/AccountManagement';
 import AccountProfile from './pages/Admin/AccountProfile';
 import MatchingManagement from './pages/Admin/MatchingManagement';
+import MatchingDetail from './pages/Admin/MatchingDetail';
+import BloodRequestDetail from './pages/Admin/BloodRequestDetail';
+import DonationProcessManagement from './pages/Admin/DonationProcessManagement';
+import DonationProcessDetail from './pages/Admin/DonationProcessDetail';
+import BloodTestManagement from './pages/Admin/BloodTestManagement';
+import BloodCheckDetail from './pages/Admin/BloodCheckDetail';
+import DashBoard from './pages/Admin/dashBoard';
+
+import BookingAntdForm from './pages/donor/BookingAntdForm/index';
+
+import AboutPage from './pages/donor/AboutPage';
+
+import ActivityPage from './pages/donor/ActivityPage';
+
+import MedicalFacilityLayout from './pages/medicalfacility/MedicalFacilityLayout';
 
 function AppContent() {
-  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') === 'true');
-  const location = useLocation();
-  const hideEmergencyButton = [
-    '/registerpage',
-    '/loginpage',
-    '/forgot-password',
-    '/user-info-form',
-    '/verify-password'
-  ].includes(location.pathname);
-
-  useEffect(() => {
-    const handleStorageChange = () => {
-      setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true');
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-
-    // Initial check
-    handleStorageChange();
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
-
   return (
     <>
-      {/* {isLoggedIn && !hideEmergencyButton && <EmergencyButton />} */}
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/registerdonate" element={<RegisterDonate />} />
@@ -92,43 +88,66 @@ function AppContent() {
         <Route path="/faq" element={<Faq />} />
         <Route path="/registerdonateform" element={<RegisterDonateform />} />
         <Route path="/addcertificate" element={<CertificatePage />} />
-        <Route path="/certificateform" element={<CertificatePageform />} />
+        <Route path="/certificate" element={<CertificatePage />} />
+        <Route path="/certificate/:certificateId" element={<CertificateDetail />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/receiveblood" element={<ReceiveBloodPage />} />
         <Route path="/bloodgroup-info" element={<BloodGroupInfo />} />
-        <Route path="/registerpage" element={<RegisterPage />} />
-        <Route path="/loginpage" element={<LoginPage />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/emergency" element={<EmergencyRequest />} />
         <Route path="/user-info-form" element={<UserInfoForm />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/blood-donation-eligibility" element={<BloodDonationEligibility />} />
-        <Route path="/eligibility" element={<BloodDonationEligibility />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/verify-password" element={<VerifyPassword />} />
         <Route path="/settings" element={<Settings />} />
-        <Route path="/medical-facility" element={<MedicalFacilityHome />} />
-        <Route path="/medical-facility/profile" element={<MedicalFacilityProfile />} />
-        <Route path="/medical-facility/receive-blood" element={<MedicalFacilityReceiveBlood />} />
-        <Route path="/medical-facility/request-history" element={<MedicalFacilityRequestHistory />} />
-        <Route path="/medical-facility/request-history/:id" element={<MedicalFacilityRequestDetail />} />
-        <Route path="/medical-facility/emergency-request" element={<MedicalFacilityEmergencyRequest />} />
-        <Route path="/medical-facility/contact" element={<MedicalFacilityContact />} />
+        <Route path="/booking-antd" element={<BookingAntdForm />} />
+        <Route path="/donor/emergency-request-detail/:requestId" element={<EmergencyRequestDetail />} />
+        <Route path="/medical-facility" element={<MedicalFacilityLayout />}>
+          <Route index element={<MedicalFacilityHome />} />
+          <Route path="profile" element={<MedicalFacilityProfile />} />
+          <Route path="receive-blood" element={<MedicalFacilityReceiveBlood />} />
+          <Route path="request-history" element={<MedicalFacilityRequestHistory />} />
+          <Route path="request-history/:id" element={<MedicalFacilityRequestDetail />} />
+          <Route path="emergency-request" element={<MedicalFacilityEmergencyRequest />} />
+          <Route path="contact" element={<MedicalFacilityContact />} />
+        </Route>
         <Route path="/" element={<Navigate to="/admin" replace />} />
-        <Route path="/admin" element={<Navigate to="/admin/statistics" replace />} />
-        <Route path="/admin/donors" element={<DonorManagement />} />
-        <Route path="/admin/blood-storage" element={<BloodStorageManagement />} />
-        <Route path="/admin/donations" element={<DonationManagement />} />
-        <Route path="/admin/donations/:id" element={<DonationDetail />} />
-        <Route path="/admin/news" element={<NewsManagement />} />
-        <Route path="/admin/blood-requests" element={<BloodRequestManagement />} />
-        <Route path="/admin/emergency-donor-matching/:requestId" element={<EmergencyDonorMatching />} />
-        <Route path="/admin/emergency-process/:requestId" element={<EmergencyProcess />} />
-        <Route path="/admin/medical-facilities" element={<MedicalFacilityManagement />} />
-        <Route path="/admin/statistics" element={<Statistics />} />
-        <Route path="/admin/accounts" element={<AccountManagement />} />
-        <Route path="/admin/profile" element={<AccountProfile />} />
-        <Route path="/admin/settings" element={<Settings />} />
-        <Route path="/admin/matching" element={<MatchingManagement />} />
+        
+        {/* Admin routes wrapped in AdminProvider */}
+        <Route path="/admin/*" element={
+          <AdminProvider>
+            <Routes>
+              <Route path="/" element={<DashBoard />} />
+              <Route path="/donors" element={<DonorManagement />} />
+              <Route path="/blood-storage" element={<BloodStorageManagement />} />
+              <Route path="/donations" element={<DonationManagement />} />
+              <Route path="/donations/:id" element={<DonationDetail />} />
+              <Route path="/news" element={<NewsManagement />} />
+              <Route path="/blood-requests" element={<BloodRequestManagement />} />
+              <Route path="/blood-requests/:id" element={<BloodRequestDetail />} />
+              <Route path="/emergency-donor-matching/:requestId" element={<EmergencyDonorMatching />} />
+              <Route path="/emergency-process/:requestId" element={<EmergencyProcess />} />
+              <Route path="/medical-facilities" element={<MedicalFacilityManagement />} />
+              <Route path="/donation-process" element={<DonationProcessManagement />} />
+              <Route path="/donation-process/:id" element={<DonationProcessDetail />} />
+              <Route path="/blood-test" element={<BloodTestManagement />} />
+              <Route path="/blood-checks/:id" element={<BloodCheckDetail />} />
+              <Route path="/dashboard" element={<DashBoard />} />
+              <Route path="/statistics" element={<Statistics />} />
+              <Route path="/accounts" element={<AccountManagement />} />
+              <Route path="/profile" element={<AccountProfile />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/matching" element={<MatchingManagement />} />
+              <Route path="/matching-detail/:id" element={<MatchingDetail />} />
+            </Routes>
+          </AdminProvider>
+        } />
+        
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/activities" element={<ActivityPage />} />
+        <Route path="/news" element={<News />} />
       </Routes>
     </>
   );

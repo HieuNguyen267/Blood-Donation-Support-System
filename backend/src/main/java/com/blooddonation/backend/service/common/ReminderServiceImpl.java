@@ -1,19 +1,14 @@
 package com.blooddonation.backend.service.common;
-
 import com.blooddonation.backend.entity.admin.DonationRegister;
 import com.blooddonation.backend.repository.admin.DonationRegisterRepository;
-import com.blooddonation.backend.service.common.EmailService;
-import com.blooddonation.backend.service.common.ReminderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.blooddonation.backend.repository.donor.DonorRepository;
 import com.blooddonation.backend.entity.donor.Donor;
 
 @Service
@@ -23,13 +18,10 @@ public class ReminderServiceImpl implements ReminderService {
     private DonationRegisterRepository donationRegisterRepository;
 
     @Autowired
-    private DonorRepository donorRepository;
-
-    @Autowired
     private EmailService emailService;
 
     @Override
-    @Scheduled(cron = "0 0 8 * * *") // Chạy hàng ngày lúc 8h sáng
+    @Scheduled(cron = "0 0 8 * * *")
     public void sendAppointmentReminders() {
         LocalDate tomorrow = LocalDate.now().plusDays(1);
         List<DonationRegister> tomorrowAppointments = donationRegisterRepository.findByAppointmentDate(tomorrow);
@@ -37,14 +29,14 @@ public class ReminderServiceImpl implements ReminderService {
         for (DonationRegister register : tomorrowAppointments) {
             Donor donor = register.getDonor();
             String email = getDonorEmail(donor);
-            if (email != null) {
+            if (email != null && donor.getAccount() != null && Boolean.TRUE.equals(donor.getAccount().getEmailNotificationEnabled())) {
                 emailService.sendAppointmentReminder(email, donor.getFullName(), tomorrow.toString());
             }
         }
     }
 
     @Override
-    @Scheduled(cron = "0 0 10 * * *") // Chạy hàng ngày lúc 10h sáng
+    @Scheduled(cron = "0 0 10 * * *") 
     public void sendPostDonationReminders() {
         LocalDate threeDaysAgo = LocalDate.now().minusDays(3);
         List<DonationRegister> recentDonations = donationRegisterRepository.findByDonationStatus("completed");
@@ -53,7 +45,7 @@ public class ReminderServiceImpl implements ReminderService {
             if (register.getCreatedAt().toLocalDate().equals(threeDaysAgo)) {
                 Donor donor = register.getDonor();
                 String email = getDonorEmail(donor);
-                if (email != null) {
+                if (email != null && donor.getAccount() != null && Boolean.TRUE.equals(donor.getAccount().getEmailNotificationEnabled())) {
                     emailService.sendPostDonationReminder(email, donor.getFullName());
                 }
             }
@@ -61,7 +53,7 @@ public class ReminderServiceImpl implements ReminderService {
     }
 
     @Override
-    @Scheduled(cron = "0 0 9 * * *") // Chạy hàng ngày lúc 9h sáng
+    @Scheduled(cron = "0 0 9 * * *") 
     public void sendRecoveryTimeReminders() {
         LocalDate threeMonthsAgo = LocalDate.now().minusMonths(3);
         List<DonationRegister> eligibleDonors = donationRegisterRepository.findByDonationStatus("completed");
@@ -70,7 +62,7 @@ public class ReminderServiceImpl implements ReminderService {
             if (register.getCreatedAt().toLocalDate().equals(threeMonthsAgo)) {
                 Donor donor = register.getDonor();
                 String email = getDonorEmail(donor);
-                if (email != null) {
+                if (email != null && donor.getAccount() != null && Boolean.TRUE.equals(donor.getAccount().getEmailNotificationEnabled())) {
                     emailService.sendRecoveryTimeReminder(email, donor.getFullName());
                 }
             }
@@ -78,10 +70,9 @@ public class ReminderServiceImpl implements ReminderService {
     }
 
     @Override
-    @Scheduled(cron = "0 0 7 * * *") // Chạy hàng ngày lúc 7h sáng
+    @Scheduled(cron = "0 0 7 * * *") 
     public void sendExpiringStockReminders() {
         // Gửi thông báo cho staff về máu sắp hết hạn
-        LocalDate expiryDate = LocalDate.now().plusDays(7);
         // Implementation sẽ được thêm sau khi có Staff entity
     }
 
@@ -96,7 +87,6 @@ public class ReminderServiceImpl implements ReminderService {
     public List<Map<String, Object>> getUpcomingReminders() {
         List<Map<String, Object>> reminders = new ArrayList<>();
         
-        // Lấy các cuộc hẹn trong 3 ngày tới
         for (int i = 1; i <= 3; i++) {
             LocalDate date = LocalDate.now().plusDays(i);
             List<DonationRegister> appointments = donationRegisterRepository.findByAppointmentDate(date);

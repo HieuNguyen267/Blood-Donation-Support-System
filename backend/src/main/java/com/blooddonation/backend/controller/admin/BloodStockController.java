@@ -7,105 +7,62 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/blood-stock")
+@RequestMapping("/api/admin/blood-stocks")
 @CrossOrigin(origins = "*")
 public class BloodStockController {
-
+    
     @Autowired
     private BloodStockService bloodStockService;
-
+    
     @GetMapping
-    public ResponseEntity<List<BloodStockDTO>> getAllBloodStock() {
-        List<BloodStockDTO> stock = bloodStockService.getAllBloodStock();
-        return ResponseEntity.ok(stock);
+    public ResponseEntity<List<BloodStockDTO>> getAllBloodStocks() {
+        List<BloodStockDTO> bloodStocks = bloodStockService.getAllBloodStocks();
+        return ResponseEntity.ok(bloodStocks);
     }
-
+    
     @GetMapping("/{id}")
-    public ResponseEntity<BloodStockDTO> getBloodStockById(@PathVariable Integer id) {
-        return bloodStockService.getBloodStockById(id)
-                .map(ResponseEntity::ok)
+    public ResponseEntity<BloodStockDTO> getBloodStockById(@PathVariable Long id) {
+        Optional<BloodStockDTO> bloodStock = bloodStockService.getBloodStockById(id);
+        return bloodStock.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-
-    @GetMapping("/blood-group/{bloodGroupId}")
-    public ResponseEntity<List<BloodStockDTO>> getBloodStockByBloodGroup(@PathVariable Integer bloodGroupId) {
-        List<BloodStockDTO> stock = bloodStockService.getBloodStockByBloodGroup(bloodGroupId);
-        return ResponseEntity.ok(stock);
-    }
-
-    @GetMapping("/status/{status}")
-    public ResponseEntity<List<BloodStockDTO>> getBloodStockByStatus(@PathVariable String status) {
-        List<BloodStockDTO> stock = bloodStockService.getBloodStockByStatus(status);
-        return ResponseEntity.ok(stock);
-    }
-
-    @GetMapping("/available")
-    public ResponseEntity<List<BloodStockDTO>> getAvailableBloodStock() {
-        List<BloodStockDTO> stock = bloodStockService.getAvailableBloodStock();
-        return ResponseEntity.ok(stock);
-    }
-
-    @GetMapping("/expiring")
-    public ResponseEntity<List<BloodStockDTO>> getExpiringStock() {
-        List<BloodStockDTO> stock = bloodStockService.getExpiringStock();
-        return ResponseEntity.ok(stock);
-    }
-
-    @GetMapping("/blood-group/{bloodGroupId}/total-volume")
-    public ResponseEntity<Integer> getTotalAvailableVolumeByBloodGroup(@PathVariable Integer bloodGroupId) {
-        Integer totalVolume = bloodStockService.getTotalAvailableVolumeByBloodGroup(bloodGroupId);
-        return ResponseEntity.ok(totalVolume);
-    }
-
+    
     @PostMapping
-    public ResponseEntity<BloodStockDTO> createBloodStock(@RequestBody BloodStockDTO stockDTO) {
+    public ResponseEntity<?> createBloodStock(@RequestBody BloodStockDTO bloodStockDTO) {
         try {
-            BloodStockDTO createdStock = bloodStockService.createBloodStock(stockDTO);
-            return ResponseEntity.ok(createdStock);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            BloodStockDTO createdBloodStock = bloodStockService.createBloodStock(bloodStockDTO);
+            return ResponseEntity.ok(createdBloodStock);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
+    
     @PutMapping("/{id}")
-    public ResponseEntity<BloodStockDTO> updateBloodStock(@PathVariable Integer id, @RequestBody BloodStockDTO stockDTO) {
-        BloodStockDTO updatedStock = bloodStockService.updateBloodStock(id, stockDTO);
-        if (updatedStock != null) {
-            return ResponseEntity.ok(updatedStock);
+    public ResponseEntity<?> updateBloodStock(@PathVariable Long id, @RequestBody BloodStockDTO bloodStockDTO) {
+        try {
+            BloodStockDTO updatedBloodStock = bloodStockService.updateBloodStock(id, bloodStockDTO);
+            return ResponseEntity.ok(updatedBloodStock);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return ResponseEntity.notFound().build();
     }
-
-    @PutMapping("/{id}/status")
-    public ResponseEntity<BloodStockDTO> updateStockStatus(@PathVariable Integer id, @RequestParam String status) {
-        BloodStockDTO updatedStock = bloodStockService.updateStockStatus(id, status);
-        if (updatedStock != null) {
-            return ResponseEntity.ok(updatedStock);
-        }
-        return ResponseEntity.notFound().build();
-    }
-
-    @PutMapping("/{id}/quality-check")
-    public ResponseEntity<BloodStockDTO> performQualityCheck(
-            @PathVariable Integer id,
-            @RequestParam Boolean passed,
-            @RequestParam(required = false) String notes,
-            @RequestParam(required = false) Integer staffId) {
-        BloodStockDTO updatedStock = bloodStockService.performQualityCheck(id, passed, notes, staffId);
-        if (updatedStock != null) {
-            return ResponseEntity.ok(updatedStock);
-        }
-        return ResponseEntity.notFound().build();
-    }
-
+    
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBloodStock(@PathVariable Integer id) {
-        boolean deleted = bloodStockService.deleteBloodStock(id);
-        if (deleted) {
+    public ResponseEntity<?> deleteBloodStock(@PathVariable Long id) {
+        try {
+            bloodStockService.deleteBloodStock(id);
             return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return ResponseEntity.notFound().build();
+    }
+    
+    @GetMapping("/blood-group/{bloodGroupId}/volume")
+    public ResponseEntity<Integer> getTotalVolumeByBloodGroup(@PathVariable Long bloodGroupId) {
+        Integer volume = bloodStockService.getTotalVolumeByBloodGroup(bloodGroupId);
+        return ResponseEntity.ok(volume);
     }
 } 

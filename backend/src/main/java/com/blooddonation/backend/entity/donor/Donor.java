@@ -1,5 +1,4 @@
 package com.blooddonation.backend.entity.donor;
-
 import jakarta.persistence.*;
 import lombok.Data;
 import java.math.BigDecimal;
@@ -61,6 +60,12 @@ public class Donor {
     @Column(name = "is_available_for_emergency")
     private Boolean isAvailableForEmergency = false;
 
+    @Column(name = "available_from")
+    private java.time.LocalDate availableFrom;
+
+    @Column(name = "available_until")
+    private java.time.LocalDate availableUntil;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -69,6 +74,9 @@ public class Donor {
 
     @Column(name = "job", length = 100)
     private String job;
+
+    @Column(name = "note")
+    private String note;
 
     public Integer getDonorId() { return donorId; }
     public void setDonorId(Integer donorId) { this.donorId = donorId; }
@@ -123,4 +131,12 @@ public class Donor {
 
     public String getJob() { return job; }
     public void setJob(String job) { this.job = job; }
+
+    public String getNote() { return note; }
+    public void setNote(String note) { this.note = note; }
+
+    public java.time.LocalDate getAvailableFrom() { return availableFrom; }
+    public void setAvailableFrom(java.time.LocalDate availableFrom) { this.availableFrom = availableFrom; }
+    public java.time.LocalDate getAvailableUntil() { return availableUntil; }
+    public void setAvailableUntil(java.time.LocalDate availableUntil) { this.availableUntil = availableUntil; }
 } 

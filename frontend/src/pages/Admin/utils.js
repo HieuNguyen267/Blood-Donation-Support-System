@@ -79,54 +79,31 @@ export function getUrgencyBadge(urgency) {
  * @returns {object} A style object with a color property.
  */
 export const getStatusStyle = (status) => {
-  switch (status) {
-    // Blood Storage statuses
-    case 'Mới':
-      return { color: '#22c55e' }; // Xanh lá
-    case 'Đang sử dụng':
-      return { color: '#3b82f6' }; // Xanh dương
-    case 'Hết hạn':
-      return { color: '#ef4444' }; // Đỏ
-
-    // Blood Request statuses (đơn yêu cầu máu)
-    case 'Chờ duyệt':
-      return { color: '#fb923c' }; // Cam
-    case 'Đang xử lý':
-      return { color: '#3b82f6' }; // Xanh dương
-    case 'Đang yêu cầu máu khẩn cấp':
-      return { color: '#ef4444' }; // Đỏ
-    case 'Hoàn thành':
-      return { color: '#22c55e' }; // Xanh lá
-
-    // Green statuses (other modules)
-    case 'Đã đồng ý':
-    case 'Đạt chuẩn':
-    case 'Xác nhận':
-    case 'Kích hoạt':
-      return { color: '#22c55e' };
-
-    // Orange/Yellow statuses
-    case 'Chờ xác nhận':
-    case 'Đang xét nghiệm':
-      return { color: '#fb923c' };
-
-    // Red statuses
-    case 'Đã từ chối':
-    case 'Không đạt chuẩn':
-    case 'Đang yêu cầu máu khẩn cấp':
-    case 'Khóa':
-    case 'Từ chối':
-      return { color: '#ef4444' };
-
-    // Blue statuses
-    case 'Đang xử lý':
-    case 'Đã hủy':
-      return { color: '#3b82f6' };
-
-    // Default Gray
-    default:
-      return { color: '#6c757d' };
+  if (status === 'Kích hoạt') {
+    return { color: '#22c55e', fontWeight: '600' }; // Xanh lá
   }
+  if (status === 'Khóa') {
+    return { color: '#ef4444', fontWeight: '600' }; // Đỏ
+  }
+  const styles = {
+    'pending': { color: '#f59e0b', fontWeight: '600' },
+    'confirmed': { color: '#059669', fontWeight: '600' },
+    'Not meeting health requirements': { color: '#dc2626', fontWeight: '600' },
+    'Chờ xác nhận': { color: '#f59e0b', fontWeight: '600' },
+    'Xác nhận': { color: '#059669', fontWeight: '600' },
+    'Không đủ điều kiện sức khỏe': { color: '#dc2626', fontWeight: '600' },
+    // Blood test statuses
+    'Chờ xét nghiệm': { color: '#f59e0b', fontWeight: '600' }, // Orange
+    'Đạt chuẩn': { color: '#10b981', fontWeight: '600' }, // Green
+    'Không đạt chuẩn': { color: '#ef4444', fontWeight: '600' }, // Red
+    // Matching statuses
+    'Đang liên hệ': { color: '#3b82f6', fontWeight: '600' }, // Xanh dương
+    'Liên hệ thành công': { color: '#10b981', fontWeight: '600' }, // Xanh lá
+    'Hoàn thành': { color: '#10b981', fontWeight: '600' }, // Xanh lá
+    'Đã từ chối': { color: '#ef4444', fontWeight: '600' }, // Đỏ
+    'Đã đồng ý': { color: '#10b981', fontWeight: '600' } // Xanh lá
+  };
+  return styles[status] || { color: '#6b7280', fontWeight: '600' };
 };
 
 /**
@@ -160,7 +137,17 @@ export const getStatusBadge = (status) => {
     case 'Đạt chuẩn':
     case 'Xác nhận':
     case 'Kích hoạt':
+    case 'Liên hệ thành công':
+    case 'Hoàn thành':
       return 'badge bg-success';
+
+    // Blood test statuses
+    case 'Chờ xét nghiệm':
+      return 'badge bg-warning text-dark';
+    case 'Đạt chuẩn':
+      return 'badge bg-success';
+    case 'Không đạt chuẩn':
+      return 'badge bg-danger';
 
     // Orange/Yellow statuses
     case 'Chờ xác nhận':
@@ -173,11 +160,13 @@ export const getStatusBadge = (status) => {
     case 'Đang yêu cầu máu khẩn cấp':
     case 'Khóa':
     case 'Từ chối':
+    case 'Không đủ điều kiện sức khỏe':
       return 'badge bg-danger';
 
     // Blue statuses
     case 'Đang xử lý':
     case 'Đã hủy':
+    case 'Đang liên hệ':
       return 'badge bg-primary';
 
     // Default Gray

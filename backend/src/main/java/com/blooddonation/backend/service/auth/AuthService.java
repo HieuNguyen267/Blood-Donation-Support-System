@@ -1,5 +1,4 @@
 package com.blooddonation.backend.service.auth;
-
 import com.blooddonation.backend.dto.auth.LoginRequest;
 import com.blooddonation.backend.dto.auth.JwtResponse;
 import com.blooddonation.backend.entity.common.Account;
@@ -40,19 +39,18 @@ public class AuthService {
 
             return new JwtResponse(
                     jwt,
-                    account.getAccountId() != null ? account.getAccountId().longValue() : null,
+                    account.getAccountId(),
                     account.getEmail(),
-                    null, // firstName nếu có
-                    null, // lastName nếu có
-                    account.getRole());
+                    null, 
+                    null, 
+                    account.getRole(),
+                    null 
+            );
         } catch (Exception e) {
             throw new RuntimeException("Invalid email or password", e);
         }
     }
 
-    public boolean existsByUsername(String username) {
-        return accountRepository.existsByUsername(username);
-    }
 
     public Account saveAccount(Account account) {
         return accountRepository.save(account);

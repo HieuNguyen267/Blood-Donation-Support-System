@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Form, Input, Button, Typography, message } from 'antd';
 import Header from '../../../components/user/Header';
 import Footer from '../../../components/user/Footer';
@@ -6,13 +6,6 @@ import { authAPI } from '../../../services/api';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const { Title } = Typography;
-
-function maskEmail(email) {
-  if (!email) return '';
-  const [name, domain] = email.split('@');
-  if (!domain) return email;
-  return name[0] + '******' + name[name.length - 1] + '@' + domain;
-}
 
 export default function ForgotPasswordPage() {
   const [form] = Form.useForm();
@@ -69,7 +62,7 @@ export default function ForgotPasswordPage() {
       
       message.success('Đặt lại mật khẩu thành công!');
       setTimeout(() => {
-        navigate('/loginpage');
+        navigate('/login');
       }, 1000);
     } catch (error) {
       console.error('Reset password error:', error);

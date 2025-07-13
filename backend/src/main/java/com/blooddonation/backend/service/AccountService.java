@@ -1,5 +1,4 @@
 package com.blooddonation.backend.service;
-
 import com.blooddonation.backend.dto.auth.JwtResponse;
 import com.blooddonation.backend.dto.auth.LoginRequest;
 import com.blooddonation.backend.dto.auth.SignupRequest;
@@ -28,4 +27,6 @@ public interface AccountService {
     String preSignup(SignupRequest signupRequest);
     // Xác thực và lưu vào database
     String confirmSignup(String email, String code);
+    String changePassword(String email, String oldPassword, String newPassword, String confirmNewPassword);
+    void deleteAccount(String email);
 } 

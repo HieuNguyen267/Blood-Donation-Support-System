@@ -10,8 +10,7 @@ export default function ReceiveBloodSuccess() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('userInfo');
+    localStorage.clear();
     setIsLoggedIn(false);
     navigate('/'); 
   };
@@ -99,7 +98,7 @@ export default function ReceiveBloodSuccess() {
                 </div>
               </Dropdown>
             ) : (
-              <Link to="/loginpage" className="login-link">
+              <Link to="/login" className="login-link">
                 <UserCircle size={20} />
                 <span>Đăng nhập</span>
               </Link>

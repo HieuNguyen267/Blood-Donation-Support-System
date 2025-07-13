@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Form, Input, Button, Typography, Select, InputNumber, Card } from "antd";
-import { Link, useNavigate } from "react-router-dom";
 import { Dropdown } from 'antd';
 import { UserCircle } from 'lucide-react';
+import MedicalFacilityHeader from '../../../components/user/MedicalFacilityHeader';
 import Footer from "../../../components/user/Footer";
 import "./index.css";
+import { FaTint, FaPhoneAlt } from 'react-icons/fa';
+import { useNavigate } from "react-router-dom";
+import { mfBloodRequestAPI } from '../../../services/api';
+import { message } from 'antd';
 
 const { Title, Text } = Typography;
 
@@ -21,134 +25,76 @@ const bloodGroups = [
   { label: "Rhnull", value: "Rhnull" },
 ];
 
-const components = [
-  { label: "Toàn phần", value: "toanphan" },
-  { label: "Hồng cầu", value: "hongcau" },
-  { label: "Tiểu cầu", value: "tieucau" },
-  { label: "Huyết tương", value: "huyettuong" },
-];
+const bloodGroupMap = {
+  "A+": 1,
+  "A-": 2,
+  "B+": 3,
+  "B-": 4,
+  "AB+": 5,
+  "AB-": 6,
+  "O+": 7,
+  "O-": 8
+};
 
 export default function EmergencyRequest() {
   const [form] = Form.useForm();
-  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') === 'true');
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('userInfo');
-    setIsLoggedIn(false);
-    navigate('/'); 
-  };
-
-  useEffect(() => {
-    const checkLoginStatus = () => {
-      setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true');
-    };
-
-    window.addEventListener('storage', checkLoginStatus);
-    checkLoginStatus();
-
-    return () => {
-      window.removeEventListener('storage', checkLoginStatus);
-    };
-  }, []);
-
-  // Lấy họ tên từ localStorage nếu đã đăng nhập
-  let userName = 'Đăng nhập';
-  let showDropdown = false;
-  if (isLoggedIn) {
+  const onFinish = async (values) => {
     try {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      if (userInfo && userInfo.fullName) {
-        userName = userInfo.fullName;
-        showDropdown = true;
-      } else {
-        userName = 'Người dùng';
-        showDropdown = true;
+      // Lấy facilityId từ userInfo hoặc localStorage
+      let userInfo = null;
+      try {
+        userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      } catch {}
+      let facilityId = userInfo?.facilityId || localStorage.getItem('facilityId');
+      if (!facilityId) {
+        message.error('Không tìm thấy thông tin cơ sở y tế. Vui lòng đăng nhập lại.');
+        return;
       }
-    } catch {
-      userName = 'Người dùng';
-      showDropdown = true;
+
+      const requestData = {
+        facilityId: Number(facilityId),
+        bloodGroupId: bloodGroupMap[values.bloodGroup],
+        quantityRequested: Number(values.amount),
+        requestStatus: 'PENDING',
+        isEmergency: true, // Đánh dấu là yêu cầu khẩn cấp
+        patientInfo: values.desc || null, // Mô tả tình trạng khẩn cấp
+        isCompatible: true, // Mặc định là tương hợp
+        requiredBy: new Date().toISOString(), // Ngày hiện tại
+        contactPerson: values.contact,
+        contactPhone: values.phone,
+        notes: values.additionalNotes || null, // Ghi chú thêm
+        specialRequirements: values.additionalNotes || null, // Yêu cầu đặc biệt
+      };
+
+      await mfBloodRequestAPI.createBloodRequest(requestData);
+      message.success({
+        content: 'Gửi yêu cầu máu khẩn cấp thành công! Chúng tôi sẽ liên hệ hỗ trợ ngay lập tức.',
+        duration: 3,
+        style: { marginTop: '60px', fontSize: 18 },
+      });
+      form.resetFields();
+      navigate('/medical-facility/request-history');
+    } catch (err) {
+      console.error('Lỗi khi gửi yêu cầu khẩn cấp:', err);
+      message.error('Gửi yêu cầu thất bại: ' + (err.message || 'Lỗi không xác định'));
     }
-  }
-
-  const menu = (
-    <div style={{ 
-      background: 'white', 
-      border: '1px solid #d9d9d9', 
-      borderRadius: '6px', 
-      padding: '4px 0',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-    }}>
-      <div 
-        style={{ 
-          padding: '8px 16px', 
-          cursor: 'pointer',
-          borderBottom: '1px solid #f0f0f0'
-        }}
-        onClick={() => navigate('/medical-facility/profile')}
-      >
-        Thông tin cơ sở
-      </div>
-      <div 
-        style={{ 
-          padding: '8px 16px', 
-          cursor: 'pointer',
-          color: '#ff4d4f'
-        }}
-        onClick={handleLogout}
-      >
-        Đăng xuất
-      </div>
-    </div>
-  );
-
-  const onFinish = (values) => {
-    // Xử lý gửi yêu cầu ở đây
-    // eslint-disable-next-line no-alert
-    alert("Yêu cầu của bạn đã được gửi! Chúng tôi sẽ liên hệ hỗ trợ sớm nhất.");
-    form.resetFields();
   };
 
   return (
     <>
       {/* Header Component */}
-      <div className="header-wrapper">
-        <div className="header-top">
-          <div className="logo-title" style={{ cursor: 'pointer' }} onClick={() => navigate('/medical-facility') }>
-            <span className="logo">🏥</span>
-            <span className="system-title">Hệ thống Nhận Máu</span>
-          </div>
-          <div className="user-section">
-          {showDropdown ? (
-            <Dropdown overlay={menu} trigger={["click"]}>
-              <div className="login-link" style={{ cursor: "pointer" }}>
-                <UserCircle size={20} />
-                <span>{userName} ▾</span>
-              </div>
-            </Dropdown>
-          ) : (
-            <Link to="/loginpage" className="login-link">
-              <UserCircle size={20} />
-              <span>Đăng nhập</span>
-            </Link>
-          )}
-        </div>
-        </div>
-        <nav className="header-nav">
-          <a href="/medical-facility">TRANG CHỦ</a>
-          <a href="/receiveblood">YÊU CẦU MÁU</a>
-          <a href="/medical-facility/history">LỊCH SỬ YÊU CẦU</a>
-          <a href="#">TIN TỨC</a>
-          <a href="/contact">LIÊN HỆ</a>
-        </nav>
-      </div>
+      <MedicalFacilityHeader />
 
       <div className="emergency-wrapper">
-        <Card className="emergency-card" bordered={false}>
-          <Title level={3} className="emergency-title">
+        <Card className="emergency-card" variant="outlined">
+          <div style={{display:'flex',justifyContent:'center',alignItems:'center',gap:12,marginBottom:8}}>
+            <FaTint style={{color:'#e53935',fontSize:36,filter:'drop-shadow(0 2px 8px #ffebee)'}}/>
+            <Title level={3} className="emergency-title" style={{margin:0}}>
             Yêu cầu nhận máu khẩn cấp
           </Title>
+          </div>
           <Text className="emergency-sub">
             Bạn đang cần máu gấp?<br />
             Hãy điền thông tin bên dưới để được hỗ trợ nhanh nhất
@@ -160,52 +106,44 @@ export default function EmergencyRequest() {
             className="emergency-form"
           >
             <div className="emergency-row">
-              <Form.Item name="patient" label="Họ và tên bệnh nhân" rules={[{ required: true, message: "Vui lòng nhập họ tên bệnh nhân" }]}
-                className="emergency-item">
-                <Input placeholder="Nhập họ tên bệnh nhân" />
-              </Form.Item>
-              <Form.Item name="contact" label="Người liên lạc" rules={[{ required: true, message: "Vui lòng nhập tên người liên lạc" }]}
+              <Form.Item name="contact" label={<b>Người liên lạc</b>} rules={[{ required: true, message: "Vui lòng nhập tên người liên lạc" }]}
                 className="emergency-item">
                 <Input placeholder="Người liên lạc" />
               </Form.Item>
-              <Form.Item name="phone" label="Số điện thoại" rules={[{ required: true, message: "Vui lòng nhập số điện thoại" }]}
+              <Form.Item name="phone" label={<b>Số điện thoại</b>} rules={[{ required: true, message: "Vui lòng nhập số điện thoại" }]}
                 className="emergency-item">
                 <Input placeholder="Số điện thoại" />
               </Form.Item>
-              <Form.Item name="bloodGroup" label="Nhóm máu" rules={[{ required: true, message: "Chọn nhóm máu" }]}
+              <Form.Item name="bloodGroup" label={<b>Nhóm máu</b>} rules={[{ required: true, message: "Chọn nhóm máu" }]}
                 className="emergency-item">
                 <Select placeholder="Chọn nhóm máu" options={bloodGroups} />
               </Form.Item>
             </div>
             <div className="emergency-row">
-              <Form.Item name="hospital" label="Cơ sở y tế" rules={[{ required: true, message: "Nhập cơ sở y tế" }]}
-                className="emergency-item">
-                <Input placeholder="Tên bệnh viện/cơ sở y tế" />
-              </Form.Item>
-              <Form.Item name="amount" label="Số lượng (ml)" rules={[{ required: true, message: "Nhập số lượng" }]}
+              <Form.Item name="amount" label={<b>Số lượng (ml)</b>} rules={[{ required: true, message: "Nhập số lượng" }]}
                 className="emergency-item">
                 <InputNumber min={100} max={10000} step={50} style={{ width: '100%' }} placeholder="Số lượng (ml)" />
               </Form.Item>
-              <Form.Item name="component" label="Thành phần" rules={[{ required: true, message: "Chọn thành phần" }]}
-                className="emergency-item">
-                <Select placeholder="Chọn thành phần" options={components} />
-              </Form.Item>
             </div>
-            <Form.Item name="desc" label="Mô tả tình trạng khẩn cấp (tùy chọn)" className="emergency-item">
+            <Form.Item name="desc" label={<b>Mô tả tình trạng khẩn cấp (tùy chọn)</b>} className="emergency-item">
               <Input.TextArea rows={4} placeholder="Mô tả tình trạng khẩn cấp (nếu có)" />
+            </Form.Item>
+            <Form.Item name="additionalNotes" label={<b>Ghi chú thêm (tùy chọn)</b>} className="emergency-item">
+              <Input.TextArea rows={3} placeholder="Ghi chú thêm thông tin khác (nếu có)" />
             </Form.Item>
             <Form.Item>
               <Button type="primary" htmlType="submit" className="emergency-btn">
-                Gửi yêu cầu
+                <FaTint style={{marginRight:8,marginBottom:2}}/> Gửi yêu cầu
               </Button>
             </Form.Item>
           </Form>
           <div className="emergency-hotline">
-            Hotline hỗ trợ <b>1900 1234</b>
+            <FaPhoneAlt style={{color:'#e53935',marginRight:6,marginBottom:-2}}/>
+            <span>Hotline hỗ trợ <b>1900 1234</b></span>
           </div>
         </Card>
       </div>
       <Footer />
     </>
   );
-} 
+}

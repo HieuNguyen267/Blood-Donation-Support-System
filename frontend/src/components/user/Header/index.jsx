@@ -19,8 +19,7 @@ export default function Header() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('userInfo');
+    localStorage.clear();
     setIsLoggedIn(false);
     setUserName('Đăng nhập');
     navigate('/'); 
@@ -59,22 +58,25 @@ export default function Header() {
     showDropdown = true;
   }
 
-  const menu = (
-    <Menu>
-      <Menu.Item key="1" icon={<User2 size={16} />}>
-        <Link to="/profile">Thông tin cá nhân</Link>
-      </Menu.Item>
-
-      <Menu.Item key="3" icon={<Settings size={16} />}>
-        <a href="/settings">Cài đặt</a>
-      </Menu.Item>
-      <Menu.Item key="4" icon={<LogOut size={16} />} danger onClick={handleLogout}>
-        Đăng xuất
-      </Menu.Item>
-    </Menu>
-  );
-
-  const email = localStorage.getItem('email');
+  const menuItems = [
+    {
+      key: '1',
+      icon: <User2 size={16} />,
+      label: <Link to="/profile">Thông tin cá nhân</Link>
+    },
+    {
+      key: '3',
+      icon: <Settings size={16} />,
+      label: <Link to="/settings">Cài đặt</Link>
+    },
+    {
+      key: '4',
+      icon: <LogOut size={16} />,
+      label: 'Đăng xuất',
+      danger: true,
+      onClick: handleLogout
+    }
+  ];
 
   return (
     <div className="header-wrapper">
@@ -85,14 +87,14 @@ export default function Header() {
         </div>
         <div className="user-section">
           {showDropdown ? (
-            <Dropdown overlay={menu} trigger={["click"]}>
+            <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
               <div className="login-link" style={{ cursor: "pointer" }}>
                 <UserCircle size={20} />
                 <span>{userName} ▾</span>
               </div>
             </Dropdown>
           ) : (
-            <Link to="/loginpage" className="login-link">
+            <Link to="/login" className="login-link">
               <UserCircle size={20} />
               <span>Đăng nhập</span>
             </Link>
@@ -100,22 +102,21 @@ export default function Header() {
         </div>
       </div>
       <nav className="header-nav">
-        <a href="/">TRANG CHỦ</a>
+        <Link to="/">TRANG CHỦ</Link>
         {isLoggedIn ? (
           <>
-            <a href="/registerdonate">LỊCH HẸN CỦA BẠN</a>
-            <a href="/appointmenthistory">LỊCH SỬ ĐẶT HẸN</a>
-            <a href="/addcertificate">CHỨNG NHẬN</a>
-            <a href="/faq">HỎI ĐÁP</a>
-            <a href="#">TIN TỨC</a>
-            <a href="/contact">LIÊN HỆ</a>
-            {/* <a href="/receiveblood">NHẬN MÁU</a> */}
+            <Link to="/registerdonate">ĐĂNG KÝ HIẾN MÁU</Link>
+            <Link to="/appointmenthistory">LỊCH SỬ ĐẶT HẸN</Link>
+            <Link to="/certificate">CHỨNG NHẬN</Link>
+            <Link to="/faq">HỎI ĐÁP</Link>
+            <Link to="/news">TIN TỨC</Link>
+            <Link to="/contact">LIÊN HỆ</Link>
           </>
         ) : (
           <>
-            <a href="/faq">HỎI ĐÁP</a>
-            <a href="#">TIN TỨC</a>
-            <a href="/contact">LIÊN HỆ</a>
+            <Link to="/faq">HỎI ĐÁP</Link>
+            <Link to="/news">TIN TỨC</Link>
+            <Link to="/contact">LIÊN HỆ</Link>
           </>
         )}
       </nav>

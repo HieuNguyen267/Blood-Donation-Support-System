@@ -2,66 +2,77 @@ import Header from "../../../components/user/Header";
 import Footer from "../../../components/user/Footer";
 import "./index.css";
 import { Link, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { message, Spin } from "antd";
-import { bloodStockAPI, analyticsAPI } from "../../../services/api";
+import { donorAPI } from '../../../services/api';
+import moment from 'moment';
 
 export default function HomePage() {
   const [selectedDate, setSelectedDate] = useState("");
-  const [bloodStock, setBloodStock] = useState({});
-  const [stats, setStats] = useState({});
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    loadHomeData();
-  }, []);
-
-  const loadHomeData = async () => {
-    setLoading(true);
-    try {
-      // Tạm thời tắt các API call này để tránh lỗi 500 do backend chưa sẵn sàng
-      // // Load thông tin kho máu
-      // const stock = await bloodStockAPI.getStock();
-      // setBloodStock(stock);
-
-      // // Load thống kê tổng quan
-      // const dashboardStats = await analyticsAPI.getDashboardStats();
-      // setStats(dashboardStats);
-    } catch (error) {
-      console.error('Load home data error:', error);
-      // Không hiển thị lỗi vì đây là trang chủ
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (selectedDate) {
       if (localStorage.getItem('isLoggedIn') !== 'true') {
-        navigate('/loginpage', { state: { requireLogin: true } });
+        navigate('/login', { state: { requireLogin: true } });
         return;
       }
-      navigate("/registerdonateform", { state: { date: selectedDate } });
+      try {
+        // Lấy profile
+        const profile = await donorAPI.getProfile();
+        // Kiểm tra ngày muốn đăng ký so với lần hiến máu gần nhất
+        if (profile.lastDonationDate) {
+          const lastDonation = moment(profile.lastDonationDate, ["YYYY-MM-DD", "DD/MM/YYYY"]);
+          const selected = moment(selectedDate, ["YYYY-MM-DD", "DD/MM/YYYY"]);
+          const today = moment();
+          const daysDiffSelected = selected.diff(lastDonation, 'days');
+          const daysDiffNow = today.diff(lastDonation, 'days');
+          if (daysDiffNow < 84) {
+            message.error('Bạn đang trong thời gian phục hồi sau hiến máu (chưa đủ 84 ngày từ lần hiến gần nhất). Vui lòng quay lại sau.');
+            return;
+          }
+          if (daysDiffSelected < 84) {
+            message.error('Ngày bạn chọn chưa đủ 84 ngày kể từ lần hiến máu gần nhất. Vui lòng chọn ngày khác.');
+            return;
+          }
+        }
+        // Lấy danh sách đơn hiến máu
+        const donationHistory = await donorAPI.getDonationHistory();
+        // Kiểm tra đơn hiến máu chưa hoàn thành
+        const hasActiveDonation = donationHistory && donationHistory.some(d =>
+          d.donationStatus !== 'deferred' &&
+          d.donationStatus !== 'completed' &&
+          d.status !== 'Not meeting health requirements'
+        );
+        if (hasActiveDonation) {
+          message.error('Bạn đã đăng ký hiến máu rồi. Vui lòng hoàn thành hoặc hủy đơn trước khi đăng ký mới.');
+          return;
+        }
+        // Kiểm tra trạng thái sẵn sàng hiến máu
+        if (profile.isEligible) {
+          const now = moment();
+          const availableFrom = profile.availableFrom ? moment(profile.availableFrom) : null;
+          const availableUntil = profile.availableUntil ? moment(profile.availableUntil) : null;
+          // Nếu đang trước available_from hoặc trong khoảng available_from - available_until hoặc sau available_until chưa đủ 84 ngày
+          if (
+            (availableFrom && now.isBefore(availableFrom, 'day')) ||
+            (availableFrom && availableUntil && now.isBetween(availableFrom, availableUntil, 'day', '[]')) ||
+            (availableUntil && now.diff(availableUntil, 'days') < 84)
+          ) {
+            message.error('Bạn đã đăng ký sẵn sàng hiến máu, không thể đăng ký hiến máu ngay bây giờ.');
+            return;
+          }
+        }
+        // Nếu hợp lệ, lưu ngày và chuyển trang
+      localStorage.setItem('selectedBookingDate', selectedDate);
+      navigate("/booking-antd", { state: { appoint_date: selectedDate } });
+      } catch (err) {
+        message.error('Không thể kiểm tra điều kiện đăng ký: ' + (err.message || 'Lỗi không xác định'));
+      }
     } else {
       message.warning("Vui lòng chọn ngày để đặt lịch.");
     }
   };
-
-  if (loading) {
-    return (
-      <>
-        <Header />
-        <div className="homepage-wrapper">
-          <div style={{ textAlign: 'center', padding: '50px' }}>
-            <Spin size="large" />
-            <div style={{ marginTop: '20px' }}>Đang tải thông tin...</div>
-          </div>
-        </div>
-        <Footer />
-      </>
-    );
-  }
 
   return (
     <>
@@ -114,6 +125,7 @@ export default function HomePage() {
                 type="date"
                 id="date"
                 value={selectedDate}
+                min={new Date().toISOString().split('T')[0]}
                 onChange={(e) => setSelectedDate(e.target.value)}
               />
               <button className="search-btn" onClick={handleSearch}>

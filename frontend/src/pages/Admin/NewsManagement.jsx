@@ -13,6 +13,17 @@ const newsDataInit = [
 const statuses = ["Công khai", "Ẩn"];
 const PAGE_SIZE = 5;
 
+const sortOptions = [
+  { value: '', label: 'Sắp xếp theo...' },
+  { value: 'date', label: 'Ngày đăng' },
+  { value: 'status', label: 'Trạng thái' },
+];
+const statusOptions = ["Công khai", "Ẩn"];
+const orderOptions = [
+  { value: 'desc', label: 'Mới nhất' },
+  { value: 'asc', label: 'Cũ nhất' }
+];
+
 export default function NewsManagement() {
   const [news, setNews] = useState(newsDataInit);
   const [search, setSearch] = useState("");
@@ -24,13 +35,18 @@ export default function NewsManagement() {
   const [addMode, setAddMode] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const [detailIdx, setDetailIdx] = useState(null);
+  const [sortBy, setSortBy] = useState('');
+  const [sortOrder, setSortOrder] = useState('desc');
+  const [filterStatus, setFilterStatus] = useState(statusOptions[0]);
 
   // Filter logic
-  const filtered = news.filter(n => {
-    const matchSearch = n.title.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = status === "Tất cả" || n.status === status;
-    return matchSearch && matchStatus;
-  });
+  let filtered = news.filter(n => n.title.toLowerCase().includes(search.toLowerCase()));
+  if (sortBy === 'status') {
+    filtered = filtered.filter(n => n.status === filterStatus);
+  }
+  if (sortBy === 'date') {
+    filtered = filtered.sort((a, b) => sortOrder === 'asc' ? new Date(a.date) - new Date(b.date) : new Date(b.date) - new Date(a.date));
+  }
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paged = filtered.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
   React.useEffect(() => { setPage(1); }, [search, status]);
@@ -116,10 +132,19 @@ export default function NewsManagement() {
           <div className="donor-toolbar">
             <input className="donor-search" placeholder="🔍 Tìm kiếm tiêu đề ..."
               value={search} onChange={e => setSearch(e.target.value)} />
-            <select className="donor-filter" value={status} onChange={e => setStatus(e.target.value)}>
-              <option value="Tất cả">Tất cả</option>
-              {statuses.map(s => <option key={s}>{s}</option>)}
+            <select className="donor-filter" value={sortBy} onChange={e => { setSortBy(e.target.value); setSortOrder('desc'); }}>
+              {sortOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
             </select>
+            {sortBy === 'status' && (
+              <select className="donor-filter" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+                {statusOptions.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            )}
+            {sortBy === 'date' && (
+              <select className="donor-filter" value={sortOrder} onChange={e => setSortOrder(e.target.value)}>
+                {orderOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            )}
             <button className="donor-add" onClick={handleAdd}>+ Thêm tin tức</button>
             <button className="donor-filter-btn">⏷</button>
           </div>
@@ -146,9 +171,111 @@ export default function NewsManagement() {
                       <span className={getStatusBadge(n.status)}>{n.status}</span>
                     </td>
                     <td className="text-center">
-                      <button className="btn btn-sm btn-outline-primary me-1" title="Sửa" onClick={() => handleEdit(i)}><span className="donor-action edit">✏️</span></button>
-                      <button className="btn btn-sm btn-outline-danger" title="Xóa" onClick={() => handleDelete(i)}><span className="donor-action delete">🗑️</span></button>
-                      <button className="btn btn-sm btn-outline-info ms-1" title="Xem chi tiết" onClick={()=>setDetailIdx((page-1)*PAGE_SIZE+i)}><span>👁️</span></button>
+                      <div style={{display: 'flex', gap: '6px', justifyContent: 'center'}}>
+                        <button 
+                          onClick={() => handleEdit(i)}
+                          title="Chỉnh sửa"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '32px',
+                            height: '32px',
+                            backgroundColor: '#059669',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease-in-out',
+                            boxShadow: '0 1px 3px rgba(5, 150, 105, 0.2)'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = '#047857';
+                            e.target.style.transform = 'translateY(-1px)';
+                            e.target.style.boxShadow = '0 2px 6px rgba(5, 150, 105, 0.3)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = '#059669';
+                            e.target.style.transform = 'translateY(0)';
+                            e.target.style.boxShadow = '0 1px 3px rgba(5, 150, 105, 0.2)';
+                          }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                          </svg>
+                        </button>
+                        
+                        <button 
+                          onClick={() => handleDelete(i)}
+                          title="Xóa"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '32px',
+                            height: '32px',
+                            backgroundColor: '#dc2626',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease-in-out',
+                            boxShadow: '0 1px 3px rgba(220, 38, 38, 0.2)'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = '#b91c1c';
+                            e.target.style.transform = 'translateY(-1px)';
+                            e.target.style.boxShadow = '0 2px 6px rgba(220, 38, 38, 0.3)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = '#dc2626';
+                            e.target.style.transform = 'translateY(0)';
+                            e.target.style.boxShadow = '0 1px 3px rgba(220, 38, 38, 0.2)';
+                          }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polyline points="3,6 5,6 21,6"></polyline>
+                            <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2V6"></path>
+                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                          </svg>
+                        </button>
+                        
+                        <button 
+                          onClick={() => setDetailIdx((page-1)*PAGE_SIZE+i)}
+                          title="Xem chi tiết"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '32px',
+                            height: '32px',
+                            backgroundColor: '#2563eb',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease-in-out',
+                            boxShadow: '0 1px 3px rgba(37, 99, 235, 0.2)'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = '#1d4ed8';
+                            e.target.style.transform = 'translateY(-1px)';
+                            e.target.style.boxShadow = '0 2px 6px rgba(37, 99, 235, 0.3)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = '#2563eb';
+                            e.target.style.transform = 'translateY(0)';
+                            e.target.style.boxShadow = '0 1px 3px rgba(37, 99, 235, 0.2)';
+                          }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                          </svg>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

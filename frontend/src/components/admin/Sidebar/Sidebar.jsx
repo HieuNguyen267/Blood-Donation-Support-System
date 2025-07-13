@@ -2,14 +2,17 @@ import React, { useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import {
   FaTachometerAlt, FaUserInjured, FaUsers, FaBox, FaHeartbeat,
-  FaNewspaper, FaProcedures, FaCity, FaChartBar, FaLink, FaChevronDown, FaChevronRight
+  FaNewspaper, FaProcedures, FaCity, FaChartBar, FaLink, FaChevronDown, FaChevronRight, FaCogs
 } from 'react-icons/fa';
 import './Sidebar.css';
+import { useAdmin } from '../../../contexts/AdminContext';
 
 // --- Centralized Menu Configuration ---
 const menuItems = [
   { path: '/admin', icon: <FaTachometerAlt />, label: 'Dashboard' },
   { path: '/admin/donations', icon: <FaUserInjured />, label: 'Quản lý đơn hiến' },
+  { path: '/admin/donation-process', icon: <FaCogs />, label: 'Quản lý quá trình hiến' },
+  { path: '/admin/blood-test', icon: <FaProcedures />, label: 'Quản lý kiểm tra máu' },
   { path: '/admin/donors', icon: <FaUsers />, label: 'Quản lý người hiến' },
   { path: '/admin/blood-storage', icon: <FaBox />, label: 'Quản lý kho máu' },
   {
@@ -29,6 +32,10 @@ const menuItems = [
 const Sidebar = () => {
   const location = useLocation();
   const [openDropdown, setOpenDropdown] = useState('');
+  const { adminInfo } = useAdmin();
+  
+  // Debug log
+  console.log('Sidebar received adminInfo from context:', adminInfo);
 
   const handleDropdownToggle = (label) => {
     setOpenDropdown(prev => (prev === label ? '' : label));
@@ -39,8 +46,9 @@ const Sidebar = () => {
       <div className="sidebar-header">
         <img src="/path-to-your-avatar.png" alt="Admin Avatar" className="avatar" />
         <div className="sidebar-user-info">
-          <span className="sidebar-name">Admin Nguyen</span>
-          <span className="sidebar-role">ADMIN</span>
+          <span className="sidebar-name">{adminInfo ? (adminInfo.fullName || adminInfo.full_name) : 'Đang tải...'}</span>
+          <span className="sidebar-role">{adminInfo ? (adminInfo.role || 'ADMIN') : 'ADMIN'}</span>
+          {adminInfo && <span className="sidebar-email">{adminInfo.email}</span>}
         </div>
       </div>
       <ul className="sidebar-menu">

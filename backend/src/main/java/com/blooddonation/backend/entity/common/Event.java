@@ -1,5 +1,4 @@
 package com.blooddonation.backend.entity.common;
-
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
@@ -21,17 +20,12 @@ public class Event {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "start_date", nullable = false)
-    private LocalDate startDate;
+    @Column(name = "date", nullable = false)
+    private LocalDate date;
 
-    @Column(name = "end_date", nullable = false)
-    private LocalDate endDate;
-
-    @Column(name = "start_time", nullable = false)
-    private LocalTime startTime;
-
-    @Column(name = "end_time", nullable = false)
-    private LocalTime endTime;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "time_event_id")
+    private TimeEvent timeEvent;
 
     @Column(name = "target_donors")
     private Integer targetDonors;
@@ -90,10 +84,9 @@ public class Event {
     public Integer getEventId() { return eventId; }
     public String getEventName() { return eventName; }
     public String getDescription() { return description; }
-    public LocalDate getStartDate() { return startDate; }
-    public LocalDate getEndDate() { return endDate; }
-    public LocalTime getStartTime() { return startTime; }
-    public LocalTime getEndTime() { return endTime; }
+    public LocalDate getDate() { return date; }
+    public TimeEvent getTimeEvent() { return timeEvent; }
+    public void setTimeEvent(TimeEvent timeEvent) { this.timeEvent = timeEvent; }
     public Integer getTargetDonors() { return targetDonors; }
     public Integer getRegisteredDonors() { return registeredDonors; }
     public Integer getActualDonors() { return actualDonors; }

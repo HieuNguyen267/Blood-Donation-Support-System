@@ -1,11 +1,8 @@
 package com.blooddonation.backend.entity.common;
-
-import com.blooddonation.backend.entity.admin.Staff;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -55,6 +52,9 @@ public class Account {
     @Column(name = "reset_password_code_expiry")
     private LocalDateTime resetPasswordCodeExpiry;
 
+    @Column(name = "email_notification_enabled")
+    private Boolean emailNotificationEnabled = true;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -92,4 +92,6 @@ public class Account {
     public void setResetPasswordCode(String resetPasswordCode) { this.resetPasswordCode = resetPasswordCode; }
     public LocalDateTime getResetPasswordCodeExpiry() { return resetPasswordCodeExpiry; }
     public void setResetPasswordCodeExpiry(LocalDateTime resetPasswordCodeExpiry) { this.resetPasswordCodeExpiry = resetPasswordCodeExpiry; }
+    public Boolean getEmailNotificationEnabled() { return emailNotificationEnabled; }
+    public void setEmailNotificationEnabled(Boolean emailNotificationEnabled) { this.emailNotificationEnabled = emailNotificationEnabled; }
 } 

@@ -21,14 +21,6 @@ public class AuthController {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
     
-    @GetMapping("/ping")
-    public ResponseEntity<?> ping() {
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Auth API hoạt động bình thường");
-        response.put("timestamp", String.valueOf(System.currentTimeMillis()));
-        return ResponseEntity.ok(response);
-    }
-    
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignupRequest signupRequest) {
         try {
@@ -169,6 +161,29 @@ public class AuthController {
             Map<String, String> response = new HashMap<>();
             response.put("error", e.getMessage());
             return ResponseEntity.badRequest().body(response);
+        }
+    }
+    
+    @DeleteMapping("/account")
+    public ResponseEntity<?> deleteAccount(org.springframework.security.core.Authentication authentication) {
+        String email = authentication.getName();
+        accountService.deleteAccount(email);
+        return ResponseEntity.ok(Map.of("message", "Tài khoản đã bị xóa!"));
+    }
+    
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(
+            @RequestBody Map<String, String> body,
+            org.springframework.security.core.Authentication authentication) {
+        String email = authentication.getName();
+        String oldPassword = body.get("oldPassword");
+        String newPassword = body.get("newPassword");
+        String confirmNewPassword = body.get("confirmNewPassword");
+        try {
+            String message = accountService.changePassword(email, oldPassword, newPassword, confirmNewPassword);
+            return ResponseEntity.ok(Map.of("message", message));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
         }
     }
 } 

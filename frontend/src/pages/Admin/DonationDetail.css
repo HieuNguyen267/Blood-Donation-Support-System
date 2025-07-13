@@ -177,26 +177,113 @@
   top: 32px;
   right: 32px;
   z-index: 9999;
-  min-width: 220px;
-  max-width: 320px;
-  padding: 16px 28px;
-  border-radius: 8px;
-  font-size: 1.08rem;
+  min-width: 280px;
+  max-width: 400px;
+  padding: 18px 24px;
+  border-radius: 12px;
+  font-size: 1.1rem;
   font-weight: 600;
   color: #fff;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
-  animation: toast-in 0.3s;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15), 0 4px 10px rgba(0,0,0,0.1);
+  animation: toast-in 0.4s ease-out;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 .custom-toast.success {
-  background: #22c55e;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-left: 4px solid #047857;
 }
 .custom-toast.error {
-  background: #e74c3c;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border-left: 4px solid #b91c1c;
+}
+.custom-toast.warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border-left: 4px solid #b45309;
 }
 @keyframes toast-in {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+  0% { 
+    opacity: 0; 
+    transform: translateX(100%) scale(0.9); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateX(0) scale(1); 
+  }
+} 
+
+.send-blood-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.send-blood-select, .send-blood-input {
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 15px;
+  background: #fff;
+  transition: border 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+.send-blood-select:focus, .send-blood-input:focus {
+  border-color: #2563eb;
+  outline: none;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+}
+.send-blood-remove {
+  background: none;
+  border: none;
+  color: #dc2626;
+  font-size: 20px;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.send-blood-remove:hover {
+  background: #fee2e2;
+}
+.send-blood-add {
+  margin-bottom: 12px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1.5px solid #e5e7eb;
+  background: #f3f4f6;
+  color: #2563eb;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, border 0.2s;
+}
+.send-blood-add:hover {
+  background: #e0e7ff;
+  border-color: #2563eb;
+} 
+.status-orange {
+  color: #f59e0b !important;
+  font-weight: 700;
+}
+.status-blue {
+  color: #3b82f6 !important;
+  font-weight: 700;
+}
+.status-green {
+  color: #059669 !important;
+  font-weight: 700;
+}
+.status-red {
+  color: #dc2626 !important;
+  font-weight: 700;
+}
+.status-gray {
+  color: #6b7280 !important;
+  font-weight: 700;
 } 

@@ -10,19 +10,21 @@ import lombok.NoArgsConstructor;
 public class JwtResponse {
     private String token;
     private String type = "Bearer";
-    private Long id;
+    private Integer id;
     private String email;
     private String firstName;
     private String lastName;
     private String role;
+    private Integer facilityId;
     
-    public JwtResponse(String token, Long id, String email, String firstName, String lastName, String role) {
+    public JwtResponse(String token, Integer id, String email, String firstName, String lastName, String role, Integer facilityId) {
         this.token = token;
         this.id = id;
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
         this.role = role;
+        this.facilityId = facilityId;
     }
     
     // Manual getters and setters
@@ -42,11 +44,11 @@ public class JwtResponse {
         this.type = type;
     }
     
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
     
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
     
@@ -80,5 +82,13 @@ public class JwtResponse {
     
     public void setRole(String role) {
         this.role = role;
+    }
+    
+    public Integer getFacilityId() {
+        return facilityId;
+    }
+    
+    public void setFacilityId(Integer facilityId) {
+        this.facilityId = facilityId;
     }
 } 

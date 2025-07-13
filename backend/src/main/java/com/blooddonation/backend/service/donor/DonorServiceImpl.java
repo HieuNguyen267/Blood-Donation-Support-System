@@ -1,15 +1,12 @@
 package com.blooddonation.backend.service.donor;
-
 import com.blooddonation.backend.entity.donor.Donor;
 import com.blooddonation.backend.repository.donor.DonorRepository;
-import com.blooddonation.backend.service.donor.DonorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.blooddonation.backend.dto.donor.DonorDTO;
 import com.blooddonation.backend.entity.admin.BloodGroup;
 import com.blooddonation.backend.repository.admin.BloodGroupRepository;
 import java.time.LocalDate;
-
 import java.util.List;
 
 @Service
@@ -18,7 +15,6 @@ public class DonorServiceImpl implements DonorService {
     @Autowired
     private BloodGroupRepository bloodGroupRepository;
 
-    @Autowired
     public DonorServiceImpl(DonorRepository donorRepository) {
         this.donorRepository = donorRepository;
     }
@@ -45,7 +41,22 @@ public class DonorServiceImpl implements DonorService {
 
     @Override
     public Donor getDonorByEmail(String email) {
-        return donorRepository.findByEmail(email).orElse(null);
+        Donor donor = donorRepository.findByEmail(email).orElse(null);
+        if (donor != null && donor.getAvailableUntil() != null) {
+            java.time.LocalDate today = java.time.LocalDate.now();
+            if (donor.getAvailableUntil().isBefore(today)) {
+                donor.setIsEligible(false);
+                donor.setAvailableFrom(null);
+                donor.setAvailableUntil(null);
+                donorRepository.save(donor);
+            }
+        }
+        return donor;
+    }
+
+    @Override
+    public List<Donor> getEligibleDonors() {
+        return donorRepository.findEligibleDonors();
     }
 
     public Donor saveOrUpdateDonorFromDTO(DonorDTO dto, Donor donor) {
@@ -58,6 +69,7 @@ public class DonorServiceImpl implements DonorService {
         donor.setPhone(dto.getPhone());
         donor.setEmail(dto.getEmail());
         donor.setJob(dto.getJob());
+        donor.setWeight(dto.getWeight());
         if (dto.getBloodGroup() != null) {
             String bg = dto.getBloodGroup();
             String aboType = bg.replace("+", "").replace("-", "");

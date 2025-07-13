@@ -12,20 +12,34 @@ const Settings = () => {
       case 'general':
         return (
           <div className="settings-card">
-            <h3>Cài đặt chung</h3>
+            <h3>Thông tin cá nhân</h3>
             <div className="form-group">
-              <label htmlFor="language">Ngôn ngữ</label>
-              <select id="language" name="language" className="form-control">
-                <option value="vi">Tiếng Việt</option>
-                <option value="en">English</option>
+              <label htmlFor="fullname">Họ và tên</label>
+              <input type="text" id="fullname" name="fullname" className="form-control" defaultValue="Admin Nguyen" />
+            </div>
+            <div className="form-group">
+              <label htmlFor="email">Email</label>
+              <input type="email" id="email" name="email" className="form-control" defaultValue="admin.nguyen@example.com" />
+            </div>
+            <div className="form-group">
+              <label htmlFor="phone">Số điện thoại</label>
+              <input type="tel" id="phone" name="phone" className="form-control" defaultValue="(+84) 123 456 789" />
+            </div>
+            <div className="form-group">
+              <label htmlFor="address">Địa chỉ</label>
+              <input type="text" id="address" name="address" className="form-control" defaultValue="123 Đường ABC, Quận XYZ, Hà Nội" />
+            </div>
+            <div className="form-group">
+              <label htmlFor="gender">Giới tính</label>
+              <select id="gender" name="gender" className="form-control" defaultValue="Nam">
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+                <option value="Khác">Khác</option>
               </select>
             </div>
             <div className="form-group">
-              <label htmlFor="timezone">Múi giờ</label>
-              <select id="timezone" name="timezone" className="form-control">
-                <option value="gmt7">(GMT+07:00) Bangkok, Hanoi, Jakarta</option>
-                <option value="gmt8">(GMT+08:00) Kuala Lumpur, Singapore</option>
-              </select>
+              <label htmlFor="dob">Ngày sinh</label>
+              <input type="date" id="dob" name="dob" className="form-control" defaultValue="1990-01-01" />
             </div>
           </div>
         );

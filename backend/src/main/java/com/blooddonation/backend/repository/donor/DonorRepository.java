@@ -1,11 +1,8 @@
 package com.blooddonation.backend.repository.donor;
-
 import com.blooddonation.backend.entity.donor.Donor;
-import com.blooddonation.backend.entity.admin.BloodGroup;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -18,7 +15,6 @@ public interface DonorRepository extends JpaRepository<Donor, Integer> {
     
     List<Donor> findByBloodGroupBloodGroupId(Integer bloodGroupId);
     
-    // Analytics methods
     @Query("SELECT " +
            "CASE " +
            "  WHEN YEAR(CURRENT_DATE) - YEAR(d.dateOfBirth) < 18 THEN 'Under 18' " +
@@ -38,4 +34,9 @@ public interface DonorRepository extends JpaRepository<Donor, Integer> {
 
     @Query("SELECT d FROM Donor d WHERE d.account.email = :email")
     Optional<Donor> findByEmail(@org.springframework.data.repository.query.Param("email") String email);
+
+    void deleteByAccount_AccountId(Integer accountId);
+
+    @Query("SELECT d FROM Donor d WHERE d.isEligible = true")
+    List<Donor> findEligibleDonors();
 } 

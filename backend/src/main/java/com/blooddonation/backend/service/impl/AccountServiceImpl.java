@@ -5,6 +5,7 @@ import com.blooddonation.backend.dto.auth.LoginRequest;
 import com.blooddonation.backend.dto.auth.SignupRequest;
 import com.blooddonation.backend.entity.common.Account;
 import com.blooddonation.backend.repository.common.AccountRepository;
+import com.blooddonation.backend.repository.donor.DonorRepository;
 import com.blooddonation.backend.security.jwt.JwtTokenProvider;
 import com.blooddonation.backend.service.common.EmailService;
 import org.slf4j.Logger;
@@ -16,11 +17,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
+
 
 @Service
 public class AccountServiceImpl implements com.blooddonation.backend.service.AccountService {
@@ -40,6 +43,9 @@ public class AccountServiceImpl implements com.blooddonation.backend.service.Acc
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private DonorRepository donorRepository;
 
     // Map lưu tạm thông tin đăng ký: key là email, value là SignupCache
     private final Map<String, SignupCache> signupCacheMap = new ConcurrentHashMap<>();
@@ -88,10 +94,9 @@ public class AccountServiceImpl implements com.blooddonation.backend.service.Acc
         // Tạo account và lưu vào database
         Account account = new Account();
         account.setEmail(signupRequest.getEmail());
-        String username = signupRequest.getFirstName() + " " + signupRequest.getLastName();
-        account.setUsername(username);
+        account.setUsername(signupRequest.getEmail());
         account.setPasswordHash(passwordEncoder.encode(signupRequest.getPassword()));
-        account.setRole("USER");
+        account.setRole("DONOR");
         account.setIsActive(true);
         account.setCreatedAt(LocalDateTime.now());
         account.setUpdatedAt(LocalDateTime.now());
@@ -109,8 +114,8 @@ public class AccountServiceImpl implements com.blooddonation.backend.service.Acc
         String jwt = jwtTokenProvider.generateToken(authentication);
         Account account = accountRepository.findByEmail(loginRequest.getEmail())
             .orElseThrow(() -> new RuntimeException("Không tìm thấy account"));
-        Long id = account.getAccountId() != null ? account.getAccountId().longValue() : null;
-        return new JwtResponse(jwt, id, account.getEmail(), null, null, account.getRole());
+        Integer id = account.getAccountId();
+        return new JwtResponse(jwt, id, account.getEmail(), null, null, account.getRole().toUpperCase(), null);
     }
 
     @Override
@@ -180,6 +185,29 @@ public class AccountServiceImpl implements com.blooddonation.backend.service.Acc
     @Override
     public String signup(SignupRequest signupRequest) {
         return preSignup(signupRequest);
+    }
+
+    @Override
+    public String changePassword(String email, String oldPassword, String newPassword, String confirmNewPassword) {
+        Account account = findByEmail(email);
+        if (!passwordEncoder.matches(oldPassword, account.getPasswordHash())) {
+            throw new RuntimeException("Mật khẩu cũ không đúng");
+        }
+        if (!newPassword.equals(confirmNewPassword)) {
+            throw new RuntimeException("Mật khẩu mới và xác nhận không khớp");
+        }
+        account.setPasswordHash(passwordEncoder.encode(newPassword));
+        accountRepository.save(account);
+        return "Đổi mật khẩu thành công";
+    }
+
+    @Override
+    @Transactional
+    public void deleteAccount(String email) {
+        Account account = findByEmail(email);
+        // Xóa donor liên kết trước (nếu có)
+        donorRepository.deleteByAccount_AccountId(account.getAccountId());
+        accountRepository.delete(account);
     }
 
     private String generateVerificationCode() {

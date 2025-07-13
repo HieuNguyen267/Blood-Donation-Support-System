@@ -1,81 +1,134 @@
 import React, { useEffect, useState } from "react";
-import "./CertificatePage.css";
 import Header from "../../../components/user/Header";
 import Footer from "../../../components/user/Footer";
+import { Button, Spin } from "antd";
 import { Link } from "react-router-dom";
-import { certificatesAPI } from "../../../services/api";
+import "./CertificatePage.css";
+import { donorAPI } from '../../../services/api';
 
 export default function CertificatePage() {
-  const [formData, setFormData] = useState(null);
+  const [certificates, setCertificates] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedData = localStorage.getItem("certificateFormData");
-    if (storedData) {
-      const parsedData = JSON.parse(storedData);
-      setFormData(parsedData);
-
-      // ✅ Xoá sau khi load để không hiển thị lại sau khi reload/truy cập lại
-      localStorage.removeItem("certificateFormData");
-    }
+    donorAPI.getCertificates()
+      .then((certs) => {
+        setCertificates(Array.isArray(certs) ? certs : []);
+      })
+      .catch(() => setCertificates([]))
+      .finally(() => setLoading(false));
   }, []);
 
   return (
     <>
       <Header />
-      <div className="certificate-container">
-        <div className="certificate-box">
-          {/* Ẩn đoạn giới thiệu nếu đã có dữ liệu */}
-          {!formData && (
-            <p>
-              Thêm giấy chứng nhận hiến máu của bạn tại đây. Nếu bạn chưa từng đặt
-              lịch hiến trên hệ thống, hãy nhớ cập nhật thông tin cá nhân của bạn
-              trước khi thực hiện thao tác này để quản trị có thể đối chiếu thông tin.
-            </p>
-          )}
-
-          {/* Nút Thêm/Chỉnh sửa */}
-          <div className="donate-btn-wrap">
-            <Link to="/certificateform">
-              <button className="add-btn">
-                {formData ? "Chỉnh sửa chứng nhận" : "Thêm chứng nhận"}
-              </button>
-            </Link>
-          </div>
-
-          {/* Hiển thị dữ liệu nếu có */}
-          {formData && (
-            <div className="certificate-info">
-              <h3>🩸 Thông tin chứng nhận:</h3>
-
-              {formData.imageUrl && (
-                <div className="certificate-image">
-                  <img
-                    src={formData.imageUrl}
-                    alt="Chứng nhận hiến máu"
-                    style={{
-                      maxWidth: "300px",
-                      marginBottom: "12px",
-                      borderRadius: "8px",
-                      border: "1px solid #ccc",
-                      padding: "4px",
-                      backgroundColor: "#fff",
-                    }}
-                  />
+      <div style={{ minHeight: 'calc(100vh - 64px - 64px)', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 16 }}>
+        <h2 style={{ textAlign: 'center', margin: '12px 0 18px 0' }}>Chứng nhận Hiến Máu Tình Nguyện</h2>
+      {loading ? (
+          <div style={{ textAlign: 'center', padding: 40 }}><Spin /> Đang tải chứng nhận...</div>
+        ) : certificates.length > 0 ? (
+          <div className="certificate-list-modern">
+            {certificates.map(cert => (
+              <div className="certificate-card-modern" key={cert.certificateId}>
+                <div className="certificate-card-left">
+                  <div className="blood-drop-icon">🩸</div>
+                  <div className="certificate-type">Chứng nhận</div>
                 </div>
-              )}
-
-              <p><strong>Họ và tên:</strong> {formData.fullName}</p>
-              <p><strong>Giấy tờ tùy thân:</strong> {formData.idNumber}</p>
-              <p><strong>Ngày sinh:</strong> {formData.birthDate}</p>
-              <p><strong>Địa chỉ:</strong> {formData.address}</p>
-              <p><strong>Cơ sở tiếp nhận máu:</strong> {formData.facility}</p>
-              <p><strong>Lượng máu (ml):</strong> {formData.amount}</p>
-              <p><strong>Số seri:</strong> {formData.serial}</p>
-            </div>
-          )}
+                <div className="certificate-card-main">
+                  <div className="certificate-title" style={{fontWeight: 'bold', fontSize: 18}}>
+                    Chứng nhận Hiến Máu Tình Nguyện
+                  </div>
+                  <div className="certificate-info-row">
+                    <span className="certificate-info-label">Ngày cấp:</span> <span>{cert.issuedDate}</span>
+                  </div>
+                  <div className="certificate-info-row">
+                    <span className="certificate-info-label">Số lượng máu:</span> <span>{cert.bloodVolume ? cert.bloodVolume + ' ml' : '-'}</span>
+                  </div>
+                  <div className="certificate-info-row">
+                    <span className="certificate-info-label">Ghi chú:</span> <span>{cert.notes || '-'}</span>
+                  </div>
+                </div>
+                <div className="certificate-card-right">
+                  <Link to={`/certificate/${cert.certificateId}`} className="details-link">
+                    Xem chi tiết
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+      ) : (
+        <div className="certificate-empty">
+          Bạn chưa có chứng nhận hiến máu nào.
         </div>
+      )}
       </div>
       <Footer />
+      <style>{`
+        .certificate-list-modern {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+          max-width: 700px;
+          margin: 0;
+          align-items: center;
+        }
+        .certificate-card-modern {
+          display: flex;
+          align-items: center;
+          background: #fff;
+          border-radius: 12px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+          padding: 20px 28px;
+          gap: 18px;
+          transition: box-shadow 0.2s;
+        }
+        .certificate-card-modern:hover {
+          box-shadow: 0 4px 16px rgba(76,175,80,0.15);
+        }
+        .certificate-card-left {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          margin-right: 12px;
+        }
+        .blood-drop-icon {
+          font-size: 32px;
+          margin-bottom: 4px;
+        }
+        .certificate-type {
+          font-size: 13px;
+          color: #1890ff;
+        }
+        .certificate-card-main {
+          flex: 1;
+        }
+        .certificate-title {
+          margin-bottom: 6px;
+        }
+        .certificate-info-row {
+          font-size: 15px;
+          margin-bottom: 2px;
+        }
+        .certificate-info-label {
+          color: #888;
+          margin-right: 4px;
+        }
+        .certificate-card-right {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          min-width: 110px;
+        }
+        .details-link {
+          color: #1890ff;
+          font-weight: 500;
+          text-decoration: none;
+          font-size: 15px;
+        }
+        .details-link:hover {
+          text-decoration: underline;
+        }
+      `}</style>
     </>
   );
 }

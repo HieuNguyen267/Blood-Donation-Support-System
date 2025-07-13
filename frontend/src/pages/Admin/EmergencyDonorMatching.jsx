@@ -1,12 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import Header from "../../components/admin/Header";
 import Sidebar from "../../components/admin/Sidebar";
+import { bloodRequestAPI } from '../../services/api';
+import { message } from 'antd';
 
 export default function EmergencyDonorMatching() {
   const { requestId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const [loading, setLoading] = useState({});
 
   // Lấy dữ liệu đơn từ location.state nếu có
   const request = location.state?.request || {
@@ -28,13 +31,28 @@ export default function EmergencyDonorMatching() {
   } catch {}
   if (!donors || donors.length === 0) {
     donors = [
-      { name: "Nguyễn Văn D", blood: "A+", phone: "0909123123", ready: "Có", address: "Q1", age: 30 },
-      { name: "Trần Thị E", blood: "A+", phone: "0912345678", ready: "Có", address: "Q3", age: 25 },
-      { name: "Lê Văn F", blood: "A+", phone: "0987654321", ready: "Không", address: "Q5", age: 28 },
+      { id: 1, name: "Nguyễn Văn D", blood: "A+", phone: "0909123123", ready: "Có", address: "Q1", age: 30 },
+      { id: 2, name: "Trần Thị E", blood: "A+", phone: "0912345678", ready: "Có", address: "Q3", age: 25 },
+      { id: 3, name: "Lê Văn F", blood: "A+", phone: "0987654321", ready: "Không", address: "Q5", age: 28 },
     ];
   }
   // Lọc người hiến sẵn sàng và cùng nhóm máu
   const matchedDonors = donors.filter(d => d.ready === 'Có' && d.blood === request.blood_group);
+
+  // Hàm xử lý gửi mail khẩn cấp
+  const handleContactDonor = async (donorId, donorName) => {
+    setLoading(prev => ({ ...prev, [donorId]: true }));
+    
+    try {
+      await bloodRequestAPI.contactDonorForEmergency(requestId, donorId);
+      message.success(`Đã gửi email yêu cầu hiến máu khẩn cấp cho ${donorName}`);
+    } catch (error) {
+      console.error('Error sending emergency email:', error);
+      message.error(`Lỗi khi gửi email: ${error.message || 'Lỗi không xác định'}`);
+    } finally {
+      setLoading(prev => ({ ...prev, [donorId]: false }));
+    }
+  };
 
   return (
     <div className="dashboard-root">
@@ -72,7 +90,15 @@ export default function EmergencyDonorMatching() {
                     <td>{d.age || ''}</td>
                     <td>{d.address || ''}</td>
                     <td>{d.phone}</td>
-                    <td><button className="btn btn-success btn-sm">Liên hệ</button></td>
+                    <td>
+                      <button 
+                        className="btn btn-success btn-sm"
+                        onClick={() => handleContactDonor(d.id, d.name)}
+                        disabled={loading[d.id]}
+                      >
+                        {loading[d.id] ? 'Đang gửi...' : 'Liên hệ'}
+                      </button>
+                    </td>
                   </tr>
                 )) : (
                   <tr><td colSpan={6} className="text-center text-secondary">Không có người hiến phù hợp</td></tr>

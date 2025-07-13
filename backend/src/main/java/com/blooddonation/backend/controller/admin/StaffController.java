@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/staff")
+@RequestMapping("/admin-staff")
 @CrossOrigin(origins = "*")
 public class StaffController {
 
@@ -32,7 +32,15 @@ public class StaffController {
 
     @GetMapping("/account/{accountId}")
     public ResponseEntity<List<StaffDTO>> getStaffByAccountId(@PathVariable Integer accountId) {
+        System.out.println("Getting staff by accountId: " + accountId);
         List<StaffDTO> staff = staffService.getStaffByAccountId(accountId);
+        System.out.println("Found staff count: " + staff.size());
+        if (!staff.isEmpty()) {
+            System.out.println("First staff: " + staff.get(0).getFullName());
+            System.out.println("First staff ID: " + staff.get(0).getStaffId());
+        } else {
+            System.out.println("No staff found for accountId: " + accountId);
+        }
         return ResponseEntity.ok(staff);
     }
 
@@ -42,6 +50,28 @@ public class StaffController {
             StaffDTO createdStaff = staffService.createStaff(staffDTO);
             return ResponseEntity.ok(createdStaff);
         } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PostMapping("/create-default/{accountId}")
+    public ResponseEntity<StaffDTO> createDefaultStaff(@PathVariable Integer accountId) {
+        try {
+            // Create default staff for account
+            StaffDTO defaultStaff = new StaffDTO();
+            defaultStaff.setAccountId(accountId);
+            defaultStaff.setFullName("Admin User");
+            defaultStaff.setEmail("admin@system.com");
+            defaultStaff.setGender("other");
+            defaultStaff.setAddress("System Address");
+            defaultStaff.setPhone("0000000000");
+            defaultStaff.setDateOfBirth(java.time.LocalDate.of(1990, 1, 1));
+            
+            StaffDTO createdStaff = staffService.createStaff(defaultStaff);
+            System.out.println("Created default staff for accountId: " + accountId);
+            return ResponseEntity.ok(createdStaff);
+        } catch (Exception e) {
+            System.out.println("Error creating default staff: " + e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }

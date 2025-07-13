@@ -8,6 +8,9 @@
   justify-content: space-between;
   align-items: flex-start;
   position: relative;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
 }
 
 .step-item {
@@ -43,9 +46,11 @@
 }
 
 /* Active State */
-.step-item.active .step-circle {
+.step-item.active .step-circle,
+.step-item.current .step-circle {
   background-color: #4CAF50;
   border-color: #4CAF50;
+  color: white;
 }
 .step-item.active .step-title {
   color: #333;
@@ -55,7 +60,7 @@
 }
 
 /* Connector Line */
-.step-connector {
+/* .step-connector {
   position: absolute;
   top: 15px;
   left: 12.5%;
@@ -64,7 +69,7 @@
   background-color: #ccc;
   z-index: -1;
   width: 75%;
-}
+} */
 
 .step-progress::before {
   content: '';

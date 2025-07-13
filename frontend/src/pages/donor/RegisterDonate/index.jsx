@@ -1,112 +1,127 @@
-import { Button, Form, Input, Select, DatePicker, Layout, Typography } from "antd";
+import { Button, Form, Input, Select, DatePicker, Layout, Typography, message } from "antd";
 import { MailOutlined, PhoneOutlined, UserOutlined, CalendarOutlined, EnvironmentOutlined } from "@ant-design/icons";
 import Header from "../../../components/user/Header";
 import Footer from "../../../components/user/Footer";
-import StepProgress from "../../../components/user/StepProgress";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import moment from "moment";
+import { donorAPI } from '../../../services/api';
 
 import "./index.css";
 const { Content } = Layout;
 const { Title } = Typography;
 const { Option } = Select;
 
+// Hàm chuyển đổi nhóm máu
+function formatBloodGroup(bloodGroup) {
+  if (!bloodGroup) return '';
+  return bloodGroup
+    .replace('positive', '+')
+    .replace('negative', '-');
+}
+
 export default function RegisterDonate() {
   const [form] = Form.useForm();
   const location = useLocation();
   const navigate = useNavigate();
   const defaultAddress = "466 Nguyễn Thị Minh Khai Phường 02, Quận 3, Tp Hồ Chí Minh";
-  const [isDateSelected, setIsDateSelected] = useState(false);
-  const [maxBloodVolume, setMaxBloodVolume] = useState(450);
-
-  // Lấy userInfo từ localStorage
-  const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
-
-  const donorId = userInfo.donorId;
-
-  // Hàm tính toán số lượng máu tối đa
-  const calculateMaxBloodVolume = (weight, gender) => {
-    if (!weight || !gender) return 450;
-    const w = parseFloat(weight);
-    if (isNaN(w)) return 450;
-    if (gender === "Nam") {
-      return Math.min(w * 8, w * 9, 450);
-    } else if (gender === "Nữ") {
-      return Math.min(w * 7, w * 9, 450);
-    }
-    return 450;
-  };
+  const [profile, setProfile] = useState({});
+  const [lastDonationDisabled, setLastDonationDisabled] = useState(false);
 
   useEffect(() => {
     const preselectedDate = location.state?.date;
     const initialValues = {
       address: defaultAddress,
-      fullName: userInfo.fullName || "",
-      phone: userInfo.phone || "",
-      email: userInfo.email || "",
-      weight: userInfo.weight || "",
-      sampleGroup: userInfo.bloodGroup || "",
-      gender: userInfo.gender || "",
-      // Có thể bổ sung thêm các trường khác nếu userInfo có
     };
-    // Tính maxBloodVolume khi load lần đầu
-    const max = calculateMaxBloodVolume(userInfo.weight, userInfo.gender);
-    console.log("Tính maxBloodVolume lần đầu:", userInfo.weight, userInfo.gender, "=>", max);
-    setMaxBloodVolume(max);
     if (preselectedDate) {
       initialValues.sendTime = moment(preselectedDate, "YYYY-MM-DD");
-      setIsDateSelected(true); // Enable time slots if date is pre-selected
     }
-    form.setFieldsValue(initialValues);
-  }, [location.state, form, userInfo]);
+    // Lấy profile
+    donorAPI.getProfile().then((data) => {
+      setProfile(data);
+      let lastDonation = undefined;
+      let disableLastDonation = false;
+      if (data.lastDonationDate) {
+        lastDonation = moment(data.lastDonationDate);
+        disableLastDonation = true;
+      }
+      const setValues = {
+        fullName: data.fullName,
+        phone: data.phone,
+        email: data.email,
+        donateLast: lastDonation,
+        sampleGroup: formatBloodGroup(data.bloodGroup),
+        ...initialValues
+      };
+      // KHÔNG set readyTimeRange ở đây để tránh mất giá trị người dùng chọn
+      form.setFieldsValue(setValues);
+      setLastDonationDisabled(disableLastDonation);
+    });
+  }, [location.state, form]);
 
   const handleFormChange = (changedValues, allValues) => {
-    if ("sendTime" in changedValues) {
-      setIsDateSelected(!!changedValues.sendTime);
-    }
-    // Khi thay đổi cân nặng hoặc gender, tính lại maxBloodVolume
-    if ("weight" in changedValues || "gender" in changedValues) {
-      const weight = allValues.weight;
-      const gender = allValues.gender || userInfo.gender;
-      const max = calculateMaxBloodVolume(weight, gender);
-      console.log("Tính maxBloodVolume với:", weight, gender, "=>", max);
-      setMaxBloodVolume(max);
-      if (allValues.sampleQuantity && parseInt(allValues.sampleQuantity) > max) {
-        form.setFieldsValue({ sampleQuantity: undefined });
-      }
-    }
+    console.log('onValuesChange:', changedValues, allValues);
   };
 
-  const handleSubmit = (values) => {
-    // Lấy lịch sử cũ từ localStorage
-    const existingHistory = JSON.parse(localStorage.getItem("appointmentHistory")) || [];
+  // Hàm chuyển đổi moment hoặc string hoặc Date sang YYYY-MM-DD
+  const toDateString = (val) => {
+    if (!val) return '';
+    if (typeof val === 'string') return val;
+    if (val._isAMomentObject) return val.format('YYYY-MM-DD');
+    if (val instanceof Date) return moment(val).format('YYYY-MM-DD');
+    if (val.$d) return moment(val.$d).format('YYYY-MM-DD'); // Trường hợp dayjs hoặc moment clone
+    return '';
+  };
 
-    // Tạo lịch hẹn mới với đầy đủ thông tin
-    const newAppointment = {
-      id: Date.now(),
-      status: 'active', // 'active' or 'cancelled'
-      fullName: values.fullName,
-      phone: values.phone,
-      email: values.email,
-      address: values.address,
-      weight: values.weight,
-      sampleGroup: values.sampleGroup,
-      sampleQuantity: values.sampleQuantity,
-      donateLast: values.donateLast ? moment(values.donateLast).format("DD/MM/YYYY") : null,
-      sendDate: values.sendTime ? moment(values.sendTime).format("DD/MM/YYYY") : null,
-      donationTimeSlot: values.donationTimeSlot,
-      healthStatus: values.status,
-    };
-
-    // Thêm lịch hẹn mới vào đầu danh sách
-    const updatedHistory = [newAppointment, ...existingHistory];
-
-    // Lưu lại vào localStorage
-    localStorage.setItem("appointmentHistory", JSON.stringify(updatedHistory));
-
-    // Chuyển hướng đến trang lịch sử đặt hẹn
-    navigate("/appointmenthistory");
+  const handleSubmit = async (values) => {
+    try {
+      // Lấy profile mới nhất
+      const profile = await donorAPI.getProfile();
+      // 1. Kiểm tra đơn hiến máu chưa hoàn thành
+      const donationHistory = await donorAPI.getDonationHistory();
+      const hasActiveDonation = donationHistory && donationHistory.some(d =>
+        d.donationStatus !== 'deferred' &&
+        d.donationStatus !== 'completed' &&
+        d.status !== 'Not meeting health requirements'
+      );
+      if (hasActiveDonation) {
+        message.error('Bạn đã đăng ký hiến máu rồi. Vui lòng hoàn thành hoặc hủy đơn trước khi đăng ký mới.');
+        return;
+      }
+      // 2. Kiểm tra trạng thái sẵn sàng hiến máu
+      if (profile.isEligible) {
+        const now = moment();
+        const availableFrom = profile.availableFrom ? moment(profile.availableFrom) : null;
+        const availableUntil = profile.availableUntil ? moment(profile.availableUntil) : null;
+        if (
+          (availableFrom && now.isBefore(availableFrom, 'day')) ||
+          (availableFrom && availableUntil && now.isBetween(availableFrom, availableUntil, 'day', '[]')) ||
+          (availableUntil && now.diff(availableUntil, 'days') < 84)
+        ) {
+          message.error('Bạn đã đăng ký sẵn sàng hiến máu, không thể đăng ký hiến máu ngay bây giờ.');
+          return;
+        }
+      }
+      // 3. Nếu hợp lệ, cập nhật profile
+      const [from, until] = values.readyTimeRange || [];
+      console.log('readyTimeRange:', values.readyTimeRange, 'from:', from, 'until:', until, 'from type:', typeof from, 'until type:', typeof until);
+      const availableFrom = toDateString(from);
+      const availableUntil = toDateString(until);
+      if (!availableFrom || !availableUntil) {
+        message.error('Vui lòng chọn thời điểm sẵn sàng hiến máu!');
+        return;
+      }
+      await donorAPI.updateProfile({
+        availableFrom,
+        availableUntil,
+        isEligible: true,
+        note: values.status || ''
+      });
+      message.success('Đăng ký sẵn sàng hiến máu thành công!');
+      navigate('/registerdonate');
+    } catch (error) {
+      message.error('Có lỗi xảy ra khi đăng ký: ' + (error.message || ''));
+    }
   };
 
   return (
@@ -114,10 +129,16 @@ export default function RegisterDonate() {
       <Header />
       <div className="form-header">
         <Title level={2} className="form-title">
-          Đăng ký hiến máu
+          Đăng ký sẵn sàng hiến máu
         </Title>
-        <div className="step-progress-wrapper">
-          <StepProgress />
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginBottom: 32 }}>
+          <Button type="primary" style={{ minWidth: 200, fontWeight: 600, fontSize: 16, boxShadow: '0 2px 6px #0001', background: '#52c41a', borderColor: '#52c41a', color: '#fff' }}>
+            Đăng ký thời điểm sẵn sàng hiến máu
+          </Button>
+          <Button style={{ minWidth: 200, fontWeight: 600, fontSize: 16, background: '#fff', color: '#222', border: '1.5px solid #888', boxShadow: '0 2px 6px #0001' }}
+            onClick={() => navigate('/booking-antd')}>
+            Đăng kí hiến máu theo thời gian
+          </Button>
         </div>
       </div>
 
@@ -129,101 +150,56 @@ export default function RegisterDonate() {
             onFinish={handleSubmit}
             onValuesChange={handleFormChange}
           >
-            <Form.Item label="Họ và tên *" name="fullName" rules={[{ required: true }]}>
-              <Input prefix={<UserOutlined />} placeholder="Nhập họ tên" />
+            <Form.Item label="Họ và tên" name="fullName" rules={[{ required: true }]}>
+              <Input prefix={<UserOutlined />} placeholder="Nhập họ tên" readOnly />
             </Form.Item>
-
-            <Form.Item label="Số điện thoại *" name="phone" rules={[{ required: true }]}>
-              <Input prefix={<PhoneOutlined />} placeholder="Nhập SĐT" />
+            <Form.Item label="Số điện thoại" name="phone" rules={[{ required: true }]}>
+              <Input prefix={<PhoneOutlined />} placeholder="Nhập SĐT" readOnly />
             </Form.Item>
-
-            <Form.Item label="Email *" name="email" rules={[{ required: true, type: "email" }]}>
-              <Input prefix={<MailOutlined />} placeholder="abc@gmail.com" />
+            <Form.Item label="Email" name="email" rules={[{ required: true, type: "email" }]}>
+              <Input prefix={<MailOutlined />} placeholder="abc@gmail.com" readOnly />
             </Form.Item>
-
             <Form.Item label="Địa chỉ hiến máu" name="address">
-              <Input prefix={<EnvironmentOutlined />} disabled />
+              <Input prefix={<EnvironmentOutlined />} readOnly />
             </Form.Item>
-
             <Form.Item
-              label="Cân nặng (kg) *"
-              name="weight"
-              rules={[
-                { required: true, message: "Vui lòng nhập cân nặng" },
-                {
-                  pattern: /^[0-9]{1,3}$/,
-                  message: "Cân nặng phải là số từ 1 đến 999",
-                },
-              ]}
-            >
-              <Input placeholder="Nhập cân nặng của bạn" />
-            </Form.Item>
-
-            <Form.Item
-              label="Nhóm máu *"
+              label="Nhóm máu"
               name="sampleGroup"
               rules={[{ required: true, message: "Vui lòng chọn nhóm máu" }]}
             >
-              <Select placeholder="Chọn nhóm máu">
-                <Select.Option value="A+">A+</Select.Option>
-                <Select.Option value="A-">A-</Select.Option>
-                <Select.Option value="B+">B+</Select.Option>
-                <Select.Option value="B-">B-</Select.Option>
-                <Select.Option value="O+">O+</Select.Option>
-                <Select.Option value="O-">O-</Select.Option>
-                <Select.Option value="AB+">AB+</Select.Option>
-                <Select.Option value="AB-">AB-</Select.Option>
-                <Select.Option value="Rh null">Rh null</Select.Option>
-                <Select.Option value="Bombay(hh)">Bombay (hh)</Select.Option>
-              </Select>
+              <Input readOnly value={formatBloodGroup(form.getFieldValue('sampleGroup'))} />
             </Form.Item>
-
-            <Form.Item
-              label="Số lượng máu muốn hiến (ml) *"
-              name="sampleQuantity"
-              rules={[
-                { required: true, message: "Vui lòng nhập số lượng máu" },
-                ({ getFieldValue }) => ({
-                  validator(_, value) {
-                    if (!value) return Promise.resolve();
-                    if (value < 250) return Promise.reject("Tối thiểu 250ml");
-                    if (value > maxBloodVolume) return Promise.reject(`Tối đa ${maxBloodVolume}ml theo cân nặng và giới tính`);
-                    return Promise.resolve();
-                  }
-                })
-              ]}
-            >
-              <Input
-                type="number"
-                min={250}
-                max={maxBloodVolume}
-                placeholder={`Nhập số ml (tối đa ${maxBloodVolume}ml)`}
+            <Form.Item label="Lần hiến máu gần nhất" name="donateLast">
+              <DatePicker
+                style={{ width: "100%", color: lastDonationDisabled ? '#888' : '#222' }}
+                suffixIcon={<CalendarOutlined />}
+                disabled={lastDonationDisabled}
+                inputReadOnly={lastDonationDisabled}
+                allowClear={!lastDonationDisabled}
               />
             </Form.Item>
-
-            <Form.Item label="Lần hiến máu gần nhất *" name="donateLast" rules={[{ required: true }]}>
-              <DatePicker style={{ width: "100%" }} suffixIcon={<CalendarOutlined />} />
-            </Form.Item>
-
-            <Form.Item label="Thời điểm sẵn sàng hiến máu *" name="sendTime" rules={[{ required: true }]}>
-              <DatePicker style={{ width: "100%" }} suffixIcon={<CalendarOutlined />} />
-            </Form.Item>
-
             <Form.Item
-              label="Khung giờ có thể hiến máu *"
-              name="donationTimeSlot"
-              rules={[{ required: true, message: "Vui lòng chọn khung giờ" }]}
+              label="Thời điểm sẵn sàng hiến máu"
+              name="readyTimeRange"
+              rules={[
+                { required: true, message: 'Vui lòng chọn khoảng thời gian sẵn sàng hiến máu!' },
+                { validator: (_, value) => {
+                    if (!value || value.length === 0) return Promise.resolve();
+                    const now = moment().startOf('day');
+                    const invalid = value.some(date => moment(date).isBefore(now, 'day'));
+                    if (invalid) return Promise.reject('Chỉ được chọn từ ngày hiện tại trở đi!');
+                    return Promise.resolve();
+                  }
+                }
+              ]}
             >
-              <Select placeholder="Vui lòng chọn ngày trước" disabled={!isDateSelected}>
-                <Option value="08:00-11:00">Sáng (08:00 - 11:00)</Option>
-                <Option value="13:00-16:00">Chiều (13:00 - 16:00)</Option>
-              </Select>
+              <DatePicker.RangePicker
+                style={{ width: "100%" }}
+                suffixIcon={<CalendarOutlined />}
+                disabledDate={current => current && current < moment().startOf('day')}
+              />
             </Form.Item>
-
-            <Form.Item label="Tình trạng sức khỏe *" name="status" rules={[{ required: true }]}>
-              <Input.TextArea rows={4} />
-            </Form.Item>
-
+            <Form.Item label="Tình trạng sức khỏe" name="status"> <Input.TextArea rows={4} /> </Form.Item>
             <Form.Item>
               <Button type="primary" htmlType="submit" block className="green-button">
                 Đăng ký

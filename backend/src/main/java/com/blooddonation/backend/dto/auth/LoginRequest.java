@@ -1,5 +1,4 @@
 package com.blooddonation.backend.dto.auth;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,7 +10,6 @@ public class LoginRequest {
     private String email;
     private String password;
     
-    // Manual getters and setters to ensure compilation
     public String getEmail() {
         return email;
     }

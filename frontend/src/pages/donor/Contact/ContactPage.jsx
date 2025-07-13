@@ -6,22 +6,34 @@ import { message } from 'antd';
 import './ContactPage.css';
 
 export default function ContactPage() {
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [formData, setFormData] = useState({ message: '' });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (formData.name && formData.email && formData.message) {
-      // Logic gửi form (nếu có) sẽ ở đây
-      console.log('Form data submitted:', formData);
-      
-      message.success('Gửi lời nhắn thành công!');
-      setFormData({ name: '', email: '', message: '' }); // Reset form
+    const email = localStorage.getItem('email');
+    if (formData.message && email) {
+      try {
+        const res = await fetch('http://localhost:8080/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, message: formData.message })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          message.success('Gửi lời nhắn thành công!');
+          setFormData({ message: '' });
+        } else {
+          message.error(data.error || 'Gửi lời nhắn thất bại!');
+        }
+      } catch {
+        message.error('Không thể gửi lời nhắn. Vui lòng thử lại sau.');
+      }
     } else {
-      message.error('Vui lòng điền đầy đủ thông tin.');
+      message.error('Vui lòng nhập lời nhắn.');
     }
   };
 
@@ -36,7 +48,7 @@ export default function ContactPage() {
               <MailOutlined />
               <h3>Email</h3>
             </div>
-            <p>gmv@intelin.vn</p>
+            <p>swp391.donateblood@gmail.com</p>
           </div>
           <div className="contact-section">
             <div className="contact-section-header">
@@ -63,19 +75,12 @@ export default function ContactPage() {
           <p>
             Nếu bạn có bất kì thắc mắc nào liên quan đến các hoạt động
             hiến máu tình nguyện xin liên hệ với chúng tôi qua địa chỉ
-            email gmv@intelin.vn hoặc gửi thông tin cho chúng tôi theo
+            email swp391.donateblood@gmail.com hoặc gửi thông tin cho chúng tôi theo
             mẫu bên dưới
           </p>
           <form onSubmit={handleSubmit}>
-            <label htmlFor="name">Họ và tên:</label>
-            <input type="text" id="name" value={formData.name} onChange={handleChange} required />
-
-            <label htmlFor="email">Email:</label>
-            <input type="email" id="email" value={formData.email} onChange={handleChange} required />
-
             <label htmlFor="message">Lời nhắn:</label>
             <textarea id="message" rows="4" value={formData.message} onChange={handleChange} required></textarea>
-
             <button type="submit" className="submit-message-btn">Gửi lời nhắn</button>
           </form>
         </div>

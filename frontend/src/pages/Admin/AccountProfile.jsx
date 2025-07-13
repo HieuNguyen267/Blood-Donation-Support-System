@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   FaUserCircle, FaEnvelope, FaPhone, FaMapMarkerAlt, FaVenusMars, 
   FaCalendarAlt, FaEdit, FaHistory, FaCheckCircle, FaPlusCircle, FaArrowCircleRight 
 } from 'react-icons/fa';
 import Header from '../../components/admin/Header';
 import Sidebar from '../../components/admin/Sidebar';
+import { useAdmin } from '../../contexts/AdminContext';
 import './AccountProfile.css';
 
 const AccountProfile = () => {
+  const { adminInfo, loading } = useAdmin();
+
   // Mock data for activity feed
   const activityFeed = [
     { icon: <FaCheckCircle />, text: "Đã duyệt một yêu cầu máu khẩn cấp.", time: "2 giờ trước" },
@@ -15,6 +18,8 @@ const AccountProfile = () => {
     { icon: <FaArrowCircleRight />, text: "Đã cập nhật trạng thái cho 5 đơn hiến máu.", time: "3 ngày trước" },
     { icon: <FaCheckCircle />, text: "Đã duyệt 10 tài khoản người hiến máu mới.", time: "5 ngày trước" },
   ];
+
+  if (loading) return <div>Đang tải thông tin admin...</div>;
 
   return (
     <div className="admin-dashboard">
@@ -28,12 +33,12 @@ const AccountProfile = () => {
           
           <div className="profile-banner-content">
             <div className="profile-banner-info">
-              <h2>Admin Nguyen</h2>
+              <h2>{adminInfo?.fullName || adminInfo?.full_name || "Admin"}</h2>
               <p>Quản trị viên hệ thống</p>
             </div>
             <div className="location-info">
               <FaMapMarkerAlt />
-              <span>Hà Nội, Việt Nam</span>
+              <span>{adminInfo?.address || "Chưa cập nhật"}</span>
             </div>
           </div>
           
@@ -64,35 +69,35 @@ const AccountProfile = () => {
                   <FaEnvelope className="info-icon" />
                   <div className="info-text">
                     <label>Địa chỉ Email</label>
-                    <span>admin.nguyen@example.com</span>
+                    <span>{adminInfo?.email || "Chưa cập nhật"}</span>
                   </div>
                 </div>
                 <div className="info-item">
                   <FaPhone className="info-icon" />
                   <div className="info-text">
                     <label>Số điện thoại</label>
-                    <span>(+84) 123 456 789</span>
+                    <span>{adminInfo?.phone || "Chưa cập nhật"}</span>
                   </div>
                 </div>
                 <div className="info-item">
                   <FaMapMarkerAlt className="info-icon" />
                   <div className="info-text">
                     <label>Địa chỉ</label>
-                    <span>123 Đường ABC, Quận XYZ, Hà Nội</span>
+                    <span>{adminInfo?.address || "Chưa cập nhật"}</span>
                   </div>
                 </div>
                  <div className="info-item">
                   <FaVenusMars className="info-icon" />
                   <div className="info-text">
                     <label>Giới tính</label>
-                    <span>Nam</span>
+                    <span>{adminInfo?.gender || "Chưa cập nhật"}</span>
                   </div>
                 </div>
                 <div className="info-item">
                   <FaCalendarAlt className="info-icon" />
                   <div className="info-text">
                     <label>Ngày tham gia</label>
-                    <span>15 tháng 8, 2023</span>
+                    <span>{adminInfo?.created_at ? new Date(adminInfo.created_at).toLocaleDateString('vi-VN') : "Chưa cập nhật"}</span>
                   </div>
                 </div>
               </div>

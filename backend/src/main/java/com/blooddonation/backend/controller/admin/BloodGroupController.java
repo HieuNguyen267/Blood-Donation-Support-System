@@ -2,7 +2,6 @@ package com.blooddonation.backend.controller.admin;
 
 import com.blooddonation.backend.entity.admin.BloodGroup;
 import com.blooddonation.backend.repository.admin.BloodGroupRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,7 +14,6 @@ public class BloodGroupController {
 
     private final BloodGroupRepository bloodGroupRepository;
 
-    @Autowired
     public BloodGroupController(BloodGroupRepository bloodGroupRepository) {
         this.bloodGroupRepository = bloodGroupRepository;
     }

@@ -1,0 +1,330 @@
+.emergency-detail-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px 0;
+}
+
+.emergency-detail-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.emergency-card {
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: none;
+}
+
+.emergency-card .ant-card-head {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  color: white;
+  border-radius: 12px 12px 0 0;
+  padding: 20px 24px;
+}
+
+.emergency-card .ant-card-head-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: white;
+}
+
+.emergency-alert {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  border: 2px solid #ffc107;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.alert-icon {
+  font-size: 48px;
+  margin-right: 16px;
+  animation: pulse 2s infinite;
+}
+
+.alert-content h3 {
+  margin: 0 0 8px 0;
+  color: #856404;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.alert-content p {
+  margin: 0;
+  color: #856404;
+  font-size: 16px;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.emergency-card .ant-descriptions-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.emergency-card .ant-descriptions-item-label {
+  font-weight: 600;
+  color: #555;
+  background-color: #f8f9fa;
+}
+
+.emergency-card .ant-descriptions-item-content {
+  color: #333;
+}
+
+.response-section {
+  margin-top: 32px;
+  padding: 24px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.response-question {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.response-question h3 {
+  color: #333;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.response-question p {
+  color: #666;
+  font-size: 16px;
+  margin: 0;
+}
+
+.response-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.accept-button {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border: none;
+  color: white;
+  font-weight: 600;
+  padding: 12px 24px;
+  height: auto;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.accept-button:hover {
+  background: linear-gradient(135deg, #218838 0%, #1ea085 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.decline-button {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  border: none;
+  color: white;
+  font-weight: 600;
+  padding: 12px 24px;
+  height: auto;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.decline-button:hover {
+  background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.emergency-note {
+  margin-top: 24px;
+  padding: 16px;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border-radius: 8px;
+  border-left: 4px solid #2196f3;
+}
+
+.emergency-note p {
+  margin: 0;
+  color: #1565c0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: white;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-container {
+  text-align: center;
+  color: white;
+  padding: 40px 20px;
+}
+
+.error-container h2 {
+  margin-bottom: 16px;
+  font-size: 24px;
+}
+
+.error-container p {
+  margin-bottom: 24px;
+  font-size: 16px;
+  opacity: 0.9;
+}
+
+.response-radio-group {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.response-radio {
+  display: flex;
+  align-items: center;
+  padding: 14px 28px;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  background: #fff;
+  min-width: 140px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  user-select: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 600;
+  font-size: 16px;
+}
+.response-radio.selected-accept {
+  border: 2px solid #059669;
+  background: #f0fdf4;
+  box-shadow: 0 2px 8px rgba(5,150,105,0.10);
+  color: #059669;
+}
+.response-radio.selected-decline {
+  border: 2px solid #dc2626;
+  background: #fef2f2;
+  box-shadow: 0 2px 8px rgba(220,38,38,0.10);
+  color: #dc2626;
+}
+.response-radio.dim {
+  opacity: 0.5;
+}
+.response-radio .radio-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.response-radio.selected-accept .radio-icon {
+  background: #059669;
+}
+.response-radio.selected-decline .radio-icon {
+  background: #dc2626;
+}
+.response-submit-btn {
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 16px;
+  padding: 12px 40px;
+  margin-top: 8px;
+}
+.response-submit-btn:disabled {
+  background: #e5e7eb !important;
+  color: #9ca3af !important;
+  cursor: not-allowed;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .emergency-detail-content {
+    padding: 0 16px;
+  }
+  
+  .emergency-alert {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .alert-icon {
+    margin-right: 0;
+    margin-bottom: 16px;
+  }
+  
+  .response-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .accept-button,
+  .decline-button {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .emergency-card .ant-descriptions-bordered .ant-descriptions-item-label,
+  .emergency-card .ant-descriptions-bordered .ant-descriptions-item-content {
+    padding: 12px 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .response-radio-group {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .response-radio {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .emergency-card .ant-card-head-title {
+    font-size: 20px;
+  }
+  
+  .alert-content h3 {
+    font-size: 18px;
+  }
+  
+  .response-question h3 {
+    font-size: 18px;
+  }
+} 

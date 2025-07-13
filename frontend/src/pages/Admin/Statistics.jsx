@@ -11,23 +11,40 @@ function getCurrentYear() {
   return new Date().getFullYear();
 }
 
-function countDonorsThisMonth(donors) {
-  const month = getCurrentMonth();
-  const year = getCurrentYear();
+function countDonorsInMonth(donors, month, year) {
   return donors.filter(d => {
     if (!d.last) return false;
     const date = new Date(d.last);
     return date.getMonth() + 1 === month && date.getFullYear() === year;
   }).length;
 }
-function countRequestsThisMonth(requests) {
-  const month = getCurrentMonth();
-  const year = getCurrentYear();
+function countRequestsInMonth(requests, month, year) {
   return requests.filter(r => {
     if (!r.required_by) return false;
     const date = new Date(r.required_by);
     return date.getMonth() + 1 === month && date.getFullYear() === year;
   }).length;
+}
+function countEmergencyRequestsInMonth(requests, month, year) {
+  return requests.filter(r => {
+    if (!r.required_by) return false;
+    const date = new Date(r.required_by);
+    return date.getMonth() + 1 === month && date.getFullYear() === year && (r.is_emergency === true || r.type === 'emergency');
+  }).length;
+}
+
+function countUniqueDonorsInMonth(donationProcesses, month, year) {
+  // Đếm số người hiến duy nhất trong tháng/năm chọn
+  const unique = new Set();
+  donationProcesses.forEach(d => {
+    if (!d.donateDate) return;
+    const date = new Date(d.donateDate);
+    if (date.getMonth() + 1 === month && date.getFullYear() === year) {
+      // Ưu tiên mã người hiến, nếu không có thì dùng tên
+      unique.add(d.donorId || d.name);
+    }
+  });
+  return unique.size;
 }
 
 export default function Statistics() {
@@ -57,9 +74,28 @@ export default function Statistics() {
       { required_by: "2024-06-20T09:00" },
     ];
   }
+  // Lấy dữ liệu quá trình hiến máu
+  let donationProcesses = [];
+  try {
+    const local = localStorage.getItem('donation_processes');
+    if (local) donationProcesses = JSON.parse(local);
+  } catch {}
+  if (!donationProcesses || donationProcesses.length === 0) {
+    // fallback mẫu
+    donationProcesses = [
+      { name: "Nguyễn Duy Hiếu", donateDate: "2024-07-01 09:30", donorId: "D001" },
+      { name: "Lữ Phước Nhật Tú", donateDate: "2024-07-10 08:30", donorId: "D002" },
+      { name: "Nguyễn Gia Triệu", donateDate: "2024-06-15 15:35", donorId: "D003" },
+      { name: "Nguyễn Duy Hiếu", donateDate: "2024-07-15 10:00", donorId: "D001" },
+    ];
+  }
 
-  const donorsCount = countDonorsThisMonth(donors);
-  const requestsCount = countRequestsThisMonth(requests);
+  const [selectedMonth, setSelectedMonth] = React.useState(getCurrentMonth());
+  const [selectedYear, setSelectedYear] = React.useState(getCurrentYear());
+
+  const donorsCount = countUniqueDonorsInMonth(donationProcesses, selectedMonth, selectedYear);
+  const requestsCount = countRequestsInMonth(requests, selectedMonth, selectedYear);
+  const emergencyRequestsCount = countEmergencyRequestsInMonth(requests, selectedMonth, selectedYear);
 
   // Dữ liệu cho biểu đồ cột (7 ngày gần nhất)
   const days = Array.from({length: 7}, (_,i) => {
@@ -88,18 +124,34 @@ export default function Statistics() {
       <div className="dashboard-main">
         <Sidebar />
         <main className="donor-page-root">
-          <h2 className="donor-title">Thống kê tháng {getCurrentMonth()}/{getCurrentYear()}</h2>
+          <h2 className="donor-title">Thống kê tháng {selectedMonth}/{selectedYear}</h2>
+          <div style={{display:'flex',gap:16,alignItems:'center',marginBottom:24}}>
+            <label>Chọn tháng:</label>
+            <select value={selectedMonth} onChange={e=>setSelectedMonth(Number(e.target.value))}>
+              {[...Array(12)].map((_,i)=>(<option key={i+1} value={i+1}>{i+1}</option>))}
+            </select>
+            <label>Chọn năm:</label>
+            <select value={selectedYear} onChange={e=>setSelectedYear(Number(e.target.value))}>
+              {[...Array(6)].map((_,i)=>(<option key={2020+i} value={2020+i}>{2020+i}</option>))}
+            </select>
+          </div>
           <div className="row" style={{marginBottom:32}}>
-            <div className="col-md-6">
+            <div className="col-md-4">
               <div className="stat-card" style={{background:'#e0f7fa'}}>
                 <div style={{fontSize:18, color:'#1976d2'}}>Người hiến máu trong tháng</div>
                 <div style={{fontSize:36, fontWeight:700, color:'#1976d2'}}>{donorsCount}</div>
               </div>
             </div>
-            <div className="col-md-6">
+            <div className="col-md-4">
               <div className="stat-card" style={{background:'#fff7e0'}}>
                 <div style={{fontSize:18, color:'#fb923c'}}>Đơn yêu cầu máu trong tháng</div>
                 <div style={{fontSize:36, fontWeight:700, color:'#fb923c'}}>{requestsCount}</div>
+              </div>
+            </div>
+            <div className="col-md-4">
+              <div className="stat-card" style={{background:'#ffe0e0'}}>
+                <div style={{fontSize:18, color:'#dc2626'}}>Đơn yêu cầu máu khẩn cấp trong tháng</div>
+                <div style={{fontSize:36, fontWeight:700, color:'#dc2626'}}>{emergencyRequestsCount}</div>
               </div>
             </div>
           </div>

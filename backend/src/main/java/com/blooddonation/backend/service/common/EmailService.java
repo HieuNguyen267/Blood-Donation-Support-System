@@ -7,4 +7,6 @@ public interface EmailService {
     void sendAppointmentReminder(String to, String donorName, String date);
     void sendPostDonationReminder(String to, String donorName);
     void sendRecoveryTimeReminder(String to, String donorName);
+    void sendContactEmail(String to, String subject, String content, String replyTo);
+    void sendEmergencyBloodRequestEmail(String to, String donorName, String detailUrl, String facilityName, String bloodGroup, String quantity, String requiredBy);
 } 

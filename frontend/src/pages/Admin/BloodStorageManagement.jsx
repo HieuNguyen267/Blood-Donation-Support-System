@@ -4,6 +4,7 @@ import Sidebar from "../../components/admin/Sidebar";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './BloodStorageManagement.css';
 import { validateBloodStorage, getStatusStyle } from './utils';
+import { bloodStockAPI } from '../../services/api';
 
 const bloodDataInit = [
   { code: "BP001", group: "Rh NULL", collect: "11/4/2024, 10:30", expire: "11/4/2027, 09:30", amount: 12, status: "Mới", quality: "Tốt", temp: "2 -6 °C" },
@@ -23,14 +24,14 @@ const qualityColors = {
   "Đã đông": "warning"
 };
 
-const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Rh NULL"];
+const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Rh NULL", "Bombay"];
 const statuses = ["Mới", "Đang sử dụng", "Hết hạn"];
 const qualities = ["Tốt", "Đã tiêu huỷ", "Đã đông"];
 
 const PAGE_SIZE = 8;
 
 export default function BloodStorageManagement() {
-  const [data, setData] = useState(bloodDataInit);
+  const [data, setData] = useState([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [editIdx, setEditIdx] = useState(null);
@@ -38,9 +39,89 @@ export default function BloodStorageManagement() {
   const [deleteIdx, setDeleteIdx] = useState(null);
   const [addMode, setAddMode] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
+  const [bloodType, setBloodType] = useState("Tất cả");
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    const fetchBloodStock = async () => {
+      try {
+        setLoading(true);
+        const stock = await bloodStockAPI.getStock();
+        
+        // Group by blood group and sum volumes
+        const groupedStock = stock.reduce((acc, item) => {
+          const bloodGroupKey = item.bloodGroupName || `${item.aboType}${item.rhFactor === 'positive' ? '+' : item.rhFactor === 'negative' ? '-' : item.rhFactor}`;
+          
+          if (!acc[bloodGroupKey]) {
+            acc[bloodGroupKey] = {
+              id: item.stockId,
+              group: bloodGroupKey,
+              volume: 0,
+              temp: item.temperatureRange || getTemperatureRange(item.aboType, item.rhFactor)
+            };
+          }
+          
+          acc[bloodGroupKey].volume += item.volume || 0;
+          return acc;
+        }, {});
+        
+        // Convert to array format
+        const formattedData = Object.values(groupedStock).map((item, index) => ({
+          id: index + 1,
+          group: item.group,
+          volume: item.volume,
+          temp: item.temp
+        }));
+        
+        setData(formattedData);
+      } catch (error) {
+        console.error('Error fetching blood stock:', error);
+        // Fallback to sample data if API fails
+        setData(bloodDataInit.map(item => ({
+          id: item.code,
+          group: item.group,
+          volume: item.amount,
+          temp: item.temp
+        })));
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBloodStock();
+  }, []);
+
+  // Helper function to get temperature range based on blood group
+  const getTemperatureRange = (aboType, rhFactor) => {
+    const bloodGroup = aboType + (rhFactor === 'positive' ? '+' : rhFactor === 'negative' ? '-' : rhFactor);
+    
+    switch (bloodGroup) {
+      case "A+":
+      case "A-":
+        return "2-6 °C";
+      case "B+":
+      case "B-":
+        return "6-10 °C";
+      case "AB+":
+      case "AB-":
+        return "4 °C";
+      case "O+":
+      case "O-":
+        return "20-24 °C";
+      case "Rh_Null":
+        return "2-6 °C";
+      case "Bombay":
+        return "4 °C";
+      default:
+        return "2-6 °C";
+    }
+  };
 
   // Filter logic (chỉ search theo nhóm máu)
-  const filtered = data.filter(d => d.group.toLowerCase().includes(search.toLowerCase()));
+  const filtered = data.filter(d => {
+    const matchSearch = d.group.toLowerCase().includes(search.toLowerCase());
+    const matchBlood = bloodType === "Tất cả" || d.group === bloodType;
+    return matchSearch && matchBlood;
+  });
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paged = filtered.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
   React.useEffect(() => { setPage(1); }, [search]);
@@ -106,6 +187,29 @@ export default function BloodStorageManagement() {
     setValidationErrors({});
   };
 
+  if (loading) {
+    return (
+      <div className="dashboard-root">
+        <Header />
+        <div className="dashboard-main">
+          <Sidebar />
+          <main className="blood-page-root">
+            <div className="blood-header">
+              <h2 className="blood-title">Quản lý kho máu</h2>
+              <div className="blood-subtitle">Chi tiết kho máu</div>
+            </div>
+            <div className="text-center p-4">
+              <div className="spinner-border" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="mt-2">Đang tải dữ liệu...</p>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="dashboard-root">
       <Header />
@@ -118,9 +222,19 @@ export default function BloodStorageManagement() {
           </div>
           <div className="blood-toolbar">
             <input className="blood-search" placeholder="🔍 Tìm kiếm nhóm máu ....." value={search} onChange={e=>setSearch(e.target.value)} />
-            <select className="blood-filter"><option>Tất cả</option></select>
-            <select className="blood-filter"><option>Tất cả</option></select>
-            <button className="blood-add" onClick={handleAdd}>+ Thêm đơn vị máu</button>
+            <select className="blood-filter" value={bloodType} onChange={e=>setBloodType(e.target.value)}>
+              <option value="Tất cả">Tất cả</option>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+              <option value="Rh NULL">Rh NULL</option>
+              <option value="Bombay">Bombay</option>
+            </select>
             <button className="blood-filter-btn">⏷</button>
             <button className="blood-export">⭳ Xuất tệp</button>
           </div>
@@ -129,152 +243,44 @@ export default function BloodStorageManagement() {
               <thead className="table-light">
                 <tr>
                   <th className="text-center" style={{minWidth: 60}}>Mã</th>
-                  <th className="text-center">Mã đơn nhận</th>
                   <th className="text-center">Nhóm máu</th>
-                  <th className="text-center">Ngày và giờ thu thập</th>
-                  <th className="text-center">Ngày và giờ hết hạn</th>
                   <th className="text-center">Số lượng trong kho</th>
-                  <th className="text-center">Trạng thái</th>
-                  <th className="text-center">Chất lượng</th>
                   <th className="text-center">Phạm vi nhiệt độ</th>
-                  <th className="text-center"><span role="img" aria-label="temp">🌡️</span></th>
-                  <th className="text-center">Hành động</th>
                 </tr>
               </thead>
               <tbody>
                 {paged.map((d, i) => (
                   <tr key={i}>
                     <td className="text-center">{d.id || (i+1+(page-1)*PAGE_SIZE)}</td>
-                    <td className="text-center">{d.code}</td>
                     <td className="text-center">{d.group}</td>
-                    <td className="text-center">{d.collect}</td>
-                    <td className="text-center">{d.expire}</td>
-                    <td className="text-center">{d.amount}</td>
-                    <td className="text-center">
-                      <span style={getStatusStyle(d.status)}>● {d.status}</span>
-                    </td>
-                    <td className="text-center">
-                      <span className={`fw-bold text-${qualityColors[d.quality]||'secondary'}`}>{d.quality}</span>
-                    </td>
+                    <td className="text-center">{d.volume + ' ml'}</td>
                     <td className="text-center">{d.temp}</td>
-                    <td className="text-center"><span role="img" aria-label="temp">🌡️</span></td>
-                    <td className="text-center">
-                      <button className="btn btn-sm btn-outline-primary me-1" title="Sửa" onClick={()=>handleEdit(i)}><span className="donor-action edit">✏️</span></button>
-                      <button className="btn btn-sm btn-outline-danger" title="Xóa" onClick={()=>handleDelete(i)}><span className="donor-action delete">🗑️</span></button>
-                    </td>
                   </tr>
                 ))}
                 {paged.length === 0 && (
-                  <tr><td colSpan={10} className="text-center text-secondary">Không có dữ liệu phù hợp</td></tr>
+                  <tr><td colSpan={4} className="text-center text-secondary">Không có dữ liệu phù hợp</td></tr>
                 )}
               </tbody>
             </table>
           </div>
-          {/* Popup thêm mới hoặc chỉnh sửa */}
-          {(addMode || editIdx !== null) && (
-            <div className="modal fade show" style={{display:'block',background:'rgba(0,0,0,0.3)'}} tabIndex="-1">
-              <div className="modal-dialog modal-lg modal-dialog-centered">
-                <div className="modal-content">
-                  <div className="modal-header" style={{background:'#8fd19e'}}>
-                    <h5 className="modal-title">{addMode ? 'Thêm đơn vị máu' : 'Chỉnh sửa kho máu'}</h5>
-                    <button type="button" className="btn-close" onClick={addMode ? handleCancelAdd : handleCancelEdit}></button>
-                  </div>
-                  <div className="modal-body">
-                    <div className="row g-3">
-                      <div className="col-md-6">
-                        <input 
-                          className={`form-control ${validationErrors.code ? 'is-invalid' : ''}`} 
-                          placeholder="Mã đơn nhận*" 
-                          value={editData.code} 
-                          onChange={e=>setEditData({...editData,code:e.target.value})} 
-                        />
-                        {validationErrors.code && <div className="invalid-feedback">{validationErrors.code}</div>}
-                      </div>
-                      <div className="col-md-6">
-                        <select className="form-control" value={editData.group} onChange={e=>setEditData({...editData,group:e.target.value})}>
-                          {bloodGroups.map(b=><option key={b}>{b}</option>)}
-                        </select>
-                      </div>
-                      <div className="col-md-6">
-                        <input 
-                          className={`form-control ${validationErrors.collect ? 'is-invalid' : ''}`} 
-                          placeholder="Ngày và giờ thu thập*" 
-                          value={editData.collect} 
-                          onChange={e=>setEditData({...editData,collect:e.target.value})} 
-                        />
-                        {validationErrors.collect && <div className="invalid-feedback">{validationErrors.collect}</div>}
-                      </div>
-                      <div className="col-md-6">
-                        <input 
-                          className={`form-control ${validationErrors.expire ? 'is-invalid' : ''}`} 
-                          placeholder="Ngày và giờ hết hạn*" 
-                          value={editData.expire} 
-                          onChange={e=>setEditData({...editData,expire:e.target.value})} 
-                        />
-                        {validationErrors.expire && <div className="invalid-feedback">{validationErrors.expire}</div>}
-                      </div>
-                      <div className="col-md-6">
-                        <input 
-                          className={`form-control ${validationErrors.amount ? 'is-invalid' : ''}`} 
-                          placeholder="Số lượng trong kho*" 
-                          value={editData.amount} 
-                          onChange={e=>setEditData({...editData,amount:e.target.value})} 
-                        />
-                        {validationErrors.amount && <div className="invalid-feedback">{validationErrors.amount}</div>}
-                      </div>
-                      <div className="col-md-6">
-                        <select className="form-control" value={editData.status} onChange={e=>setEditData({...editData,status:e.target.value})}>
-                          {statuses.map(s=><option key={s}>{s}</option>)}
-                        </select>
-                      </div>
-                      <div className="col-md-6">
-                        <select className="form-control" value={editData.quality} onChange={e=>setEditData({...editData,quality:e.target.value})}>
-                          {qualities.map(q=><option key={q}>{q}</option>)}
-                        </select>
-                      </div>
-                      <div className="col-md-6">
-                        <input 
-                          className={`form-control ${validationErrors.temp ? 'is-invalid' : ''}`} 
-                          placeholder="Phạm vi nhiệt độ*" 
-                          value={editData.temp} 
-                          onChange={e=>setEditData({...editData,temp:e.target.value})} 
-                        />
-                        {validationErrors.temp && <div className="invalid-feedback">{validationErrors.temp}</div>}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="modal-footer">
-                    <button className="btn btn-success" onClick={addMode ? handleSaveAdd : handleSaveEdit}>Lưu</button>
-                    <button className="btn btn-danger" onClick={addMode ? handleCancelAdd : handleCancelEdit}>Hủy</button>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <nav className="mt-3">
+              <ul className="pagination justify-content-center">
+                <li className={`page-item ${page === 1 ? 'disabled' : ''}`}>
+                  <button className="page-link" onClick={() => setPage(page - 1)}>Trước</button>
+                </li>
+                {Array.from({length: totalPages}, (_, i) => i + 1).map(p => (
+                  <li key={p} className={`page-item ${p === page ? 'active' : ''}`}>
+                    <button className="page-link" onClick={() => setPage(p)}>{p}</button>
+                  </li>
+                ))}
+                <li className={`page-item ${page === totalPages ? 'disabled' : ''}`}>
+                  <button className="page-link" onClick={() => setPage(page + 1)}>Sau</button>
+                </li>
+              </ul>
+            </nav>
           )}
-          {/* Modal xác nhận xóa */}
-          {deleteIdx !== null && (
-            <div className="modal fade show" style={{display:'block',background:'rgba(0,0,0,0.3)'}} tabIndex="-1">
-              <div className="modal-dialog modal-dialog-centered">
-                <div className="modal-content">
-                  <div className="modal-header">
-                    <h5 className="modal-title">Xác nhận xóa</h5>
-                  </div>
-                  <div className="modal-body">
-                    <p>Bạn có chắc muốn xóa đơn vị máu này không?</p>
-                  </div>
-                  <div className="modal-footer">
-                    <button className="btn btn-danger" onClick={handleConfirmDelete}>Xóa</button>
-                    <button className="btn btn-secondary" onClick={handleCancelDelete}>Hủy</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-          <div className="donor-pagination">
-            <button disabled={page===1} onClick={()=>setPage(p=>Math.max(1,p-1))}>{'⟨'}</button>
-            <span>Page {page} of {totalPages}</span>
-            <button disabled={page===totalPages} onClick={()=>setPage(p=>Math.min(totalPages,p+1))}>{'⟩'}</button>
-          </div>
         </main>
       </div>
     </div>
