@@ -57,7 +57,7 @@ export default function EmergencyRequest() {
         facilityId: Number(facilityId),
         bloodGroupId: bloodGroupMap[values.bloodGroup],
         quantityRequested: Number(values.amount),
-        requestStatus: 'PENDING',
+        requestStatus: 'pending',
         isEmergency: true, // Đánh dấu là yêu cầu khẩn cấp
         patientInfo: values.desc || null, // Mô tả tình trạng khẩn cấp
         isCompatible: true, // Mặc định là tương hợp

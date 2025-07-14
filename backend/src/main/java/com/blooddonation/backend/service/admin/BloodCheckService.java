@@ -240,14 +240,11 @@ public class BloodCheckService {
             dto.setQuantityMl(register.getQuantityMl());
             dto.setAppointmentDate(register.getAppointmentDate());
 
-            // Get event and time information
-            Event event = register.getEvent();
-            if (event != null) {
-                TimeEvent timeEvent = event.getTimeEvent();
-                if (timeEvent != null) {
-                    dto.setStartTime(timeEvent.getStartTime());
-                    dto.setEndTime(timeEvent.getEndTime());
-                }
+            // Get time information directly from register's timeEvent
+            TimeEvent timeEvent = register.getTimeEvent();
+            if (timeEvent != null) {
+                dto.setStartTime(timeEvent.getStartTime());
+                dto.setEndTime(timeEvent.getEndTime());
             }
         }
 

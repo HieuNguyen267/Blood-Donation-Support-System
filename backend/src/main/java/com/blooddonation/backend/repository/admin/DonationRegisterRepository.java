@@ -23,16 +23,15 @@ public interface DonationRegisterRepository extends JpaRepository<DonationRegist
            "CASE WHEN bg.rhFactor = 'positive' THEN '+' " +
            "     WHEN bg.rhFactor = 'negative' THEN '-' " +
            "     ELSE '' END), " +
-           "CASE WHEN te.startTime IS NOT NULL AND te.endTime IS NOT NULL " +
+           "CASE WHEN dr.timeEvent.startTime IS NOT NULL AND dr.timeEvent.endTime IS NOT NULL " +
            "     THEN CONCAT(FUNCTION('DATE_FORMAT', dr.appointmentDate, '%d/%m/%Y'), ', ', " +
-           "                 FUNCTION('TIME_FORMAT', te.startTime, '%H:%i'), ' - ', " +
-           "                 FUNCTION('TIME_FORMAT', te.endTime, '%H:%i')) " +
+           "                 FUNCTION('TIME_FORMAT', dr.timeEvent.startTime, '%H:%i'), ' - ', " +
+           "                 FUNCTION('TIME_FORMAT', dr.timeEvent.endTime, '%H:%i')) " +
            "     ELSE FUNCTION('DATE_FORMAT', dr.appointmentDate, '%d/%m/%Y') END) " +
            "FROM DonationRegister dr " +
            "JOIN dr.donor d " +
            "JOIN d.bloodGroup bg " +
-           "LEFT JOIN dr.event e " +
-           "LEFT JOIN e.timeEvent te " +
+           "LEFT JOIN dr.timeEvent " +
            "WHERE dr.status IN ('pending', 'confirmed', 'Not meeting health requirements') " +
            "ORDER BY dr.createdAt DESC")
     List<DonationManagementDTO> findAllForManagement();
@@ -47,16 +46,15 @@ public interface DonationRegisterRepository extends JpaRepository<DonationRegist
            "CASE WHEN bg.rhFactor = 'positive' THEN '+' " +
            "     WHEN bg.rhFactor = 'negative' THEN '-' " +
            "     ELSE '' END), " +
-           "CASE WHEN te.startTime IS NOT NULL AND te.endTime IS NOT NULL " +
+           "CASE WHEN dr.timeEvent.startTime IS NOT NULL AND dr.timeEvent.endTime IS NOT NULL " +
            "     THEN CONCAT(FUNCTION('DATE_FORMAT', dr.appointmentDate, '%d/%m/%Y'), ', ', " +
-           "                 FUNCTION('TIME_FORMAT', te.startTime, '%H:%i'), ' - ', " +
-           "                 FUNCTION('TIME_FORMAT', te.endTime, '%H:%i')) " +
+           "                 FUNCTION('TIME_FORMAT', dr.timeEvent.startTime, '%H:%i'), ' - ', " +
+           "                 FUNCTION('TIME_FORMAT', dr.timeEvent.endTime, '%H:%i')) " +
            "     ELSE FUNCTION('DATE_FORMAT', dr.appointmentDate, '%d/%m/%Y') END) " +
            "FROM DonationRegister dr " +
            "JOIN dr.donor d " +
            "JOIN d.bloodGroup bg " +
-           "LEFT JOIN dr.event e " +
-           "LEFT JOIN e.timeEvent te " +
+           "LEFT JOIN dr.timeEvent " +
            "WHERE dr.status = :status " +
            "ORDER BY dr.createdAt DESC")
     List<DonationManagementDTO> findByStatusForManagement(@Param("status") String status);
@@ -71,16 +69,15 @@ public interface DonationRegisterRepository extends JpaRepository<DonationRegist
            "CASE WHEN bg.rhFactor = 'positive' THEN '+' " +
            "     WHEN bg.rhFactor = 'negative' THEN '-' " +
            "     ELSE '' END), " +
-           "CASE WHEN te.startTime IS NOT NULL AND te.endTime IS NOT NULL " +
+           "CASE WHEN dr.timeEvent.startTime IS NOT NULL AND dr.timeEvent.endTime IS NOT NULL " +
            "     THEN CONCAT(FUNCTION('DATE_FORMAT', dr.appointmentDate, '%d/%m/%Y'), ', ', " +
-           "                 FUNCTION('TIME_FORMAT', te.startTime, '%H:%i'), ' - ', " +
-           "                 FUNCTION('TIME_FORMAT', te.endTime, '%H:%i')) " +
+           "                 FUNCTION('TIME_FORMAT', dr.timeEvent.startTime, '%H:%i'), ' - ', " +
+           "                 FUNCTION('TIME_FORMAT', dr.timeEvent.endTime, '%H:%i')) " +
            "     ELSE FUNCTION('DATE_FORMAT', dr.appointmentDate, '%d/%m/%Y') END) " +
            "FROM DonationRegister dr " +
            "JOIN dr.donor d " +
            "JOIN d.bloodGroup bg " +
-           "LEFT JOIN dr.event e " +
-           "LEFT JOIN e.timeEvent te " +
+           "LEFT JOIN dr.timeEvent " +
            "WHERE dr.status IN ('pending', 'confirmed', 'Not meeting health requirements') " +
            "AND bg.aboType = :aboType AND bg.rhFactor = :rhFactor " +
            "ORDER BY dr.createdAt DESC")
@@ -97,16 +94,15 @@ public interface DonationRegisterRepository extends JpaRepository<DonationRegist
            "CASE WHEN bg.rhFactor = 'positive' THEN '+' " +
            "     WHEN bg.rhFactor = 'negative' THEN '-' " +
            "     ELSE '' END), " +
-           "CASE WHEN te.startTime IS NOT NULL AND te.endTime IS NOT NULL " +
+           "CASE WHEN dr.timeEvent.startTime IS NOT NULL AND dr.timeEvent.endTime IS NOT NULL " +
            "     THEN CONCAT(FUNCTION('DATE_FORMAT', dr.appointmentDate, '%d/%m/%Y'), ', ', " +
-           "                 FUNCTION('TIME_FORMAT', te.startTime, '%H:%i'), ' - ', " +
-           "                 FUNCTION('TIME_FORMAT', te.endTime, '%H:%i')) " +
+           "                 FUNCTION('TIME_FORMAT', dr.timeEvent.startTime, '%H:%i'), ' - ', " +
+           "                 FUNCTION('TIME_FORMAT', dr.timeEvent.endTime, '%H:%i')) " +
            "     ELSE FUNCTION('DATE_FORMAT', dr.appointmentDate, '%d/%m/%Y') END) " +
            "FROM DonationRegister dr " +
            "JOIN dr.donor d " +
            "JOIN d.bloodGroup bg " +
-           "LEFT JOIN dr.event e " +
-           "LEFT JOIN e.timeEvent te " +
+           "LEFT JOIN dr.timeEvent " +
            "WHERE dr.status IN ('pending', 'confirmed', 'Not meeting health requirements') " +
            "AND LOWER(d.fullName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
            "ORDER BY dr.createdAt DESC")
@@ -140,10 +136,10 @@ public interface DonationRegisterRepository extends JpaRepository<DonationRegist
            "dr.registerId, " +
            "d.fullName, " +
            "dr.appointmentDate, " +
-           "CASE WHEN te.startTime IS NOT NULL AND te.endTime IS NOT NULL " +
+           "CASE WHEN dr.timeEvent.startTime IS NOT NULL AND dr.timeEvent.endTime IS NOT NULL " +
            "     THEN CONCAT(FUNCTION('DATE_FORMAT', dr.appointmentDate, '%d/%m/%Y'), ', ', " +
-           "                 FUNCTION('TIME_FORMAT', te.startTime, '%H:%i'), ' - ', " +
-           "                 FUNCTION('TIME_FORMAT', te.endTime, '%H:%i')) " +
+           "                 FUNCTION('TIME_FORMAT', dr.timeEvent.startTime, '%H:%i'), ' - ', " +
+           "                 FUNCTION('TIME_FORMAT', dr.timeEvent.endTime, '%H:%i')) " +
            "     ELSE FUNCTION('DATE_FORMAT', dr.appointmentDate, '%d/%m/%Y') END, " +
            "dr.status, " +
            "dr.donationStatus, " +
@@ -157,8 +153,7 @@ public interface DonationRegisterRepository extends JpaRepository<DonationRegist
            "FROM DonationRegister dr " +
            "JOIN dr.donor d " +
            "JOIN d.bloodGroup bg " +
-           "LEFT JOIN dr.event e " +
-           "LEFT JOIN e.timeEvent te " +
+           "LEFT JOIN dr.timeEvent " +
            "LEFT JOIN dr.staff s " +
            "WHERE dr.donationStatus IN ('processing', 'deferred', 'completed') " +
            "ORDER BY dr.createdAt DESC")
@@ -168,10 +163,10 @@ public interface DonationRegisterRepository extends JpaRepository<DonationRegist
            "dr.registerId, " +
            "d.fullName, " +
            "dr.appointmentDate, " +
-           "CASE WHEN te.startTime IS NOT NULL AND te.endTime IS NOT NULL " +
+           "CASE WHEN dr.timeEvent.startTime IS NOT NULL AND dr.timeEvent.endTime IS NOT NULL " +
            "     THEN CONCAT(FUNCTION('DATE_FORMAT', dr.appointmentDate, '%d/%m/%Y'), ', ', " +
-           "                 FUNCTION('TIME_FORMAT', te.startTime, '%H:%i'), ' - ', " +
-           "                 FUNCTION('TIME_FORMAT', te.endTime, '%H:%i')) " +
+           "                 FUNCTION('TIME_FORMAT', dr.timeEvent.startTime, '%H:%i'), ' - ', " +
+           "                 FUNCTION('TIME_FORMAT', dr.timeEvent.endTime, '%H:%i')) " +
            "     ELSE FUNCTION('DATE_FORMAT', dr.appointmentDate, '%d/%m/%Y') END, " +
            "dr.status, " +
            "dr.donationStatus, " +
@@ -185,8 +180,7 @@ public interface DonationRegisterRepository extends JpaRepository<DonationRegist
            "FROM DonationRegister dr " +
            "JOIN dr.donor d " +
            "JOIN d.bloodGroup bg " +
-           "LEFT JOIN dr.event e " +
-           "LEFT JOIN e.timeEvent te " +
+           "LEFT JOIN dr.timeEvent " +
            "LEFT JOIN dr.staff s " +
            "WHERE dr.donationStatus = :donationStatus " +
            "ORDER BY dr.createdAt DESC")
@@ -196,10 +190,10 @@ public interface DonationRegisterRepository extends JpaRepository<DonationRegist
            "dr.registerId, " +
            "d.fullName, " +
            "dr.appointmentDate, " +
-           "CASE WHEN te.startTime IS NOT NULL AND te.endTime IS NOT NULL " +
+           "CASE WHEN dr.timeEvent.startTime IS NOT NULL AND dr.timeEvent.endTime IS NOT NULL " +
            "     THEN CONCAT(FUNCTION('DATE_FORMAT', dr.appointmentDate, '%d/%m/%Y'), ', ', " +
-           "                 FUNCTION('TIME_FORMAT', te.startTime, '%H:%i'), ' - ', " +
-           "                 FUNCTION('TIME_FORMAT', te.endTime, '%H:%i')) " +
+           "                 FUNCTION('TIME_FORMAT', dr.timeEvent.startTime, '%H:%i'), ' - ', " +
+           "                 FUNCTION('TIME_FORMAT', dr.timeEvent.endTime, '%H:%i')) " +
            "     ELSE FUNCTION('DATE_FORMAT', dr.appointmentDate, '%d/%m/%Y') END, " +
            "dr.status, " +
            "dr.donationStatus, " +
@@ -213,8 +207,7 @@ public interface DonationRegisterRepository extends JpaRepository<DonationRegist
            "FROM DonationRegister dr " +
            "JOIN dr.donor d " +
            "JOIN d.bloodGroup bg " +
-           "LEFT JOIN dr.event e " +
-           "LEFT JOIN e.timeEvent te " +
+           "LEFT JOIN dr.timeEvent " +
            "LEFT JOIN dr.staff s " +
            "WHERE dr.donationStatus IN ('processing', 'deferred', 'completed') " +
            "AND bg.aboType = :aboType AND bg.rhFactor = :rhFactor " +
@@ -225,10 +218,10 @@ public interface DonationRegisterRepository extends JpaRepository<DonationRegist
            "dr.registerId, " +
            "d.fullName, " +
            "dr.appointmentDate, " +
-           "CASE WHEN te.startTime IS NOT NULL AND te.endTime IS NOT NULL " +
+           "CASE WHEN dr.timeEvent.startTime IS NOT NULL AND dr.timeEvent.endTime IS NOT NULL " +
            "     THEN CONCAT(FUNCTION('DATE_FORMAT', dr.appointmentDate, '%d/%m/%Y'), ', ', " +
-           "                 FUNCTION('TIME_FORMAT', te.startTime, '%H:%i'), ' - ', " +
-           "                 FUNCTION('TIME_FORMAT', te.endTime, '%H:%i')) " +
+           "                 FUNCTION('TIME_FORMAT', dr.timeEvent.startTime, '%H:%i'), ' - ', " +
+           "                 FUNCTION('TIME_FORMAT', dr.timeEvent.endTime, '%H:%i')) " +
            "     ELSE FUNCTION('DATE_FORMAT', dr.appointmentDate, '%d/%m/%Y') END, " +
            "dr.status, " +
            "dr.donationStatus, " +
@@ -242,8 +235,7 @@ public interface DonationRegisterRepository extends JpaRepository<DonationRegist
            "FROM DonationRegister dr " +
            "JOIN dr.donor d " +
            "JOIN d.bloodGroup bg " +
-           "LEFT JOIN dr.event e " +
-           "LEFT JOIN e.timeEvent te " +
+           "LEFT JOIN dr.timeEvent " +
            "LEFT JOIN dr.staff s " +
            "WHERE dr.donationStatus IN ('processing', 'deferred', 'completed') " +
            "AND LOWER(d.fullName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +

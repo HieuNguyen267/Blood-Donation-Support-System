@@ -59,7 +59,7 @@ function ReceiveBloodPage() {
         facilityId: facilityId, // Long
         bloodGroupId: Number(formData.bloodGroupId),
         quantityRequested: Number(formData.quantity),
-        requestStatus: 'PENDING',
+        requestStatus: 'pending', // lowercase
         compatibilityRequirement: formData.notes,
         requiredBy: new Date().toISOString(), // Set ngày hiện tại
         // Các trường khác nếu cần: notes, requiredBy, ...

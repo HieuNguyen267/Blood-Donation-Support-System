@@ -355,6 +355,13 @@ public class DonationRegisterService {
             existingRegister.setEvent(event);
         }
 
+        // Update timeEvent if provided
+        if (dto.getTimeId() != null) {
+            TimeEvent timeEvent = timeEventRepository.findById(dto.getTimeId())
+                .orElseThrow(() -> new EntityNotFoundException("Time event not found with id: " + dto.getTimeId()));
+            existingRegister.setTimeEvent(timeEvent);
+        }
+
         // Update staff if provided
         if (dto.getStaffId() != null) {
             Staff staff = staffRepository.findById(dto.getStaffId())
