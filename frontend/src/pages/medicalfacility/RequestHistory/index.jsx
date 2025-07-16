@@ -1,3 +1,4 @@
+// Trang lịch sử yêu cầu máu cho cơ sở y tế
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '../../../components/user/Footer';
@@ -7,6 +8,7 @@ import { mfBloodRequestAPI } from '../../../services/api';
 
 const { Title } = Typography;
 
+// Hàm chuyển đổi trạng thái yêu cầu máu thành text và màu sắc hiển thị
 function getStatusText(request) {
   // Highest priority: emergency_status
   if (request.emergencyStatus) {
@@ -27,10 +29,13 @@ function getStatusText(request) {
   return { text: request.requestStatus || '-', color: '#888' };
 }
 
+// Component chính hiển thị lịch sử yêu cầu máu
 const RequestHistory = () => {
+  // State lưu danh sách yêu cầu máu và trạng thái loading
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Lấy dữ liệu lịch sử yêu cầu máu khi component mount
   useEffect(() => {
     mfBloodRequestAPI.getBloodRequestHistory()
       .then((data) => setRequests(Array.isArray(data) ? data : []))
@@ -40,21 +45,26 @@ const RequestHistory = () => {
 
   return (
     <div className="history-page-container" style={{ minHeight: '100vh', background: '#f7f7f7' }}>
+      {/* Header cho cơ sở y tế */}
       <MedicalFacilityHeader />
       <div style={{ minHeight: 'calc(100vh - 64px - 64px)', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 16 }}>
         <Title level={2} style={{ textAlign: 'center', margin: '12px 0 18px 0' }}>Lịch sử yêu cầu máu</Title>
+        {/* Hiển thị loading khi đang lấy dữ liệu */}
         {loading ? (
           <div style={{ textAlign: 'center', padding: 40 }}><Spin /> Đang tải lịch sử yêu cầu...</div>
         ) : requests.length > 0 ? (
+          // Danh sách các yêu cầu máu
           <div className="certificate-list-modern">
             {requests.map(req => {
               const status = getStatusText(req);
               return (
                 <div className="certificate-card-modern" key={req.id}>
+                  {/* Cột trái: icon và loại giấy chứng nhận */}
                   <div className="certificate-card-left">
                     <div className="blood-drop-icon">🩸</div>
                     <div className="certificate-type">Yêu cầu máu</div>
                   </div>
+                  {/* Thông tin chính của yêu cầu */}
                   <div className="certificate-card-main">
                     <div className="certificate-title" style={{ fontWeight: 'bold', fontSize: 18 }}>
                       Yêu cầu máu
@@ -75,6 +85,7 @@ const RequestHistory = () => {
                       <span className="certificate-info-label">Trạng thái:</span> <span style={{ color: status.color, fontWeight: 500 }}>{status.text}</span>
                     </div>
                   </div>
+                  {/* Cột phải: link xem chi tiết */}
                   <div className="certificate-card-right">
                     <Link to={`/medical-facility/request-history/${req.id}`} className="details-link">
                       Xem chi tiết
@@ -85,12 +96,15 @@ const RequestHistory = () => {
             })}
           </div>
         ) : (
+          // Nếu không có yêu cầu nào
           <div className="certificate-empty">
             Không có yêu cầu máu nào.
           </div>
         )}
       </div>
+      {/* Footer */}
       <Footer />
+      {/* CSS nội tuyến cho component */}
       <style>{`
         .certificate-list-modern {
           display: flex;
@@ -169,5 +183,5 @@ const RequestHistory = () => {
     </div>
   );
 };
-
+// Xuất component mặc định
 export default RequestHistory; 
