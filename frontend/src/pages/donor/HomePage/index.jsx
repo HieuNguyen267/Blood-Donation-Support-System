@@ -6,7 +6,6 @@ import { useState } from "react";
 import { message, Spin } from "antd";
 import { donorAPI } from '../../../services/api';
 import moment from 'moment';
-import DonorNotificationBell from '../../../components/user/DonorNotificationBell';
 
 export default function HomePage() {
   const [selectedDate, setSelectedDate] = useState("");
@@ -78,7 +77,6 @@ export default function HomePage() {
   return (
     <>
       <Header />
-      <DonorNotificationBell />
       <div className="homepage-wrapper">
         {/* Banner */}
         <div className="banner-section">
@@ -89,50 +87,41 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Thông tin chi tiết về các nhóm máu */}
-        <Link
-          to="/bloodgroup-info"
-          style={{
-            color: '#219653',
-            textAlign: 'left',
-            margin: '18px 0 30px 300px',
-            fontWeight: 700,
-            fontSize: 16,
-            textDecoration: 'underline',
-            display: 'block',
-            width: 'fit-content'
-          }}
-        >
-          Thông tin chi tiết về các nhóm máu
-        </Link>
-
-        {/* Điều kiện hiến máu */}
-        <div className="blood-condition">
-          <div className="condition-col">
-            <img
-              src="/images/loi_ich_hien_mau.jpg"
-              alt="Lợi ích hiến máu"
-              className="condition-img"
-            />
-          </div>
-          <div className="condition-col">
-            <img
-              src="/images/dieu-kien-hien-mau.png"
-              alt="Điều kiện hiến máu"
-              className="condition-img"
-            />
-            <div className="condition-search">
-              <label htmlFor="date">Bạn cần đặt lịch vào thời gian nào?</label>
-              <input
-                type="date"
-                id="date"
-                value={selectedDate}
-                min={new Date().toISOString().split('T')[0]}
-                onChange={(e) => setSelectedDate(e.target.value)}
+        {/* Thông tin chi tiết về các nhóm máu + Điều kiện hiến máu */}
+        <div className="blood-condition-wrapper">
+          <Link
+            to="/bloodgroup-info"
+            className="condition-guide-link"
+          >
+            Thông tin chi tiết về các nhóm máu
+          </Link>
+          <div className="blood-condition">
+            <div className="condition-col">
+              <img
+                src="/images/loi_ich_hien_mau.jpg"
+                alt="Lợi ích hiến máu"
+                className="condition-img"
               />
-              <button className="search-btn" onClick={handleSearch}>
-                Tìm kiếm
-              </button>
+            </div>
+            <div className="condition-col">
+              <img
+                src="/images/dieu-kien-hien-mau.png"
+                alt="Điều kiện hiến máu"
+                className="condition-img"
+              />
+              <div className="condition-search">
+                <label htmlFor="date">Bạn cần đặt lịch vào thời gian nào?</label>
+                <input
+                  type="date"
+                  id="date"
+                  value={selectedDate}
+                  min={new Date().toISOString().split('T')[0]}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                />
+                <button className="search-btn" onClick={handleSearch}>
+                  Tìm kiếm
+                </button>
+              </div>
             </div>
           </div>
         </div>

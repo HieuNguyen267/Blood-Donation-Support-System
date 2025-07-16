@@ -1,0 +1,202 @@
+/* BloodGroupInfo.css */
+.bloodgroup-info-wrapper {
+    max-width: 1100px;
+    margin: 32px auto;
+    padding: 0 16px;
+  }
+  .bloodgroup-title {
+    color: #43a047;
+    text-align: center;
+    margin-bottom: 32px;
+    font-weight: 700;
+    font-size: 28px;
+  }
+  .bloodgroup-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
+  }
+  .bloodgroup-card {
+    background: #ffe9dc;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px #0001;
+    padding: 20px;
+    min-height: 180px;
+    border-top-width: 8px;
+    border-top-style: solid;
+  }
+  .bloodgroup-name {
+    font-weight: 700;
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+  .bloodgroup-label {
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .bloodgroup-value {
+    margin-bottom: 8px;
+  }
+  
+  .bloodcomponent-title {
+    color: #e53935;
+    text-align: center;
+    margin: 48px 0 24px 0;
+    font-weight: 700;
+    font-size: 22px;
+  }
+  .bloodcomponent-list {
+    display: flex;
+    gap: 24px;
+    flex-wrap: nowrap;
+    justify-content: center;
+    margin-bottom: 32px;
+    overflow-x: auto;
+  }
+  .bloodcomponent-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px #0001;
+    padding: 18px;
+    min-width: 220px;
+    max-width: 260px;
+    text-align: center;
+  }
+  .bloodcomponent-icon {
+    font-size: 32px;
+    margin-bottom: 8px;
+  }
+  .bloodcomponent-name {
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+  .bloodcomponent-desc {
+    text-align: left;
+    font-size: 15px;
+    margin: 0;
+    padding-left: 18px;
+  }
+  
+  .bloodprocess-section {
+    position: relative;
+    margin: 40px 0 32px 0;
+    width: 100%;
+    max-width: 1100px;
+    min-height: 120px;
+    display: flex;
+    justify-content: center;
+  }
+  .bloodprocess-bar {
+    position: absolute;
+    top: 32px;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: #e53935;
+    z-index: 0;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .bloodprocess-steps {
+    display: flex;
+    gap: 0;
+    flex-wrap: nowrap;
+    width: 100%;
+    max-width: 900px;
+    justify-content: space-between;
+    z-index: 1;
+  }
+  .bloodprocess-step {
+    flex: 1;
+    text-align: center;
+    position: relative;
+  }
+  .bloodprocess-step-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #e53935;
+    color: #fff;
+    font-weight: 700;
+    font-size: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 2;
+  }
+  .bloodprocess-step-title {
+    font-weight: 700;
+    font-size: 17px;
+    margin-bottom: 4px;
+  }
+  .bloodprocess-step-desc {
+    font-size: 15px;
+  }
+  
+  .bloodinfo-list {
+    display: flex;
+    gap: 24px;
+    flex-wrap: nowrap;
+    justify-content: center;
+    margin-bottom: 40px;
+    overflow-x: auto;
+  }
+  .bloodinfo-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px #0001;
+    padding: 18px;
+    min-width: 220px;
+    max-width: 260px;
+    text-align: center;
+  }
+  .bloodinfo-icon {
+    font-size: 28px;
+    margin-bottom: 8px;
+  }
+  .bloodinfo-title {
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+  .bloodinfo-desc {
+    text-align: left;
+    font-size: 15px;
+    margin: 0;
+    padding-left: 18px;
+  }
+  
+  @media (max-width: 900px) {
+    .bloodgroup-info-wrapper {
+      max-width: 98vw;
+      padding: 0 4vw;
+    }
+    .bloodgroup-grid, .bloodcomponent-list, .bloodinfo-list {
+      gap: 14px;
+    }
+  }
+  @media (max-width: 600px) {
+    .bloodgroup-title, .bloodcomponent-title {
+      font-size: 1.2rem;
+    }
+    .bloodgroup-card, .bloodcomponent-card, .bloodinfo-card {
+      min-width: 90vw;
+      max-width: 98vw;
+      padding: 14px 8px;
+    }
+    .bloodprocess-section {
+      min-height: 80px;
+    }
+    .bloodprocess-step-circle {
+      width: 36px;
+      height: 36px;
+      font-size: 1.1rem;
+    }
+  }
+  body {
+    font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+    background: #f8f9fa;
+  } 

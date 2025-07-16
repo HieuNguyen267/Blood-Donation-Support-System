@@ -56,6 +56,23 @@ const faqs = [
       "Hiện tượng sưng nhẹ, hơi đau, hoặc bầm tím là bình thường.",
       "Nếu kéo dài hoặc sưng to, hãy dùng khăn lạnh chườm nhẹ và liên hệ cơ sở y tế nếu cần."
     ]
+  },
+  {
+    question: "Sau khi hiến máu nên làm gì?",
+    answer: [
+      "Nghỉ ngơi tại chỗ 10-15 phút sau khi hiến máu.",
+      "Uống nhiều nước, ăn nhẹ sau khi hiến máu.",
+      "Tránh vận động mạnh, mang vác nặng trong 24 giờ đầu.",
+      "Nếu có dấu hiệu bất thường như chóng mặt, buồn nôn, hãy báo ngay cho nhân viên y tế."
+    ]
+  },
+  {
+    question: "Hiến máu có ảnh hưởng đến sức khỏe không?",
+    answer: [
+      "Hiến máu đúng quy định hoàn toàn không ảnh hưởng xấu đến sức khỏe.",
+      "Cơ thể sẽ nhanh chóng tái tạo lại lượng máu đã hiến.",
+      "Hiến máu còn giúp kiểm tra sức khỏe định kỳ và góp phần cứu người."
+    ]
   }
 ];
 
@@ -77,13 +94,13 @@ export default function FaqPage() {
               key={index}
               className={`faq-box ${openIndex === index ? "open" : ""}`}
             >
-              <div className="faq-question" onClick={() => toggle(index)}>
+              <div className="faq-question" onClick={() => toggle(index)} aria-expanded={openIndex === index} tabIndex={0} role="button">
                 <span>
                   {index + 1}. {faq.question}
                 </span>
-                <span className="faq-icon">{openIndex === index ? "▲" : "▼"}</span>
+                <span className="faq-icon">{openIndex === index ? "\u25b2" : "\u25bc"}</span>
               </div>
-              <div className="faq-answer">
+              <div className="faq-answer" style={{display: openIndex === index ? 'block' : 'none'}}>
                 <ul>
                   {faq.answer.map((a, i) => (
                     <li key={i}>{a}</li>
