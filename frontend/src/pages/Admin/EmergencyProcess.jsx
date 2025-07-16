@@ -5,6 +5,7 @@ import Sidebar from "../../components/admin/Sidebar";
 import { donorAPI, bloodRequestAPI } from '../../services/api';
 import { message, Modal } from 'antd';
 import './DonationDetail.css';
+import { useEffect } from 'react';
 
 const GOOGLE_MAPS_API_KEY = 'a04183a395a6fd210ec327f88707af47';
 
@@ -42,58 +43,20 @@ export default function EmergencyProcess() {
   const location = useLocation();
   const [loading, setLoading] = useState({});
   
-  // Lấy dữ liệu đơn từ location.state nếu có
-  const request = location.state?.request || {
-    request_id: requestId,
-    facility_name: "BV Chợ Rẫy",
-    facility_address: "201B Nguyễn Chí Thanh, Phường 12, Quận 5, TP.HCM",
-    blood_group: "A+",
-    quantity_requested: 1000,
-    urgency_level: "emergency",
-    contact_person: "Bác sĩ B",
-    contact_phone: "0909123456",
-    required_by: "2024-07-10T10:00",
-  };
+  // State for blood request detail
+  const [request, setRequest] = useState(null);
+
+  // Fetch blood request detail on mount
+  useEffect(() => {
+    if (requestId) {
+      bloodRequestAPI.getRequestById(requestId)
+        .then(setRequest)
+        .catch(() => setRequest(null));
+    }
+  }, [requestId]);
 
   // Dữ liệu mẫu cho những người hiến đã chấp nhận
-  const [acceptedDonors] = useState([
-    {
-      id: 1,
-      name: "Nguyễn Văn D",
-      blood_group: "A+",
-      phone: "0909123123",
-      address: "Q1, TP.HCM",
-      age: 30,
-      accepted_time: "2024-07-09 14:30",
-      status: "Đã xác nhận",
-      quantity: 350,
-      arrival_time: "2024-07-09 16:00"
-    },
-    {
-      id: 2,
-      name: "Trần Thị E",
-      blood_group: "A+",
-      phone: "0912345678",
-      address: "Q3, TP.HCM",
-      age: 25,
-      accepted_time: "2024-07-09 15:15",
-      status: "Đang di chuyển",
-      quantity: 400,
-      arrival_time: "2024-07-09 17:30"
-    },
-    {
-      id: 3,
-      name: "Lê Văn F",
-      blood_group: "A+",
-      phone: "0987654321",
-      address: "Q5, TP.HCM",
-      age: 28,
-      accepted_time: "2024-07-09 15:45",
-      status: "Đã xác nhận",
-      quantity: 300,
-      arrival_time: "2024-07-09 18:00"
-    }
-  ]);
+
 
   const [eligibleDonors, setEligibleDonors] = React.useState([]);
   React.useEffect(() => {
@@ -103,19 +66,19 @@ export default function EmergencyProcess() {
   // State lưu khoảng cách cho từng donor
   const [distances, setDistances] = React.useState({});
   React.useEffect(() => {
-    if (!request.facility_name || eligibleDonors.length === 0) return;
+    if (!request?.facilityName || eligibleDonors.length === 0) return;
     const fetchDistances = async () => {
       const newDistances = {};
       for (const donor of eligibleDonors) {
         const key = donor.donor_id;
         const origin = donor.address;
-        const destination = request.facility_address || request.facility_name;
+        const destination = request?.facilityAddress || request?.facilityName;
         newDistances[key] = await getDistance(origin, destination);
       }
       setDistances(newDistances);
     };
     fetchDistances();
-  }, [eligibleDonors, request.facility_name]);
+  }, [eligibleDonors, request?.facilityName]);
 
   // State lưu matching_blood cho request
   const [matchingList, setMatchingList] = React.useState([]);
@@ -126,12 +89,40 @@ export default function EmergencyProcess() {
       .catch(() => setMatchingList([]));
   }, [requestId]);
 
+  // State lưu danh sách người hiến đã đồng ý (accepted donors)
+  const [acceptedDonorsList, setAcceptedDonorsList] = React.useState([]);
+  React.useEffect(() => {
+    if (requestId) {
+      bloodRequestAPI.getAcceptedDonorsByRequestId(requestId)
+        .then(setAcceptedDonorsList)
+        .catch(() => setAcceptedDonorsList([]));
+    }
+  }, [requestId]);
+
   // Tính toán thống kê dựa trên matchingList
   const acceptedMatchings = matchingList.filter(m => m.status === 'contact_successful');
-  const totalAccepted = acceptedMatchings.length;
-  const totalBlood = acceptedMatchings.reduce((sum, m) => sum + (m.quantityMl || 0), 0);
-  const remainingNeeded = Math.max((request.quantity_requested || 0) - totalBlood, 0);
-  const progressPercent = request.quantity_requested ? Math.min((totalBlood / request.quantity_requested) * 100, 100) : 0;
+  const totalAccepted = acceptedDonorsList.length;
+  // Tính tổng máu đã có từ acceptedDonorsList
+  const totalAcceptedBlood = acceptedDonorsList.reduce((sum, d) => sum + (d.quantityMl || 0), 0);
+
+  // Tính tổng máu đã gửi từ bloodFullfilled (O+: 100 ml, A-: 100 ml, ...)
+  function parseBloodFullfilled(str) {
+    if (!str) return 0;
+    // Ví dụ: "O+: 100 ml, A-: 100 ml"
+    return str.split(',').reduce((sum, part) => {
+      const match = part.match(/(\d+)\s*ml/);
+      if (match) {
+        return sum + parseInt(match[1], 10);
+      }
+      return sum;
+    }, 0);
+  }
+  const totalBloodFullfilled = parseBloodFullfilled(request?.bloodFullfilled);
+
+  // Tổng máu đã có = máu đã đồng ý + máu đã gửi
+  const totalBlood = totalAcceptedBlood + totalBloodFullfilled;
+  const remainingNeeded = Math.max((request?.quantityRequested || 0) - totalBlood, 0);
+  const progressPercent = request?.quantityRequested ? Math.min((totalBlood / request?.quantityRequested) * 100, 100) : 0;
 
   // Hàm trả về màu sắc cho trạng thái
   const getStatusColor = (status) => {
@@ -276,7 +267,7 @@ export default function EmergencyProcess() {
   // Hàm hoàn thành quá trình
   const handleCompleteProcess = () => {
     // Kiểm tra xem emergency_status hoặc processing_status đã completed chưa
-    const isCompleted = request.emergency_status === 'completed' || request.processing_status === 'completed';
+    const isCompleted = request?.emergency_status === 'completed' || request?.processing_status === 'completed';
     
     if (isCompleted) {
       message.info('Yêu cầu đã hoàn thành!');
@@ -325,10 +316,16 @@ export default function EmergencyProcess() {
   };
 
   // Lọc donor phù hợp nhóm máu
-  const compatibleGroups = getCompatibleBloodGroups(request.blood_group);
+  const compatibleGroups = getCompatibleBloodGroups(request?.bloodGroup);
   const filteredDonors = eligibleDonors.filter(donor => {
     const donorGroup = formatBloodGroup(donor.abo_type, donor.rh_factor);
     return compatibleGroups.includes(donorGroup);
+  });
+
+  // Lọc ra những donor chưa hoàn thành (trạng thái khác 'completed')
+  const filteredDonorsNotCompleted = filteredDonors.filter(donor => {
+    const matching = getMatchingByDonor(donor.donor_id);
+    return !matching || matching.status !== 'completed';
   });
 
   // Hàm lấy số thực từ chuỗi khoảng cách
@@ -362,7 +359,7 @@ export default function EmergencyProcess() {
   const hasCompletedMatching = matchingList.some(m => m.status === 'completed');
 
   // Kiểm tra xem emergency_status hoặc processing_status đã completed chưa
-  const isCompleted = request.emergency_status === 'completed' || request.processing_status === 'completed';
+  const isCompleted = request?.emergency_status === 'completed' || request?.processing_status === 'completed';
 
   return (
     <div className="dashboard-root">
@@ -376,18 +373,18 @@ export default function EmergencyProcess() {
           <div className="card p-3 mb-3">
             <div className="row">
               <div className="col-md-8">
-                <h5 className="text-danger fw-bold">🚨 Đơn yêu cầu #{request.request_id}</h5>
+                <h5 className="text-danger fw-bold">🚨 Đơn yêu cầu #{request?.requestId}</h5>
                 <div className="row">
                   <div className="col-md-6">
-                    <span>Cơ sở y tế: <b>{request.facility_name}</b></span><br/>
-                    <span>Địa chỉ: <b>{request.facility_address || 'Chưa có thông tin'}</b></span><br/>
-                    <span>Nhóm máu: <b className="text-danger">{request.blood_group}</b></span><br/>
-                    <span>Mức độ: <b className="text-danger">{request.urgency_level}</b></span>
+                    <span>Cơ sở y tế: <b>{request?.facilityName}</b></span><br/>
+                    <span>Địa chỉ: <b>{request?.facilityAddress || 'Chưa có thông tin'}</b></span><br/>
+                    <span>Nhóm máu: <b className="text-danger">{request?.bloodGroup}</b></span><br/>
+                    <span>Mức độ: <b className="text-danger">{request?.isEmergency ? 'Khẩn cấp' : 'Bình thường'}</b></span>
                   </div>
                   <div className="col-md-6">
-                    <span>Số lượng cần: <b>{request.quantity_requested} ml</b></span><br/>
-                    <span>Ngày cần: <b>{request.required_by?.replace('T',' ')}</b></span><br/>
-                    <span>Liên hệ: <b>{request.contact_person} ({request.contact_phone})</b></span>
+                    <span>Số lượng cần: <b>{request?.quantityRequested} ml</b></span><br/>
+                    <span>Ngày cần: <b>{request?.requiredBy}</b></span><br/>
+                    <span>Liên hệ: <b>{request?.contactPerson} ({request?.contactPhone})</b></span>
                   </div>
                 </div>
               </div>
@@ -402,7 +399,7 @@ export default function EmergencyProcess() {
                       ></div>
                     </div>
                     <small>
-                      <span className="text-success fw-bold">{totalBlood} ml</span> / {request.quantity_requested} ml
+                      <span className="text-success fw-bold">{totalBlood} ml</span> / {request?.quantityRequested} ml
                     </small>
                     {remainingNeeded > 0 && (
                       <div className="mt-2">
@@ -418,10 +415,9 @@ export default function EmergencyProcess() {
           {/* Bảng người hiến có thể liên hệ */}
           <div className="card p-3 mb-3">
             <h5 className="text-success">📞 Những người có thể liên hệ</h5>
-            <div className="alert alert-info mb-3">
-              <strong>💡 Lưu ý:</strong> Khoảng cách được tính dựa trên địa chỉ. Nếu hiển thị lỗi, vui lòng cập nhật địa chỉ chi tiết hơn trong thông tin người hiến máu.
-            </div>
             <div className="table-responsive">
+              {/* Ẩn bảng nếu không còn donor nào chưa hoàn thành */}
+              {filteredDonorsNotCompleted.length > 0 ? (
               <table className="table table-hover table-bordered">
                 <thead className="table-light">
                   <tr>
@@ -440,15 +436,13 @@ export default function EmergencyProcess() {
                   </tr>
                 </thead>
                 <tbody>
-                  {eligibleDonors.length > 0 ? sortedDonors.map((donor, idx) => {
+                    {filteredDonorsNotCompleted.map((donor, idx) => {
                     const matching = getMatchingByDonor(donor.donor_id);
                     return (
                       <tr key={donor.donor_id}>
                         <td className="text-center">{idx + 1}</td>
                         <td className="text-center fw-bold">{donor.full_name}</td>
-                        <td className="text-center">
-                          <span className="badge bg-danger">{formatBloodGroup(donor.abo_type, donor.rh_factor)}</span>
-                        </td>
+                          <td className="text-center">{formatBloodGroup(donor.abo_type, donor.rh_factor)}</td>
                         <td className="text-center">{calcAge(donor.date_of_birth)}</td>
                         <td className="text-center">{donor.phone}</td>
                         <td className="text-center">{donor.address}</td>
@@ -503,8 +497,52 @@ export default function EmergencyProcess() {
                         <td className="text-center">{distances[donor.donor_id] || '...'}</td>
                       </tr>
                     );
-                  }) : (
-                    <tr><td colSpan={12} className="text-center text-secondary">Không có người hiến phù hợp</td></tr>
+                    })}
+                  </tbody>
+                </table>
+              ) : (
+                <div className="text-center text-secondary py-3">Không còn người hiến nào có thể liên hệ (tất cả đã hoàn thành)</div>
+              )}
+            </div>
+          </div>
+
+          {/* Bảng người hiến đã đồng ý */}
+          <div className="card p-3 mb-3">
+            <h5 className="text-primary">🩸 Những người hiến đã đồng ý</h5>
+            <div className="table-responsive">
+              <table className="table table-hover table-bordered">
+                <thead className="table-light">
+                  <tr>
+                    <th className="text-center">STT</th>
+                    <th className="text-center">Họ và tên</th>
+                    <th className="text-center">Nhóm máu</th>
+                    <th className="text-center">Tuổi</th>
+                    <th className="text-center">SĐT</th>
+                    <th className="text-center">Địa chỉ</th>
+                    <th className="text-center">Khoảng cách (km)</th>
+                    <th className="text-center">Thời điểm phản hồi</th>
+                    <th className="text-center">Số lượng (ml)</th>
+                    <th className="text-center">Thời điểm đến</th>
+                    <th className="text-center">Trạng thái</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {acceptedDonorsList.length > 0 ? acceptedDonorsList.map((d, idx) => (
+                    <tr key={d.matchingId}>
+                      <td className="text-center">{idx + 1}</td>
+                      <td className="text-center">{d.fullName}</td>
+                      <td className="text-center">{d.aboType}{d.rhFactor === 'positive' ? '+' : d.rhFactor === 'negative' ? '-' : ''}</td>
+                      <td className="text-center">{d.dateOfBirth ? new Date().getFullYear() - new Date(d.dateOfBirth).getFullYear() : ''}</td>
+                      <td className="text-center">{d.phone}</td>
+                      <td className="text-center">{d.address}</td>
+                      <td className="text-center">{d.distanceKm || '-'}</td>
+                      <td className="text-center">{d.responseTime ? new Date(d.responseTime).toLocaleString('vi-VN') : '-'}</td>
+                      <td className="text-center">{d.quantityMl || '-'}</td>
+                      <td className="text-center">{d.arrivalTime ? new Date(d.arrivalTime).toLocaleString('vi-VN') : '-'}</td>
+                      <td className="text-center">{formatStatus(d.status)}</td>
+                    </tr>
+                  )) : (
+                    <tr><td colSpan={11} className="text-center text-secondary">Không có người hiến đã đồng ý</td></tr>
                   )}
                 </tbody>
               </table>
@@ -545,7 +583,7 @@ export default function EmergencyProcess() {
                 <div className="stat-icon">📈</div>
                 <div className="stat-info">
                   <h6>Tiến độ</h6>
-                  <h4>{request.quantity_requested > 0 ? Math.round((totalBlood/request.quantity_requested)*100) : 0}<small>%</small></h4>
+                  <h4>{request?.quantityRequested > 0 ? Math.round((totalBlood/request?.quantityRequested)*100) : 0}<small>%</small></h4>
                 </div>
               </div>
             </div>
@@ -579,7 +617,7 @@ export default function EmergencyProcess() {
       </div>
       
       {/* CSS cho animation loading spinner */}
-      <style jsx>{`
+      <style>{`
         .animate-spin {
           animation: spin 1s linear infinite;
         }

@@ -17,5 +17,20 @@ public class MatchingBloodAdminDTO {
     private Integer quantityDonated;
     private String note;
     private BigDecimal distanceKm;
+    private String fullName;
+    private java.time.LocalDate dateOfBirth;
+    private String phone;
+    private String address;
+    private String aboType;
+    private String rhFactor;
+    private Integer donorId;
+    private Integer facilityId;
+    private java.time.LocalDateTime notificationSentAt;
+    private java.time.LocalDateTime responseTime;
+    private java.time.LocalDateTime arrivalTime;
+    private Integer quantityMl;
+    private String notes;
+    private java.time.LocalDateTime createdAt;
+    private java.time.LocalDateTime updatedAt;
     // Add more fields if needed
 } 

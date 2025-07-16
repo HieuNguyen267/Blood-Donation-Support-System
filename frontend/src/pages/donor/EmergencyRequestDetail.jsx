@@ -97,8 +97,8 @@ export default function EmergencyRequestDetail() {
   return (
     <>
       <Header />
-      <div className="container py-4">
-        <div className="row justify-content-center">
+      <div className="container py-4 d-flex flex-column min-vh-100" style={{minHeight: '100vh', display: 'flex', flexDirection: 'column'}}>
+        <div className="row justify-content-center flex-grow-1">
           <div className="col-lg-8 col-md-10">
             <div className="card shadow-lg emergency-card">
               <div className="card-header bg-danger text-white d-flex align-items-center">

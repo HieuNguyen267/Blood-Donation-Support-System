@@ -30,6 +30,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -71,6 +72,17 @@ public class DonationRegisterService {
      * Chỉ lấy status: pending, confirmed, cancelled
      */
     public List<DonationManagementDTO> getAllForManagement() {
+        List<DonationRegister> registers = donationRegisterRepository.findAll();
+        LocalDate today = LocalDate.now();
+        for (DonationRegister register : registers) {
+            if (register.getAppointmentDate() != null && register.getAppointmentDate().isBefore(today)) {
+                if (!"Not meeting health requirements".equals(register.getStatus())) {
+                    register.setStatus("Not meeting health requirements");
+                    donationRegisterRepository.save(register);
+                }
+            }
+        }
+        // Sau khi cập nhật, trả về danh sách cho quản trị
         return donationRegisterRepository.findAllForManagement();
     }
 
@@ -261,6 +273,12 @@ public class DonationRegisterService {
                 System.out.println("DEBUG: Error saving blood_check: " + e.getMessage());
                 System.out.println("DEBUG: Skipping blood_check creation due to database constraint");
             }
+            // Cập nhật last_donation_date cho donor
+            Donor donor = updatedRegister.getDonor();
+            if (donor != null && updatedRegister.getAppointmentDate() != null) {
+                donor.setLastDonationDate(updatedRegister.getAppointmentDate());
+                donorRepository.save(donor);
+            }
         } else {
             System.out.println("DEBUG: Not creating blood_check - donationStatus=" + donationStatus);
         }
@@ -402,16 +420,28 @@ public class DonationRegisterService {
     public void deleteDonationRegister(Integer id) {
         DonationRegister register = donationRegisterRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Donation register not found with id: " + id));
+        Integer surveyId = null;
         if (register.getPreDonationSurvey() != null) {
-            Integer surveyId = register.getPreDonationSurvey().getSurveyId();
+            surveyId = register.getPreDonationSurvey().getSurveyId();
+        }
+        // Xóa donation_register trước
+        donationRegisterRepository.deleteById(id);
+        // Sau đó mới xóa pre_donation_survey nếu có
+        if (surveyId != null) {
             preDonationSurveyService.deleteSurveyById(surveyId);
         }
-        donationRegisterRepository.deleteById(id);
     }
 
     public DonationRegisterDTO getDonationRegister(Integer id) {
         DonationRegister register = donationRegisterRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Donation register not found with id: " + id));
+        // Nếu ngày hẹn đã qua, cập nhật status
+        if (register.getAppointmentDate() != null && register.getAppointmentDate().isBefore(LocalDate.now())) {
+            if (!"Not meeting health requirements".equals(register.getStatus())) {
+                register.setStatus("Not meeting health requirements");
+                donationRegisterRepository.save(register);
+            }
+        }
         DonationRegisterDTO dto = convertToDTO(register);
         // KHÔNG gọi lại preDonationSurveyService.getLatestSurvey nữa
         return dto;
@@ -424,9 +454,17 @@ public class DonationRegisterService {
     }
 
     public List<DonationRegisterDTO> getDonationRegistersByDonor(Integer donorId) {
-        return donationRegisterRepository.findByDonorDonorId(donorId).stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
+        List<DonationRegister> registers = donationRegisterRepository.findByDonorDonorId(donorId);
+        LocalDate today = LocalDate.now();
+        for (DonationRegister register : registers) {
+            if (register.getAppointmentDate() != null && register.getAppointmentDate().isBefore(today)) {
+                if (!"Not meeting health requirements".equals(register.getStatus())) {
+                    register.setStatus("Not meeting health requirements");
+                    donationRegisterRepository.save(register);
+                }
+            }
+        }
+        return registers.stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
     public List<DonationRegisterDTO> getDonationRegistersByEvent(Integer eventId) {

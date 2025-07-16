@@ -1,8 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../../components/admin/Header";
 import Sidebar from "../../components/admin/Sidebar";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { fetchNewsList, createNews, updateNews } from "../../services/admin/news";
 import { getStatusBadge } from './utils';
+
+const statusMap = {
+  public: { label: "Công khai", className: "badge bg-success" },
+  hidden: { label: "Ẩn", className: "badge bg-danger" }
+};
 
 const newsDataInit = [
   { title: "Hiến máu cứu người - Nghĩa cử cao đẹp", summary: "Phong trào hiến máu cứu người lan tỏa mạnh mẽ...", content: "Nội dung bài viết 1...", author: "Admin", date: "2024-07-01", status: "Công khai" },
@@ -24,8 +30,26 @@ const orderOptions = [
   { value: 'asc', label: 'Cũ nhất' }
 ];
 
+const uploadImage = async (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const token = localStorage.getItem('token');
+  const response = await fetch('http://localhost:8080/admin/news/upload-image', {
+    method: 'POST',
+    headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+    body: formData
+  });
+  if (!response.ok) throw new Error('Upload ảnh thất bại');
+  return await response.text();
+};
+
+const getStaffId = () => {
+  // Lấy staffId từ localStorage hoặc context, ví dụ:
+  return parseInt(localStorage.getItem('staffId'), 10) || 1; // fallback 1 nếu chưa có
+};
+
 export default function NewsManagement() {
-  const [news, setNews] = useState(newsDataInit);
+  const [news, setNews] = useState([]);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("Tất cả");
   const [page, setPage] = useState(1);
@@ -38,6 +62,10 @@ export default function NewsManagement() {
   const [sortBy, setSortBy] = useState('');
   const [sortOrder, setSortOrder] = useState('desc');
   const [filterStatus, setFilterStatus] = useState(statusOptions[0]);
+
+  useEffect(() => {
+    fetchNewsList().then(setNews);
+  }, []);
 
   // Filter logic
   let filtered = news.filter(n => n.title.toLowerCase().includes(search.toLowerCase()));
@@ -64,23 +92,44 @@ export default function NewsManagement() {
 
   // Edit logic
   const handleEdit = (idx) => {
+    const item = filtered[idx];
     setEditIdx(idx);
-    setEditData({...filtered[idx]});
+    setEditData({
+      title: item.title || "",
+      summary: item.brief || "",
+      content: item.content || "",
+      author: item.authorName || "",
+      date: item.createdAt ? item.createdAt.slice(0, 10) : "",
+      status: item.status === "public" ? "Công khai" : "Ẩn"
+    });
     setValidationErrors({});
   };
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     const errors = validateNews(editData);
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
-    const globalIdx = news.findIndex(n => n === filtered[editIdx]);
-    const newNews = [...news];
-    newNews[globalIdx] = editData;
-    setNews(newNews);
-    setEditIdx(null);
-    setEditData(null);
-    setValidationErrors({});
+    try {
+      const globalIdx = news.findIndex(n => n === filtered[editIdx]);
+      const newsId = news[globalIdx].newsId;
+      await updateNews(newsId, {
+        title: editData.title,
+        brief: editData.summary,
+        content: editData.content,
+        imageUrl: editData.imageUrl,
+        authorName: editData.author,
+        status: editData.status === 'Công khai' ? 'public' : 'hidden',
+        staffId: getStaffId()
+      });
+      const newsList = await fetchNewsList();
+      setNews(newsList);
+      setEditIdx(null);
+      setEditData(null);
+      setValidationErrors({});
+    } catch (err) {
+      alert('Lỗi khi cập nhật tin tức');
+    }
   };
   const handleCancelEdit = () => {
     setEditIdx(null);
@@ -105,16 +154,30 @@ export default function NewsManagement() {
     });
     setValidationErrors({});
   };
-  const handleSaveAdd = () => {
+  const handleSaveAdd = async () => {
     const errors = validateNews(editData);
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
-    setNews([editData, ...news]);
-    setAddMode(false);
-    setEditData(null);
-    setValidationErrors({});
+    try {
+      await createNews({
+        title: editData.title,
+        brief: editData.summary,
+        content: editData.content,
+        imageUrl: editData.imageUrl,
+        authorName: editData.author,
+        status: editData.status === 'Công khai' ? 'public' : 'hidden',
+        staffId: getStaffId()
+      });
+      const newsList = await fetchNewsList();
+      setNews(newsList);
+      setAddMode(false);
+      setEditData(null);
+      setValidationErrors({});
+    } catch (err) {
+      alert('Lỗi khi thêm tin tức');
+    }
   };
   const handleCancelAdd = () => {
     setAddMode(false);
@@ -152,23 +215,27 @@ export default function NewsManagement() {
             <table className="table table-hover table-bordered align-middle mb-0">
               <thead className="table-light">
                 <tr>
-                  <th className="text-center" style={{minWidth: 220}}>Tiêu đề</th>
-                  <th className="text-center" style={{minWidth: 220}}>Tóm tắt</th>
-                  <th className="text-center" style={{minWidth: 120}}>Tác giả</th>
-                  <th className="text-center" style={{minWidth: 120}}>Ngày đăng</th>
-                  <th className="text-center" style={{minWidth: 120}}>Trạng thái</th>
-                  <th className="text-center" style={{minWidth: 90}}>Hành động</th>
+                  <th className="text-center">ID</th>
+                  <th className="text-center">Tiêu đề</th>
+                  <th className="text-center">Tóm tắt</th>
+                  <th className="text-center">Tác giả</th>
+                  <th className="text-center">Ngày đăng</th>
+                  <th className="text-center">Trạng thái</th>
+                  <th className="text-center">Hành động</th>
                 </tr>
               </thead>
               <tbody>
                 {paged.map((n, i) => (
-                  <tr key={i}>
+                  <tr key={n.newsId}>
+                    <td className="text-center">{n.newsId}</td>
                     <td className="text-truncate" style={{maxWidth: 180, cursor:'pointer', color:'#1976d2', textDecoration:'underline'}} title={n.title} onClick={()=>setDetailIdx((page-1)*PAGE_SIZE+i)}>{n.title}</td>
-                    <td className="text-truncate" style={{maxWidth: 260}} title={n.summary}>{n.summary}</td>
-                    <td className="text-center">{n.author}</td>
-                    <td className="text-center">{n.date}</td>
+                    <td className="text-truncate" style={{maxWidth: 260}} title={n.brief}>{n.brief}</td>
+                    <td className="text-center">{n.authorName}</td>
+                    <td className="text-center">{new Date(n.createdAt).toLocaleDateString()}</td>
                     <td className="text-center">
-                      <span className={getStatusBadge(n.status)}>{n.status}</span>
+                      <span className={statusMap[n.status]?.className || "badge bg-secondary"}>
+                        {statusMap[n.status]?.label || n.status}
+                      </span>
                     </td>
                     <td className="text-center">
                       <div style={{display: 'flex', gap: '6px', justifyContent: 'center'}}>
@@ -327,6 +394,35 @@ export default function NewsManagement() {
                         />
                         {validationErrors.content && <div className="invalid-feedback">{validationErrors.content}</div>}
                       </div>
+                      <div className="col-md-12">
+                        <input
+                          className="form-control"
+                          placeholder="URL ảnh minh họa"
+                          value={editData.imageUrl || ''}
+                          onChange={e => setEditData({...editData, imageUrl: e.target.value})}
+                        />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="form-control mt-2"
+                          onChange={async e => {
+                            const file = e.target.files[0];
+                            if (file) {
+                              try {
+                                const url = await uploadImage(file);
+                                setEditData({...editData, imageUrl: url});
+                              } catch (err) {
+                                alert('Upload ảnh thất bại');
+                              }
+                            }
+                          }}
+                        />
+                        {editData.imageUrl && (
+                          <div style={{marginTop:8, textAlign:'center'}}>
+                            <img src={editData.imageUrl} alt="preview" style={{maxWidth: '100%', maxHeight: 180, borderRadius: 8, border: '1px solid #eee'}} />
+                          </div>
+                        )}
+                      </div>
                       <div className="col-md-6">
                         <input 
                           className={`form-control ${validationErrors.author ? 'is-invalid' : ''}`} 
@@ -391,10 +487,10 @@ export default function NewsManagement() {
                   </div>
                   <div className="modal-body">
                     <div style={{fontWeight:'bold', marginBottom:8}}>Tóm tắt:</div>
-                    <div style={{marginBottom:16}}>{news[detailIdx].summary}</div>
+                    <div style={{marginBottom:16}}>{news[detailIdx].brief}</div>
                     <div style={{fontWeight:'bold', marginBottom:8}}>Nội dung:</div>
                     <div style={{whiteSpace:'pre-line'}}>{news[detailIdx].content}</div>
-                    <div style={{marginTop:24, fontSize:14, color:'#888'}}>Tác giả: {news[detailIdx].author} | Ngày đăng: {news[detailIdx].date}</div>
+                    <div style={{marginTop:24, fontSize:14, color:'#888'}}>Tác giả: {news[detailIdx].authorName} | Ngày đăng: {news[detailIdx].createdAt ? new Date(news[detailIdx].createdAt).toLocaleDateString() : ''}</div>
                   </div>
                   <div className="modal-footer">
                     <button className="btn btn-secondary" onClick={()=>setDetailIdx(null)}>Đóng</button>

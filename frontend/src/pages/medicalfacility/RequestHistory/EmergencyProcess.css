@@ -1,0 +1,9 @@
+.emergency-process-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f9f9f9;
+}
+.emergency-process-content {
+  flex: 1 0 auto;
+} 

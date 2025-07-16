@@ -6,6 +6,7 @@ import { useState } from "react";
 import { message, Spin } from "antd";
 import { donorAPI } from '../../../services/api';
 import moment from 'moment';
+import DonorNotificationBell from '../../../components/user/DonorNotificationBell';
 
 export default function HomePage() {
   const [selectedDate, setSelectedDate] = useState("");
@@ -77,6 +78,7 @@ export default function HomePage() {
   return (
     <>
       <Header />
+      <DonorNotificationBell />
       <div className="homepage-wrapper">
         {/* Banner */}
         <div className="banner-section">

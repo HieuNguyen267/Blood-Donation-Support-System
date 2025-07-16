@@ -134,9 +134,8 @@ export default function BloodRequestManagement() {
   };
 
   // Edit logic - Navigate to detail page
-  const handleEdit = (idx) => {
-    const request = filtered[idx];
-    navigate(`/admin/blood-requests/${request.request_id}`);
+  const handleEdit = (requestId) => {
+    navigate(`/admin/blood-requests/${requestId}`);
   };
   const handleSaveEdit = () => {
     const errors = validateRequestData(editData);
@@ -261,7 +260,7 @@ export default function BloodRequestManagement() {
                     <td className="text-center">
                       <div style={{display: 'flex', gap: '6px', justifyContent: 'center', flexWrap: 'wrap'}}>
                         <button 
-                          onClick={() => handleEdit(i)}
+                          onClick={() => handleEdit(r.request_id)}
                           title="Xem chi tiết"
                           style={{
                             display: 'flex',

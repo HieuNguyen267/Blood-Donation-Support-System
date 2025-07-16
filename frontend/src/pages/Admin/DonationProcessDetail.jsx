@@ -126,6 +126,7 @@ export default function DonationProcessDetail() {
                   data.status === 'pending' ? 'Chờ xác nhận' : 
                   data.status === 'Not meeting health requirements' ? 'Từ chối' : data.status,
           blood: data.bloodGroup || '-',
+          weight: data.weightKg !== undefined && data.weightKg !== null ? `${data.weightKg} kg` : '-', // Thêm dòng này
           healthResult: data.healthCheckResult || '',
           processStatus: data.donationStatus === 'completed' ? 'Hoàn thành' :
                         data.donationStatus === 'deferred' ? 'Tạm dừng' :
@@ -419,6 +420,7 @@ export default function DonationProcessDetail() {
                     <tr><td>Số lượng (ml) :</td><td>{currentDonation.amount}</td></tr>
                     <tr><td>Trạng thái đơn hiến :</td><td>{currentDonation.status}</td></tr>
                     <tr><td>Trạng thái xử lý :</td><td style={getProcessStatusStyle(currentDonation.processStatus)}>{currentDonation.processStatus}</td></tr>
+                    <tr><td>Cân nặng :</td><td>{currentDonation.weight}</td></tr> {/* Thêm dòng này phía trên nhóm máu */}
                     <tr><td>Nhóm máu :</td><td>{currentDonation.blood}</td></tr>
                     <tr><td>Kết quả kiểm tra sức khỏe :</td><td>{currentDonation.healthResult || 'Chưa cập nhật'}</td></tr>
                     <tr><td>Ghi chú của nhân viên :</td><td>{currentDonation.staffNotes || 'Không có ghi chú'}</td></tr>
@@ -889,6 +891,56 @@ export default function DonationProcessDetail() {
                       </div>
                     </div>
                   )}
+                </div>
+              </div>
+
+              {/* Bảng lượng máu tối đa có thể hiến theo cân nặng */}
+              <div className="donation-detail-table" style={{marginTop: 24}}>
+                <div className="donation-detail-section-title">Lượng máu tối đa có thể hiến</div>
+                <div style={{padding: '20px'}}>
+                  {(() => {
+                    const weightStr = currentDonation.weight;
+                    let weight = null;
+                    if (weightStr && typeof weightStr === 'string' && weightStr.includes('kg')) {
+                      weight = parseInt(weightStr.replace('kg', '').trim());
+                    }
+                    let maxBlood = '-';
+                    let note = '';
+                    if (weight !== null && !isNaN(weight)) {
+                      if (weight < 42) {
+                        maxBlood = 'Không đủ điều kiện hiến máu';
+                        note = 'Cân nặng phải từ 42kg trở lên mới đủ điều kiện hiến máu.';
+                      } else if (weight >= 42 && weight < 45) {
+                        maxBlood = '250 ml';
+                        note = 'Có thể hiến tối đa 250ml máu toàn phần mỗi lần.';
+                      } else if (weight >= 45) {
+                        const calculated = Math.floor(weight * 9);
+                        const max = Math.min(calculated, 500);
+                        maxBlood = `${max} ml`;
+                        note = `Có thể hiến tối đa ${max}ml máu toàn phần mỗi lần (09ml/kg cân nặng, tối đa 500ml).`;
+                      }
+                    } else {
+                      maxBlood = '-';
+                      note = 'Chưa có thông tin cân nặng.';
+                    }
+                    return (
+                      <table style={{width: '100%'}}>
+                        <tbody>
+                          <tr>
+                            <td style={{fontWeight: 500}}>Cân nặng:</td>
+                            <td>{weight !== null && !isNaN(weight) ? `${weight} kg` : '-'}</td>
+                          </tr>
+                          <tr>
+                            <td style={{fontWeight: 500}}>Lượng máu tối đa có thể hiến:</td>
+                            <td>{maxBlood}</td>
+                          </tr>
+                          <tr>
+                            <td colSpan={2} style={{color: '#6b7280', fontSize: 13, paddingTop: 8}}>{note}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    );
+                  })()}
                 </div>
               </div>
             </div>

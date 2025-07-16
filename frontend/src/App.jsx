@@ -47,6 +47,7 @@ import MedicalFacilityRequestHistory from './pages/medicalfacility/RequestHistor
 import MedicalFacilityRequestDetail from './pages/medicalfacility/RequestHistory/RequestDetail';
 import MedicalFacilityEmergencyRequest from './pages/medicalfacility/EmergencyRequest/index';
 import MedicalFacilityContact from './pages/medicalfacility/Contact/ContactPage';
+import EmergencyProcessFacility from './pages/medicalfacility/RequestHistory/EmergencyProcess';
 
 import Statistics from './pages/Admin/Statistics';
 import DonorManagement from './pages/Admin/DonorManagement';
@@ -104,12 +105,14 @@ function AppContent() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/booking-antd" element={<BookingAntdForm />} />
         <Route path="/donor/emergency-request-detail/:requestId" element={<EmergencyRequestDetail />} />
+        <Route path="/donor/AppointmentHistory/:id" element={<AppointmentDetail />} />
         <Route path="/medical-facility" element={<MedicalFacilityLayout />}>
           <Route index element={<MedicalFacilityHome />} />
           <Route path="profile" element={<MedicalFacilityProfile />} />
           <Route path="receive-blood" element={<MedicalFacilityReceiveBlood />} />
           <Route path="request-history" element={<MedicalFacilityRequestHistory />} />
           <Route path="request-history/:id" element={<MedicalFacilityRequestDetail />} />
+          <Route path="request-history/:id/emergency-process" element={<EmergencyProcessFacility />} />
           <Route path="emergency-request" element={<MedicalFacilityEmergencyRequest />} />
           <Route path="contact" element={<MedicalFacilityContact />} />
         </Route>

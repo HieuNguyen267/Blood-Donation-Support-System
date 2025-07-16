@@ -241,4 +241,7 @@ public interface DonationRegisterRepository extends JpaRepository<DonationRegist
            "AND LOWER(d.fullName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
            "ORDER BY dr.createdAt DESC")
     List<DonationManagementDTO> findByDonorNameForProcessManagement(@Param("searchTerm") String searchTerm);
+
+    @Query("SELECT dr FROM DonationRegister dr WHERE dr.status = 'confirmed' AND dr.donationStatus = 'processing' AND dr.appointmentDate >= :today AND dr.appointmentDate <= :maxDate")
+    List<DonationRegister> findUpcomingConfirmedProcessing(@Param("today") LocalDate today, @Param("maxDate") LocalDate maxDate);
 } 

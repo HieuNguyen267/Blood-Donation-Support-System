@@ -227,8 +227,6 @@ public class DonorController {
         try {
             logger.info("[DELETE] Bắt đầu xóa đơn: registerId={}", registerId);
             donationRegisterService.deleteDonationRegister(registerId);
-            // Xóa luôn khảo sát sức khỏe liên quan
-            preDonationSurveyService.deleteSurveysByDonorId(donor.getDonorId());
             logger.info("[DELETE] Đã xóa thành công đơn: registerId={}", registerId);
         } catch (Exception ex) {
             logger.error("[DELETE] Lỗi khi xóa đơn: registerId={}, lỗi: {}", registerId, ex.getMessage(), ex);

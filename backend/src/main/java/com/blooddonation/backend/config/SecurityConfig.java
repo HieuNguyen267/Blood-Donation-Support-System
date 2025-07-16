@@ -85,7 +85,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/admin/medical-facilities/**").hasAnyRole("ADMIN", "STAFF", "MEDICAL_FACILITY")
                 .requestMatchers("/admin/matching-blood/**").hasAnyRole("ADMIN", "STAFF")
                 .requestMatchers("/admin/certificates/**").hasAnyRole("ADMIN", "STAFF")
+                .requestMatchers("/admin/news/**").hasAnyRole("ADMIN", "STAFF")
                 .requestMatchers("/api/common/distance").permitAll()
+                .requestMatchers("/uploads/**").permitAll()
                 .anyRequest().authenticated(); // Các request còn lại phải xác thực
             })
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

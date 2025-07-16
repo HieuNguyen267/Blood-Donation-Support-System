@@ -181,6 +181,12 @@ export default function RegisterDonatePage () {
     return formattedDate;
   };
 
+  // Kiểm tra đơn hiến máu hợp lệ
+  const isValidAppointment = latestAppointment &&
+    latestAppointment.donationStatus !== 'deferred' &&
+    latestAppointment.donationStatus !== 'completed' &&
+    latestAppointment.status !== 'Not meeting health requirements';
+
   // Hàm hiển thị trạng thái khảo sát sức khỏe
   const getHealthCheckStatus = () => {
     if (!healthAnswers) return null;
@@ -317,6 +323,47 @@ export default function RegisterDonatePage () {
     }
   };
 
+  // Hàm kiểm tra điều kiện đăng ký hiến máu giống HomePage
+  const handleRegisterDonate = async () => {
+    try {
+      // Lấy profile
+      const profile = await donorAPI.getProfile();
+      // Lấy danh sách đơn hiến máu
+      const donationHistory = await donorAPI.getDonationHistory();
+
+      // Kiểm tra đơn hiến máu chưa hoàn thành
+      const hasActiveDonation = donationHistory && donationHistory.some(d =>
+        d.donationStatus !== 'deferred' &&
+        d.donationStatus !== 'completed' &&
+        d.status !== 'Not meeting health requirements'
+      );
+      if (hasActiveDonation) {
+        message.error('Bạn đã đăng ký hiến máu rồi. Vui lòng hoàn thành hoặc hủy đơn trước khi đăng ký mới.');
+        return;
+      }
+
+      // Kiểm tra trạng thái sẵn sàng hiến máu
+      if (profile.isEligible) {
+        const now = moment();
+        const availableFrom = profile.availableFrom ? moment(profile.availableFrom) : null;
+        const availableUntil = profile.availableUntil ? moment(profile.availableUntil) : null;
+        if (
+          (availableFrom && now.isBefore(availableFrom, 'day')) ||
+          (availableFrom && availableUntil && now.isBetween(availableFrom, availableUntil, 'day', '[]')) ||
+          (availableUntil && now.diff(availableUntil, 'days') < 84)
+        ) {
+          message.error('Bạn đã đăng ký sẵn sàng hiến máu, không thể đăng ký hiến máu ngay bây giờ.');
+          return;
+        }
+      }
+
+      // Nếu hợp lệ, chuyển sang trang đặt lịch
+      navigate('/booking-antd');
+    } catch (err) {
+      message.error('Không thể kiểm tra điều kiện đăng ký: ' + (err.message || 'Lỗi không xác định'));
+    }
+  };
+
   if (loading) {
     return (
       <div className="donate-bg">
@@ -370,7 +417,7 @@ export default function RegisterDonatePage () {
           </div>
 
           {/* Thông tin đăng ký hiến máu */}
-          {latestAppointment ? (
+          {isValidAppointment ? (
             <div className="donate-phieubox" style={{ textAlign: 'left' }}>
               <div className="donate-phieutitle">Thông tin đăng ký hiến máu</div>
               <div className="donate-phieucontent" style={{ textAlign: 'left' }}>
@@ -386,33 +433,24 @@ export default function RegisterDonatePage () {
                 </div>
               </div>
             </div>
-          ) : healthAnswers ? (
-            <div className="donate-phieubox" style={{ textAlign: 'left' }}>
-              <div className="donate-phieutitle">Kết quả khảo sát sức khỏe</div>
-              <div className="donate-phieucontent" style={{ textAlign: 'left' }}>
-                <div className="donate-survey-info" style={{ textAlign: 'left' }}>
-                  <div style={{marginBottom: 16}}>
-                    <b>Trạng thái:</b> {getHealthCheckStatus() === 'Đủ điều kiện hiến máu' ? 
-                      <span style={{color: 'green'}}>Đủ điều kiện hiến máu</span> : 
-                      <span style={{color: 'red'}}>Không đủ điều kiện hiến máu</span>
-                    }
-                  </div>
-                  {getDeferralReason() && (
-                    <div style={{marginBottom: 16}}>
-                      <b>Lý do từ chối:</b> <span style={{color: 'red'}}>{getDeferralReason()}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
           ) : (
-            <div className="donate-phieubox" style={{ textAlign: 'left' }}>
-              <div className="donate-phieutitle">Bạn chưa thực hiện khảo sát sức khỏe</div>
+            <div className="donate-phieubox" style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 220 }}>
+              <div className="donate-phieutitle">Thông tin đăng ký</div>
+              <div style={{ fontSize: 64, margin: '24px 0 8px 0', color: '#219653' }}>
+                📝
+              </div>
+              <div style={{ color: '#219653', fontWeight: 600, fontSize: 18 }}>
+                Bạn chưa đăng ký đơn hiến nào
+              </div>
             </div>
           )}
 
           {/* Chi tiết khảo sát sức khỏe */}
-          {healthAnswers && (
+          {latestAppointment && latestAppointment.registerId &&
+            healthAnswers &&
+            latestAppointment.donationStatus !== 'deferred' &&
+            latestAppointment.donationStatus !== 'completed' &&
+            latestAppointment.status !== 'Not meeting health requirements' && (
             <div className="donate-phieubox" style={{ minWidth: 320, marginLeft: 24, textAlign: 'left' }}>
               <div className="donate-phieutitle">Chi tiết khảo sát sức khỏe</div>
               <div className="donate-phieucontent" style={{ textAlign: 'left' }}>
@@ -440,7 +478,7 @@ export default function RegisterDonatePage () {
       {/* Nút đăng ký hiến máu chỉ hiển thị khi chưa có đơn đăng ký */}
       {!latestAppointment && (
         <div className="center-btn">
-          <Button type="primary" className="green-button" style={{ minWidth: 240, fontWeight: 600, fontSize: 18 }} onClick={() => navigate('/booking-antd')}>
+          <Button type="primary" className="green-button" style={{ minWidth: 240, fontWeight: 600, fontSize: 18 }} onClick={handleRegisterDonate}>
             Đăng ký hiến máu
           </Button>
         </div>

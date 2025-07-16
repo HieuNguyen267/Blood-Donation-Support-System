@@ -31,4 +31,10 @@ public class MF_BloodRequestDTO {
     private String contactPhone;
     private String notes;
     private String deliveryPerson;
+    private String facilityName;
+    private String facilityAddress;
+    private String facilityPhone;
+    private String facilityEmail;
+    private String bloodGroupAboType;
+    private String bloodGroupRhFactor;
 } 

@@ -83,6 +83,21 @@ public class ReminderServiceImpl implements ReminderService {
         // Implementation sẽ được thêm sau khi có Staff entity
     }
 
+    @Scheduled(cron = "0 0 8 * * *")
+    public void sendUpcomingDonationReminders() {
+        LocalDate today = LocalDate.now();
+        LocalDate maxDate = today.plusDays(5);
+        List<DonationRegister> upcoming = donationRegisterRepository.findUpcomingConfirmedProcessing(today, maxDate);
+        for (DonationRegister register : upcoming) {
+            Donor donor = register.getDonor();
+            String email = getDonorEmail(donor);
+            if (email != null) {
+                String dateStr = register.getAppointmentDate() != null ? register.getAppointmentDate().toString() : "";
+                emailService.sendAppointmentReminder(email, donor.getFullName(), dateStr);
+            }
+        }
+    }
+
     @Override
     public List<Map<String, Object>> getUpcomingReminders() {
         List<Map<String, Object>> reminders = new ArrayList<>();

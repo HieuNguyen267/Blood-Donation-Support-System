@@ -136,8 +136,8 @@ public class BloodRequestController {
         // Cập nhật tất cả matching_blood liên quan (trừ những cái có status 'rejected')
         List<MatchingBlood> matchings = matchingBloodRepository.findByRequestId(requestId);
         for (MatchingBlood m : matchings) {
-            // Chỉ cập nhật nếu status không phải 'rejected'
-            if (!"rejected".equals(m.getStatus())) {
+            // Chỉ cập nhật nếu status không phải 'rejected' và có quantityMl
+            if (!"rejected".equals(m.getStatus()) && m.getQuantityMl() != null) {
                 m.setStatus("completed");
             }
         }

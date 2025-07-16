@@ -124,6 +124,13 @@ export default function BloodRequestDetail() {
     setIsDeliveryUpdated(false);
   }, [id]);
 
+  // Luôn kiểm tra lại khi currentRequest thay đổi
+  useEffect(() => {
+    if (currentRequest?.bloodFullfilled && currentRequest?.deliveryPerson) {
+      checkBloodSentFromDB();
+    }
+  }, [currentRequest]);
+
   useEffect(() => {
     bloodStockAPI.getStock().then(setBloodStock).catch(() => setBloodStock([]));
   }, []);
@@ -344,6 +351,13 @@ export default function BloodRequestDetail() {
   // Chỉ hiển thị nút yêu cầu khẩn cấp khi mức độ là "Khẩn cấp"
   const showEmergencyRequestBtn = currentRequest?.isEmergency === true;
 
+  // Thêm helper để lấy số từ chuỗi như '100 ml'
+  const getAmountNumber = (amount) => {
+    if (!amount) return 0;
+    const match = amount.toString().match(/\d+/);
+    return match ? parseInt(match[0], 10) : 0;
+  };
+
   return (
     <div className="dashboard-root">
       <Header />
@@ -552,7 +566,10 @@ export default function BloodRequestDetail() {
                   {(!canSendBlood) && (
                 <button 
                       onClick={e => {
-                        if (isCompleted) {
+                        if (currentRequest?.emergencyStatus) {
+                          e.preventDefault();
+                          setToast({ show: true, type: 'info', message: 'Đang yêu cầu máu khẩn cấp, hãy sang trang quá trình yêu cầu khẩn cấp để biết chi tiết.' });
+                        } else if (isCompleted) {
                           e.preventDefault(); showCompletedToast();
                         } else {
                           handleCompleteRequest();
@@ -565,7 +582,7 @@ export default function BloodRequestDetail() {
                   )}
                   
                   {/* Hiển thị thông tin máu đã gửi */}
-                  {isBloodSent && sentBloodInfo && (
+                  {currentRequest?.deliveryPerson && isBloodSent && sentBloodInfo && (
                     <div style={{
                       marginTop: '24px', 
                       padding: '16px', 
@@ -601,7 +618,7 @@ export default function BloodRequestDetail() {
                                 padding: '4px 0'
                               }}>
                                 <span style={{ fontWeight: '500' }}>Nhóm máu {row.group}:</span>
-                                <span style={{ color: '#059669', fontWeight: '600' }}>{row.amount} ml</span>
+                                <span style={{ color: '#059669', fontWeight: '600' }}>{row.amount}</span>
                               </div>
                             ))}
                             <hr style={{ margin: '8px 0', borderColor: '#d1fae5' }} />
@@ -612,7 +629,7 @@ export default function BloodRequestDetail() {
                               color: '#059669'
                             }}>
                               <span>Tổng cộng:</span>
-                              <span>{sentBloodInfo.bloodRows.reduce((sum, row) => sum + Number(row.amount || 0), 0)} ml</span>
+                              <span>{sentBloodInfo.bloodRows.reduce((sum, row) => sum + getAmountNumber(row.amount), 0)} ml</span>
                             </div>
                           </>
                         ) : (

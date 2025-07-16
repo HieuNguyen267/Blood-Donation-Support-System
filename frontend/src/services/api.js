@@ -411,6 +411,12 @@ export const bloodRequestAPI = {
     });
     return handleResponse(response);
   },
+  getAcceptedDonorsByRequestId: async (requestId) => {
+    const response = await fetch(`${API_BASE_URL}/api/admin/emergency-process/blood-requests/${requestId}/accepted-donors`, {
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  },
 
   // Matching Blood API
   getMatchingBloodForAdmin: async () => {
@@ -870,6 +876,52 @@ export const mfBloodRequestAPI = {
   deleteBloodRequest: async (id) => {
     const response = await fetch(`${API_BASE_URL}/api/medical-facility/blood-requests/${id}`, {
       method: 'DELETE',
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  },
+  getBloodRequestHistory: async () => {
+    const response = await fetch(`${API_BASE_URL}/api/medical-facility/blood-requests/history`, {
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  },
+  getEmergencyProcessByRequestId: async (requestId) => {
+    const response = await fetch(`${API_BASE_URL}/api/medical-facility/blood-requests/${requestId}/emergency-process`, {
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  },
+  getAcceptedMatchingByRequestId: async (requestId) => {
+    const response = await fetch(`${API_BASE_URL}/api/medical-facility/blood-requests/${requestId}/accepted-matching`, {
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  },
+  getBloodRequestSummaryById: async (requestId) => {
+    const response = await fetch(`${API_BASE_URL}/api/medical-facility/blood-requests/${requestId}/summary`, {
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  },
+  updateMatchingBloodQuantity: async (matchingId, quantityMl) => {
+    const response = await fetch(`${API_BASE_URL}/api/medical-facility/matching-blood/${matchingId}/quantity`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify({ quantityMl })
+    });
+    return handleResponse(response);
+  },
+  confirmMatchingBloodCompleted: async (matchingId) => {
+    const response = await fetch(`${API_BASE_URL}/api/medical-facility/matching-blood/${matchingId}/confirm-completed`, {
+      method: 'PUT',
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  },
+  completeEmergencyProcess: async (requestId) => {
+    const response = await fetch(`${API_BASE_URL}/api/medical-facility/blood-requests/${requestId}/complete-emergency`, {
+      method: 'PUT',
       headers: getHeaders()
     });
     return handleResponse(response);

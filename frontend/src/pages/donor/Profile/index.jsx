@@ -6,6 +6,7 @@ import Footer from '../../../components/user/Footer';
 import { donorAPI } from '../../../services/api';
 import dayjs from 'dayjs';
 import './index.css';
+import DonorNotificationBell from '../../../components/user/DonorNotificationBell';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -124,6 +125,7 @@ const ProfilePage = () => {
     return (
       <div className="profile-page">
         <Header />
+        <DonorNotificationBell />
         <div className="profile-container">
           <div style={{ textAlign: 'center', padding: '50px' }}>
             <Spin size="large" />
@@ -141,6 +143,7 @@ const ProfilePage = () => {
       {/* Left column */}
       <Col xs={24} md={14}>
         <Card className="profile-card profile-main-card">
+          <DonorNotificationBell />
           <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
             <Avatar size={96} icon={<User size={48} />} style={{ background: '#222' }} />
             <div>

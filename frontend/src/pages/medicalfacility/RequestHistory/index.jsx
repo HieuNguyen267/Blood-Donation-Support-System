@@ -1,248 +1,171 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '../../../components/user/Footer';
 import MedicalFacilityHeader from '../../../components/user/MedicalFacilityHeader';
-import { Typography, Button, message, Spin } from "antd";
-import { EnvironmentOutlined, ClockCircleOutlined, FileTextOutlined } from "@ant-design/icons";
-import "../../donor/AppointmentHistory/index.css";
+import { Spin, Typography } from 'antd';
 import { mfBloodRequestAPI } from '../../../services/api';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
+
+function getStatusText(request) {
+  // Highest priority: emergency_status
+  if (request.emergencyStatus) {
+    if (request.emergencyStatus === 'pending') return { text: 'Chờ liên hệ', color: '#faad14' };
+    if (request.emergencyStatus === 'contacting') return { text: 'Đang liên hệ', color: '#1890ff' };
+    if (request.emergencyStatus === 'completed') return { text: 'Hoàn thành', color: '#52c41a' };
+  }
+  // Next: request_status + processing_status
+  if (request.requestStatus === 'confirmed' && request.processingStatus) {
+    if (request.processingStatus === 'pending') return { text: 'Đang xử lí', color: '#faad14' };
+    if (request.processingStatus === 'in transit') return { text: 'Đang vận chuyển', color: '#1890ff' };
+    if (request.processingStatus === 'completed') return { text: 'Hoàn thành', color: '#52c41a' };
+  }
+  // Lowest: request_status
+  if (request.requestStatus === 'pending') return { text: 'Chờ xác nhận', color: '#faad14' };
+  if (request.requestStatus === 'confirmed') return { text: 'Xác nhận', color: '#1890ff' };
+  if (request.requestStatus === 'rejected') return { text: 'Từ chối', color: '#ff4d4f' };
+  return { text: request.requestStatus || '-', color: '#888' };
+}
 
 const RequestHistory = () => {
-  const [receiveRequests, setReceiveRequests] = useState([]);
-  const [donateRequests, setDonateRequests] = useState([]);
+  const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchAllRequests = async () => {
-    try {
-      setLoading(true);
-      
-      // Lấy lịch sử yêu cầu máu từ API thực tế
-      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
-      const facilityId = userInfo.facilityId;
-      
-      if (facilityId) {
-        // Sử dụng API mfBloodRequestAPI để lấy dữ liệu từ database
-        const bloodRequests = await mfBloodRequestAPI.getAllBloodRequests();
-        // Map dữ liệu sang camelCase nếu cần
-        const mapped = (bloodRequests || []).map(req => ({
-          ...req,
-          id: req.id || req.requestId,
-          isEmergency: req.isEmergency ?? req.is_emergency,
-          quantityRequested: req.quantityRequested ?? req.quantity_requested,
-          requiredBy: req.requiredBy ?? req.required_by,
-        }));
-        console.log('receiveRequests:', mapped);
-        setReceiveRequests(mapped);
-      } else {
-        setReceiveRequests([]);
-      }
-
-      // Lấy lịch sử hiến máu (giữ nguyên logic cũ)
-      const res2 = await fetch('http://localhost:8080/donation-registers', {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + localStorage.getItem('token')
-        }
-      });
-      const donateData = await res2.json();
-      setDonateRequests(donateData || []);
-    } catch (error) {
-      console.error('Error fetching requests:', error);
-      message.error('Không thể tải lịch sử yêu cầu');
-      setReceiveRequests([]);
-      setDonateRequests([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchAllRequests();
+    mfBloodRequestAPI.getBloodRequestHistory()
+      .then((data) => setRequests(Array.isArray(data) ? data : []))
+      .catch(() => setRequests([]))
+      .finally(() => setLoading(false));
   }, []);
 
-  const handleCancelRequest = async (requestId) => {
-    try {
-      // TODO: Implement delete API for blood requests
-      message.success('Đã hủy yêu cầu');
-      fetchAllRequests(); // Tải lại danh sách sau khi hủy
-    } catch (error) {
-      console.error('Error canceling request:', error);
-      message.error('Không thể hủy yêu cầu');
-    }
-  };
-
-  // Hàm hủy yêu cầu nhận máu
-  const handleCancelReceiveRequest = async (requestId) => {
-    try {
-      await mfBloodRequestAPI.deleteBloodRequest(requestId);
-      message.success('Đã hủy yêu cầu nhận máu');
-      fetchAllRequests();
-    } catch (error) {
-      console.error('Error canceling receive request:', error);
-      message.error('Không thể hủy yêu cầu nhận máu');
-    }
-  };
-
-  const getStatusText = (status, isEmergency) => {
-    if (isEmergency) {
-      return 'Khẩn cấp';
-    }
-    switch (status) {
-      case 'PENDING': return 'Chờ xác nhận';
-      case 'CONFIRMED': return 'Đã xác nhận';
-      case 'REJECTED': return 'Từ chối';
-      case 'COMPLETED': return 'Hoàn thành';
-      default: return status || 'Chờ xác nhận';
-    }
-  };
-
-  const getStatusColor = (status, isEmergency) => {
-    if (isEmergency) return 'red';
-    switch (status) {
-      case 'PENDING': return 'gold';
-      case 'CONFIRMED': return 'blue';
-      case 'REJECTED': return 'red';
-      case 'COMPLETED': return 'green';
-      default: return 'default';
-    }
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('vi-VN');
-    } catch {
-      return dateString;
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="history-page-container">
-        <MedicalFacilityHeader />
-        <div className="history-content">
-          <div style={{ textAlign: 'center', padding: '50px' }}>
-            <Spin size="large" />
-            <div style={{ marginTop: '20px' }}>Đang tải lịch sử yêu cầu...</div>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
   return (
-    <div className="history-page-container">
+    <div className="history-page-container" style={{ minHeight: '100vh', background: '#f7f7f7' }}>
       <MedicalFacilityHeader />
-      <div className="history-content">
-        <Title level={2} className="history-title">
-          Lịch sử yêu cầu máu
-        </Title>
-
-        <div className="appointment-list">
-          {receiveRequests.length > 0 ? (
-            receiveRequests.map((req) => (
-              <div key={req.id || req.requestId} className="appointment-card">
-                <div className="card-left">
-                  <div className="blood-drop-icon">🩸</div>
-                  <Text strong>Nhận máu</Text>
+      <div style={{ minHeight: 'calc(100vh - 64px - 64px)', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 16 }}>
+        <Title level={2} style={{ textAlign: 'center', margin: '12px 0 18px 0' }}>Lịch sử yêu cầu máu</Title>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: 40 }}><Spin /> Đang tải lịch sử yêu cầu...</div>
+        ) : requests.length > 0 ? (
+          <div className="certificate-list-modern">
+            {requests.map(req => {
+              const status = getStatusText(req);
+              return (
+                <div className="certificate-card-modern" key={req.id}>
+                  <div className="certificate-card-left">
+                    <div className="blood-drop-icon">🩸</div>
+                    <div className="certificate-type">Yêu cầu máu</div>
+                  </div>
+                  <div className="certificate-card-main">
+                    <div className="certificate-title" style={{ fontWeight: 'bold', fontSize: 18 }}>
+                      Yêu cầu máu
+                    </div>
+                    <div className="certificate-info-row">
+                      <span className="certificate-info-label">Ngày yêu cầu:</span> <span>{req.requiredBy ? new Date(req.requiredBy).toLocaleDateString() : '-'}</span>
+                    </div>
+                    <div className="certificate-info-row">
+                      <span className="certificate-info-label">Số lượng máu:</span> <span>{req.quantityRequested ? req.quantityRequested + ' ml' : '-'}</span>
+                    </div>
+                    <div className="certificate-info-row">
+                      <span className="certificate-info-label">Ghi chú:</span> <span>{req.specialRequirements || '-'}</span>
+                    </div>
+                    <div className="certificate-info-row">
+                      <span className="certificate-info-label">Mức độ:</span> <span style={{ color: req.isEmergency ? '#ff4d4f' : '#52c41a', fontWeight: 500 }}>{req.isEmergency ? 'Khẩn cấp' : 'Bình thường'}</span>
+                    </div>
+                    <div className="certificate-info-row">
+                      <span className="certificate-info-label">Trạng thái:</span> <span style={{ color: status.color, fontWeight: 500 }}>{status.text}</span>
+                    </div>
+                  </div>
+                  <div className="certificate-card-right">
+                    <Link to={`/medical-facility/request-history/${req.id}`} className="details-link">
+                      Xem chi tiết
+                    </Link>
+                  </div>
                 </div>
-                <div className="card-main">
-                  <Text className="location-title" style={{fontWeight: 'normal', fontSize: 18}}>
-                    Mã yêu cầu: {req.id || req.requestId}
-                  </Text>
-                  <Text className="appointment-details">
-                    Ngày yêu cầu: {formatDate(req.requiredBy)}
-                  </Text>
-                  <Text className="appointment-details">
-                    Số lượng yêu cầu: {req.quantityRequested || '-'} ml
-                  </Text>
-                  <Text className="appointment-details">
-                    Tình trạng: {req.isEmergency ? (
-                      <span style={{ color: 'red', fontWeight: 'bold' }}>Khẩn cấp</span>
-                    ) : (
-                      <span style={{ color: 'green', fontWeight: 'bold' }}>Bình thường</span>
-                    )}
-                  </Text>
-                  <Text className="appointment-details">
-                    Trạng thái: <span style={{ color: getStatusColor(req.requestStatus, req.isEmergency) === 'green' ? '#52c41a' : 
-                                               getStatusColor(req.requestStatus, req.isEmergency) === 'red' ? '#ff4d4f' : 
-                                               getStatusColor(req.requestStatus, req.isEmergency) === 'blue' ? '#1890ff' : '#faad14' }}>
-                      {getStatusText(req.requestStatus, req.isEmergency)}
-                    </span>
-                  </Text>
-                  {req.patientInfo && (
-                    <Text className="appointment-details">
-                      Thông tin: {req.patientInfo}
-                    </Text>
-                  )}
-                </div>
-                <div className="card-right">
-                  <Button className="status-btn yellow-btn" onClick={() => handleCancelReceiveRequest(req.id || req.requestId)}>
-                    Hủy yêu cầu
-                  </Button>
-                  <Link to={`/medical-facility/request-history/${req.id || req.requestId}`} className="details-link">
-                    <FileTextOutlined /> Xem chi tiết
-                  </Link>
-                </div>
-              </div>
-            ))
-          ) : (
-            <Text className="no-history-text">Chưa có yêu cầu nhận máu nào.</Text>
-          )}
-        </div>
-
-        <div className="appointment-list">
-          {donateRequests.length > 0 ? (
-            donateRequests.map((req) => (
-              <div key={req.registerId} className="appointment-card">
-                <div className="card-left">
-                  <div className="blood-drop-icon">🩸</div>
-                  <Text strong>Hiến máu</Text>
-                </div>
-                <div className="card-main">
-                  <Text className="location-title" style={{fontWeight: 'normal', fontSize: 18}}>
-                    Mã đăng ký: {req.registerId}
-                  </Text>
-                  <Text className="appointment-details">
-                    Ngày hẹn: {req.appointmentDate || '-'}
-                  </Text>
-                  <Text className="appointment-details">
-                    Số lượng: {req.quantity || '-'} ml
-                  </Text>
-                  <Text className="appointment-details">
-                    Trạng thái: <span style={{ color: req.status === 'confirmed' ? '#52c41a' : 
-                                               req.status === 'cancelled' ? '#ff4d4f' : '#faad14' }}>
-                      {req.status === 'confirmed' ? 'Đã xác nhận' : 
-                       req.status === 'cancelled' ? 'Đã hủy' : 'Chờ xác nhận'}
-                    </span>
-                  </Text>
-                </div>
-                <div className="card-right">
-                  {req.status === 'cancelled' ? (
-                    <Button className="status-btn red-btn" disabled>
-                      Đã hủy
-                    </Button>
-                  ) : (
-                    <Button className="status-btn yellow-btn" onClick={() => handleCancelRequest(req.id)}>
-                      Hủy yêu cầu
-                    </Button>
-                  )}
-                  <Link to={`/medical-facility/request-history/${req.registerId}`} className="details-link">
-                    <FileTextOutlined /> Xem chi tiết
-                  </Link>
-                </div>
-              </div>
-            ))
-          ) : (
-            <Text className="no-history-text">Chưa có đăng ký hiến máu nào.</Text>
-          )}
-        </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="certificate-empty">
+            Không có yêu cầu máu nào.
+          </div>
+        )}
       </div>
       <Footer />
+      <style>{`
+        .certificate-list-modern {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+          max-width: 700px;
+          margin: 0;
+          align-items: center;
+        }
+        .certificate-card-modern {
+          display: flex;
+          align-items: center;
+          background: #fff;
+          border-radius: 12px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+          padding: 20px 28px;
+          gap: 18px;
+          transition: box-shadow 0.2s;
+          min-height: 140px;
+          width: 100%;
+          max-width: 600px;
+          box-sizing: border-box;
+        }
+        .certificate-card-modern:hover {
+          box-shadow: 0 4px 16px rgba(76,175,80,0.15);
+        }
+        .certificate-card-left {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          margin-right: 12px;
+        }
+        .blood-drop-icon {
+          font-size: 32px;
+          margin-bottom: 4px;
+        }
+        .certificate-type {
+          font-size: 13px;
+          color: #1890ff;
+        }
+        .certificate-card-main {
+          flex: 1;
+        }
+        .certificate-title {
+          margin-bottom: 6px;
+        }
+        .certificate-info-row {
+          font-size: 15px;
+          margin-bottom: 2px;
+        }
+        .certificate-info-label {
+          color: #888;
+          margin-right: 4px;
+        }
+        .certificate-card-right {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          min-width: 110px;
+        }
+        .details-link {
+          color: #1890ff;
+          font-weight: 500;
+          text-decoration: none;
+          font-size: 15px;
+        }
+        .details-link:hover {
+          text-decoration: underline;
+        }
+        .certificate-empty {
+          color: #888;
+          font-size: 16px;
+          margin-top: 32px;
+        }
+      `}</style>
     </div>
   );
 };

@@ -22,9 +22,9 @@ export default function AdminDashBoard() {
         <Sidebar />
         <main className="dashboard-content">
           <div className="dashboard-row dashboard-row-cards">
-            <StatCard icon="📅" color="#7c3aed" title="Appointments" value="650" />
-            <StatCard icon="🛠️" color="#fb923c" title="Operations" value="54" />
-            <StatCard icon="👤" color="#22c55e" title="New Patients" value="129" />
+            <StatCard icon="🩸" color="#7c3aed" title="Số đơn hiến trong tháng" value="650" />
+            <StatCard icon="📝" color="#fb923c" title="Số đơn yêu cầu máu trong tháng" value="54" />
+            <StatCard icon="🚨" color="#22c55e" title="Số đơn yêu cầu khẩn cấp trong tháng " value="129" />
           </div>
           <div className="dashboard-row dashboard-row-charts">
             <ChartPlaceholder />
