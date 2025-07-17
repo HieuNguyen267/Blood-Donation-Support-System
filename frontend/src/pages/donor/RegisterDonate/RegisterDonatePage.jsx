@@ -190,7 +190,6 @@ export default function RegisterDonatePage () {
   // Hàm hiển thị trạng thái khảo sát sức khỏe
   const getHealthCheckStatus = () => {
     if (!healthAnswers) return null;
-    
     // Kiểm tra các điều kiện để xác định trạng thái
     const hasSymptoms = 
       healthAnswers.hasFluFeverCough !== 'khong_co_trieu_chung' ||

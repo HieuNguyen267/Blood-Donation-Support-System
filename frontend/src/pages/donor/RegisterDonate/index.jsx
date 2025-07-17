@@ -62,16 +62,15 @@ export default function RegisterDonate() {
   const handleFormChange = (changedValues, allValues) => {
     console.log('onValuesChange:', changedValues, allValues);
   };
-
-  // Hàm chuyển đổi moment hoặc string hoặc Date sang YYYY-MM-DD
-  const toDateString = (val) => {
-    if (!val) return '';
-    if (typeof val === 'string') return val;
-    if (val._isAMomentObject) return val.format('YYYY-MM-DD');
-    if (val instanceof Date) return moment(val).format('YYYY-MM-DD');
-    if (val.$d) return moment(val.$d).format('YYYY-MM-DD'); // Trường hợp dayjs hoặc moment clone
-    return '';
-  };
+// Hàm chuyển đổi moment hoặc string hoặc Date sang YYYY-MM-DD
+const toDateString = (val) => {
+  if (!val) return '';
+  if (typeof val === 'string') return val;
+  if (val._isAMomentObject) return val.format('YYYY-MM-DD');
+  if (val instanceof Date) return moment(val).format('YYYY-MM-DD');
+  if (val.$d) return moment(val.$d).format('YYYY-MM-DD'); // Trường hợp dayjs hoặc moment clone
+  return '';
+};
 
   const handleSubmit = async (values) => {
     try {

@@ -48,24 +48,23 @@ export default function BookingAntdForm() {
     const loadData = async () => {
       try {
         setLoading(true);
-        
-        // Lấy thông tin profile donor
-        const profileData = await donorAPI.getProfile();
-        setProfile(profileData);
+         // Lấy thông tin profile donor
+         const profileData = await donorAPI.getProfile();
+         setProfile(profileData);
         
         // Lấy danh sách khung giờ hiến máu
         const timeEventsData = await donorAPI.getTimeEvents();
         setTimeEvents(timeEventsData);
-        
-        // Điền dữ liệu vào form
+       
+         // Điền dữ liệu vào form
         form.setFieldsValue({
-          fullName: profileData.fullName,
-          gender: renderGender(profileData.gender),
-          phone: profileData.phone,
-          email: profileData.email,
-          bloodGroup: renderBloodGroup(profileData.aboType, profileData.rhFactor),
-          weight: profileData.weight,
-          lastDonationDate: profileData.lastDonationDate ? moment(profileData.lastDonationDate) : null,
+         fullName: profileData.fullName,
+         gender: renderGender(profileData.gender),
+         phone: profileData.phone,
+         email: profileData.email,
+         bloodGroup: renderBloodGroup(profileData.aboType, profileData.rhFactor),
+         weight: profileData.weight,
+         lastDonationDate: profileData.lastDonationDate ? moment(profileData.lastDonationDate) : null,
         });
 
         // Tự động điền appointment_date nếu có
