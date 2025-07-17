@@ -84,24 +84,24 @@ export default function CertificateDetail() {
                 <div style={{ color: "#444", fontSize: 15, marginBottom: 2 }}><b>Ghi chú thêm:</b> {data.notes || '-'}</div>
               </div>
             </div>
-            <Button
-              type="primary"
-              icon={<DownloadOutlined />}
-              size="large"
-              style={{
-                marginTop: 24,
-                backgroundColor: '#4CAF50',
-                borderColor: '#4CAF50',
-                borderRadius: 8,
-                fontWeight: 500,
-                fontSize: 16,
-                padding: "0 32px"
-              }}
-              onClick={handleDownload}
-            >
-              Tải giấy chứng nhận
-            </Button>
           </div>
+          <Button
+            type="primary"
+            icon={<DownloadOutlined />}
+            size="large"
+            style={{
+              marginTop: 24,
+              backgroundColor: '#4CAF50',
+              borderColor: '#4CAF50',
+              borderRadius: 8,
+              fontWeight: 500,
+              fontSize: 16,
+              padding: "0 32px"
+            }}
+            onClick={handleDownload}
+          >
+            Tải giấy chứng nhận
+          </Button>
         ) : (
           <div className="certificate-empty">
             Không tìm thấy chứng nhận hoặc bạn không có quyền xem.
