@@ -15,6 +15,8 @@ export default function AppointmentHistory() {
   const [loading, setLoading] = useState(true);
   const [bookingData, setBookingData] = useState(null);
   const [donationFormData, setDonationFormData] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(3); // Hiển thị 3 lịch hẹn mỗi trang
 
   useEffect(() => {
     setLoading(true);
@@ -215,7 +217,9 @@ export default function AppointmentHistory() {
 
         <div className="appointment-list">
           {appointments.length > 0 ? (
-            appointments.map((app) => (
+            appointments
+              .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+              .map((app) => (
               <div key={`${app.type}-${app.id}`} className="appointment-card">
                 <div className="card-left">
                   <div className="blood-drop-icon">🩸</div>
@@ -260,6 +264,29 @@ export default function AppointmentHistory() {
             ))
           ) : (
             <Text className="no-history-text">Bạn chưa có lịch hẹn nào.</Text>
+          )}
+          
+          {/* Phân trang */}
+          {appointments.length > pageSize && (
+            <div className="pagination-container">
+              <Button 
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(currentPage - 1)}
+                style={{ marginRight: 8 }}
+              >
+                Trước
+              </Button>
+              <span className="pagination-info">
+                Trang {currentPage} / {Math.ceil(appointments.length / pageSize)}
+              </span>
+              <Button 
+                disabled={currentPage === Math.ceil(appointments.length / pageSize)}
+                onClick={() => setCurrentPage(currentPage + 1)}
+                style={{ marginLeft: 8 }}
+              >
+                Sau
+              </Button>
+            </div>
           )}
         </div>
       </div>

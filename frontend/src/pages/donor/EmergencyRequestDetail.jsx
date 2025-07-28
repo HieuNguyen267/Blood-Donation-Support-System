@@ -112,6 +112,7 @@ export default function EmergencyRequestDetail() {
                     <div className="col-md-6">
                       <div><b>Mã yêu cầu:</b> #{request.requestId}</div>
                       <div><b>Cơ sở y tế:</b> {request.facilityName}</div>
+                      <div><b>Địa chỉ:</b> {request.facilityAddress || <span className="text-muted">Không có</span>}</div>
                       <div><b>Nhóm máu cần:</b> {request.bloodGroup}</div>
                       <div><b>Số lượng cần:</b> {request.quantityRequested} ml</div>
                       <div><b>Ngày cần:</b> {request.requiredBy}</div>

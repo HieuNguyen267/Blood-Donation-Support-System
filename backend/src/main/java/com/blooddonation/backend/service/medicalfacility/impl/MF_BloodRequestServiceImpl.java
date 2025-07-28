@@ -8,6 +8,7 @@ import com.blooddonation.backend.dto.medicalfacility.MatchingBloodFacilityDTO;
 import com.blooddonation.backend.repository.common.MatchingBloodRepository;
 import com.blooddonation.backend.entity.common.MatchingBlood;
 import com.blooddonation.backend.dto.medicalfacility.BloodRequestSummaryDTO;
+import com.blooddonation.backend.service.common.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,8 @@ public class MF_BloodRequestServiceImpl implements MF_BloodRequestService {
     private MatchingBloodRepository matchingBloodRepository;
     @Autowired
     private DonorRepository donorRepository;
+    @Autowired
+    private EmailService emailService;
 
     @Override
     public MF_BloodRequestDTO createBloodRequest(MF_BloodRequestDTO dto) {
@@ -153,6 +156,93 @@ public class MF_BloodRequestServiceImpl implements MF_BloodRequestService {
             }
         }
         matchingBloodRepository.saveAll(matchings);
+    }
+
+    @Override
+    public boolean cancelBloodRequest(Integer id) {
+        Optional<MF_BloodRequest> entityOpt = bloodRequestRepository.findByRequestId(id);
+        if (entityOpt.isPresent()) {
+            MF_BloodRequest entity = entityOpt.get();
+            // Chỉ cho phép hủy nếu request chưa hoàn thành
+            if (!"completed".equals(entity.getRequestStatus()) && !"rejected".equals(entity.getRequestStatus())) {
+                entity.setRequestStatus("cancelled");
+                entity.setUpdatedAt(LocalDateTime.now());
+                bloodRequestRepository.save(entity);
+                
+                // Gửi email thông báo hủy yêu cầu khẩn cấp nếu có matching_blood với status 'contacting'
+                sendCancellationEmailsToContactingDonors(id);
+                
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    private void sendCancellationEmailsToContactingDonors(Integer requestId) {
+        try {
+            // Lấy tất cả matching_blood có request_id và status = 'contacting' hoặc 'contact_successful'
+            List<MatchingBlood> contactingMatchings = matchingBloodRepository.findByRequestId(requestId)
+                .stream()
+                .filter(matching -> "contacting".equals(matching.getStatus()) || "contact_successful".equals(matching.getStatus()))
+                .collect(Collectors.toList());
+            
+            if (contactingMatchings.isEmpty()) {
+                return; // Không có donor nào đang được liên hệ hoặc đã liên hệ thành công
+            }
+            
+            // Lấy thông tin yêu cầu máu
+            MF_BloodRequest bloodRequest = bloodRequestRepository.findByRequestId(requestId).orElse(null);
+            if (bloodRequest == null) {
+                return;
+            }
+            
+            // Chuẩn bị thông tin cho email
+            String facilityName = bloodRequest.getFacility() != null ? bloodRequest.getFacility().getFacilityName() : "Không xác định";
+            String bloodGroup = "";
+            if (bloodRequest.getBloodGroup() != null) {
+                String aboType = bloodRequest.getBloodGroup().getAboType();
+                String rhFactor = bloodRequest.getBloodGroup().getRhFactor();
+                if ("Rh_Null".equals(aboType)) {
+                    bloodGroup = "Rh NULL";
+                } else if ("Bombay".equals(aboType)) {
+                    bloodGroup = "Bombay";
+                } else {
+                    String rhSymbol = "positive".equals(rhFactor) ? "+" : "negative".equals(rhFactor) ? "-" : "";
+                    bloodGroup = aboType + rhSymbol;
+                }
+            }
+            String quantity = String.valueOf(bloodRequest.getQuantityRequested());
+            String requiredBy = bloodRequest.getRequiredBy() != null ? bloodRequest.getRequiredBy().toString() : "Không xác định";
+            
+            // Gửi email cho từng donor
+            for (MatchingBlood matching : contactingMatchings) {
+                Optional<Donor> donorOpt = donorRepository.findById(matching.getDonorId());
+                if (donorOpt.isPresent()) {
+                    Donor donor = donorOpt.get();
+                    String donorEmail = donor.getEmail();
+                    String donorName = donor.getFullName();
+                    
+                    if (donorEmail != null && !donorEmail.trim().isEmpty()) {
+                        try {
+                            emailService.sendEmergencyRequestCancellationEmail(
+                                donorEmail, 
+                                donorName, 
+                                facilityName, 
+                                bloodGroup, 
+                                quantity, 
+                                requiredBy
+                            );
+                        } catch (Exception e) {
+                            // Log lỗi nhưng không dừng quá trình
+                            System.err.println("Error sending cancellation email to " + donorEmail + ": " + e.getMessage());
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Log lỗi nhưng không dừng quá trình hủy yêu cầu
+            System.err.println("Error in sendCancellationEmailsToContactingDonors: " + e.getMessage());
+        }
     }
 
     private int parseBloodFullfilled(String str) {

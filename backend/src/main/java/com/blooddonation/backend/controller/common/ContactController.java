@@ -42,6 +42,7 @@ public class ContactController {
                 "Test User",
                 "http://localhost:3000/donor/emergency-request-detail/1",
                 "BV Test",
+                "123 Đường Test, Quận 1, TP.HCM",
                 "A+",
                 "500",
                 "2024-07-15 10:00"

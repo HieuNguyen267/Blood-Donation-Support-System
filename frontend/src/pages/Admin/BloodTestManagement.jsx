@@ -168,7 +168,6 @@ export default function BloodTestManagement() {
                 {orderOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
             )}
-            <button className="donation-export">⭳ Xuất tệp</button>
           </div>
           <div className="donation-table-card">
             <table className="table table-hover table-bordered align-middle mb-0">

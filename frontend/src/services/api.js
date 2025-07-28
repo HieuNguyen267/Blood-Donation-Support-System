@@ -174,6 +174,13 @@ export const donorAPI = {
     return handleResponse(response);
   },
 
+  getSurveyByRegisterId: async (registerId) => {
+    const response = await fetch(`${API_BASE_URL}/donor/survey/by-register/${registerId}`, {
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  },
+
   getDonationRegistrationInfo: async () => {
     const response = await fetch(`${API_BASE_URL}/donor/donation-registration-info`, {
       headers: getHeaders()
@@ -474,6 +481,22 @@ export const bloodStockAPI = {
       headers: getHeaders()
     });
     return handleResponse(response);
+  },
+  addVolume: async (id, amount) => {
+    const response = await fetch(`${API_BASE_URL}/api/admin/blood-stocks/${id}/add`, {
+      method: 'PATCH',
+      headers: getHeaders(),
+      body: JSON.stringify({ amount })
+    });
+    return handleResponse(response);
+  },
+  subtractVolume: async (id, amount) => {
+    const response = await fetch(`${API_BASE_URL}/api/admin/blood-stocks/${id}/subtract`, {
+      method: 'PATCH',
+      headers: getHeaders(),
+      body: JSON.stringify({ amount })
+    });
+    return handleResponse(response);
   }
 };
 
@@ -616,47 +639,72 @@ export const medicalFacilityAPI = {
     });
     return handleResponse(response);
   },
-  // Có thể bổ sung các hàm khác nếu cần
-  };
+  getFacilityById: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/api/admin/medical-facilities/${id}`, {
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  }
+};
 
 // Account API
 export const accountAPI = {
   getAccounts: async () => {
+    const token = localStorage.getItem('token');
+    console.log('[DEBUG] Token in localStorage:', token);
+    const headers = getHeaders();
+    console.log('[DEBUG] Headers sent to /accounts:', headers);
     const response = await fetch(`${API_BASE_URL}/accounts`, {
-      headers: getHeaders()
+      headers
     });
     return handleResponse(response);
   },
 
   getAccountById: async (id) => {
+    const token = localStorage.getItem('token');
+    console.log('[DEBUG] Token in localStorage:', token);
+    const headers = getHeaders();
+    console.log('[DEBUG] Headers sent to /accounts/:id:', headers);
     const response = await fetch(`${API_BASE_URL}/accounts/${id}`, {
-      headers: getHeaders()
+      headers
     });
     return handleResponse(response);
   },
 
   createAccount: async (accountData) => {
+    const token = localStorage.getItem('token');
+    console.log('[DEBUG] Token in localStorage:', token);
+    const headers = getHeaders();
+    console.log('[DEBUG] Headers sent to POST /accounts:', headers);
     const response = await fetch(`${API_BASE_URL}/accounts`, {
       method: 'POST',
-      headers: getHeaders(),
+      headers,
       body: JSON.stringify(accountData)
     });
     return handleResponse(response);
   },
 
   updateAccount: async (id, accountData) => {
+    const token = localStorage.getItem('token');
+    console.log('[DEBUG] Token in localStorage:', token);
+    const headers = getHeaders();
+    console.log('[DEBUG] Headers sent to PUT /accounts/:id:', headers);
     const response = await fetch(`${API_BASE_URL}/accounts/${id}`, {
       method: 'PUT',
-      headers: getHeaders(),
+      headers,
       body: JSON.stringify(accountData)
     });
     return handleResponse(response);
   },
 
   deleteAccount: async (id) => {
+    const token = localStorage.getItem('token');
+    console.log('[DEBUG] Token in localStorage:', token);
+    const headers = getHeaders();
+    console.log('[DEBUG] Headers sent to DELETE /accounts/:id:', headers);
     const response = await fetch(`${API_BASE_URL}/accounts/${id}`, {
       method: 'DELETE',
-      headers: getHeaders()
+      headers
     });
     return handleResponse(response);
   }
@@ -880,6 +928,14 @@ export const mfBloodRequestAPI = {
     });
     return handleResponse(response);
   },
+
+  cancelBloodRequest: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/api/medical-facility/blood-requests/${id}/cancel`, {
+      method: 'PUT',
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  },
   getBloodRequestHistory: async () => {
     const response = await fetch(`${API_BASE_URL}/api/medical-facility/blood-requests/history`, {
       headers: getHeaders()
@@ -928,6 +984,30 @@ export const mfBloodRequestAPI = {
   }
 };
 
+// News API
+export const newsAPI = {
+  getAllNews: async () => {
+    const response = await fetch(`${API_BASE_URL}/api/news`, {
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  },
+
+  getNewsById: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/api/news/${id}`, {
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  },
+
+  getPublicNews: async () => {
+    const response = await fetch(`${API_BASE_URL}/api/news/public`, {
+      headers: getHeaders()
+    });
+    return handleResponse(response);
+  }
+};
+
 // Cuối file, export default object tổng hợp
 const api = {
   authAPI,
@@ -947,7 +1027,8 @@ const api = {
   adminDonationRegisterAPI,
   bloodCheckAPI,
   certificateAPI,
-  mfBloodRequestAPI
+  mfBloodRequestAPI,
+  newsAPI
 };
 
 export default api;

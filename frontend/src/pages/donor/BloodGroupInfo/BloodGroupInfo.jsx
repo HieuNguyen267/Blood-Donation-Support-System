@@ -1,7 +1,6 @@
 import React from "react";
 import Header from "../../../components/user/Header";
 import Footer from "../../../components/user/Footer";
-import "./BloodGroupInfo.css";
 
 const bloodGroups = [
   {
@@ -135,59 +134,66 @@ export default function BloodGroupInfo() {
   return (
     <>
       <Header />
-      <div className="bloodgroup-info-wrapper">
-        <h2 className="bloodgroup-title">CÁC NHÓM MÁU</h2>
-        <div className="bloodgroup-grid">
+      <div style={{ maxWidth: 1100, margin: "32px auto", padding: "0 16px" }}>
+        <h2 style={{ color: "#43a047", textAlign: "center", marginBottom: 32, fontWeight: 700, fontSize: 28 }}>
+          CÁC NHÓM MÁU
+        </h2>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 24 }}>
           {bloodGroups.map((group) => (
-            <div
-              key={group.name}
-              className="bloodgroup-card"
-              style={{ borderTop: `8px solid ${group.color}` }}
-            >
-              <div className="bloodgroup-name" style={{ color: group.color }}>{group.name}</div>
-              <div className="bloodgroup-label">Có thể nhận máu từ:</div>
-              <div className="bloodgroup-value">{group.receive.join(", ")}</div>
-              <div className="bloodgroup-label">Có thể cho máu:</div>
-              <div className="bloodgroup-value">{group.donate.join(", ")}</div>
+            <div key={group.name} style={{
+              background: "#ffe9dc",
+              borderRadius: 12,
+              boxShadow: "0 2px 8px #0001",
+              padding: 20,
+              borderTop: `8px solid ${group.color}`,
+              minHeight: 180,
+            }}>
+              <div style={{ fontWeight: 700, fontSize: 20, color: group.color, marginBottom: 8 }}>{group.name}</div>
+              <div style={{ fontWeight: 500, marginBottom: 6 }}>Có thể nhận máu từ:</div>
+              <div style={{ marginBottom: 8 }}>{group.receive.join(", ")}</div>
+              <div style={{ fontWeight: 500, marginBottom: 6 }}>Có thể cho máu:</div>
+              <div>{group.donate.join(", ")}</div>
             </div>
           ))}
         </div>
 
-        <h2 className="bloodcomponent-title">Thành phần máu</h2>
-        <div className="bloodcomponent-list">
-          <div className="bloodcomponent-card">
-            <div className="bloodcomponent-icon">🟡</div>
-            <div className="bloodcomponent-name">Huyết tương</div>
-            <ul className="bloodcomponent-desc">
+        <h2 style={{ color: "#e53935", textAlign: "center", margin: "48px 0 24px 0", fontWeight: 700, fontSize: 22 }}>
+          Thành phần máu
+        </h2>
+        <div style={{ display: "flex", gap: 24, flexWrap: "nowrap", justifyContent: "center", marginBottom: 32, overflowX: "auto" }}>
+          <div style={{ background: "#fff", borderRadius: 10, boxShadow: "0 2px 8px #0001", padding: 18, minWidth: 220, maxWidth: 260, textAlign: "center" }}>
+            <div style={{ fontSize: 32, marginBottom: 8 }}>🟡</div>
+            <div style={{ fontWeight: 700, color: "#ffb300", fontSize: 18, marginBottom: 8 }}>Huyết tương</div>
+            <ul style={{ textAlign: "left", fontSize: 15, margin: 0, paddingLeft: 18 }}>
               <li>Là phần chất lỏng của máu, chứa các protein, hormone và chất dinh dưỡng</li>
               <li>55% thể tích máu</li>
               <li>Vàng nhạt</li>
               <li>Chứa các yếu tố đông máu</li>
             </ul>
           </div>
-          <div className="bloodcomponent-card">
-            <div className="bloodcomponent-icon">🔴</div>
-            <div className="bloodcomponent-name">Hồng cầu</div>
-            <ul className="bloodcomponent-desc">
+          <div style={{ background: "#fff", borderRadius: 10, boxShadow: "0 2px 8px #0001", padding: 18, minWidth: 220, maxWidth: 260, textAlign: "center" }}>
+            <div style={{ fontSize: 32, marginBottom: 8 }}>🔴</div>
+            <div style={{ fontWeight: 700, color: "#e53935", fontSize: 18, marginBottom: 8 }}>Hồng cầu</div>
+            <ul style={{ textAlign: "left", fontSize: 15, margin: 0, paddingLeft: 18 }}>
               <li>Vận chuyển oxy từ phổi đến các mô và đưa CO2 từ các mô về phổi</li>
               <li>45% thể tích máu</li>
               <li>Đỏ</li>
               <li>Chứa hemoglobin</li>
             </ul>
           </div>
-          <div className="bloodcomponent-card">
-            <div className="bloodcomponent-icon">🟠</div>
-            <div className="bloodcomponent-name">Tiểu cầu</div>
-            <ul className="bloodcomponent-desc">
+          <div style={{ background: "#fff", borderRadius: 10, boxShadow: "0 2px 8px #0001", padding: 18, minWidth: 220, maxWidth: 260, textAlign: "center" }}>
+            <div style={{ fontSize: 32, marginBottom: 8 }}>🟠</div>
+            <div style={{ fontWeight: 700, color: "#ff9800", fontSize: 18, marginBottom: 8 }}>Tiểu cầu</div>
+            <ul style={{ textAlign: "left", fontSize: 15, margin: 0, paddingLeft: 18 }}>
               <li>Giúp đông máu và ngăn chảy máu khi bị thương</li>
               <li>Kích thước bé nhất trong các thành phần máu</li>
               <li>Tuổi thọ 7-10 ngày</li>
             </ul>
           </div>
-          <div className="bloodcomponent-card">
-            <div className="bloodcomponent-icon">🔵</div>
-            <div className="bloodcomponent-name">Bạch cầu</div>
-            <ul className="bloodcomponent-desc">
+          <div style={{ background: "#fff", borderRadius: 10, boxShadow: "0 2px 8px #0001", padding: 18, minWidth: 220, maxWidth: 260, textAlign: "center" }}>
+            <div style={{ fontSize: 32, marginBottom: 8 }}>🔵</div>
+            <div style={{ fontWeight: 700, color: "#1976d2", fontSize: 18, marginBottom: 8 }}>Bạch cầu</div>
+            <ul style={{ textAlign: "left", fontSize: 15, margin: 0, paddingLeft: 18 }}>
               <li>Bảo vệ cơ thể khỏi các tác nhân gây bệnh</li>
               <li>Không màu</li>
               <li>Hệ thống miễn dịch</li>
@@ -195,58 +201,62 @@ export default function BloodGroupInfo() {
           </div>
         </div>
 
-        <div className="bloodprocess-section">
-          <div className="bloodprocess-bar"></div>
-          <div className="bloodprocess-steps">
+        <div style={{ position: "relative", margin: "40px 0 32px 0", width: "100%", maxWidth: 1100, minHeight: 120, display: "flex", justifyContent: "center" }}>
+          <div style={{ position: "absolute", top: 32, left: 0, right: 0, height: 4, background: "#e53935", zIndex: 0, maxWidth: 900, margin: "0 auto" }}></div>
+          <div style={{ display: "flex", gap: 0, flexWrap: "nowrap", width: "100%", maxWidth: 900, justifyContent: "space-between", zIndex: 1 }}>
             {[
               { num: 1, title: "Đăng ký", desc: "Điền thông tin cá nhân và kiểm tra điều kiện hiến máu" },
               { num: 2, title: "Khám sàng lọc", desc: "Kiểm tra sức khỏe, đo huyết áp và xét nghiệm máu" },
               { num: 3, title: "Hiến máu", desc: "Quá trình hiến máu diễn ra trong khoảng 10 - 15 phút" },
               { num: 4, title: "Nghỉ ngơi", desc: "Nghỉ ngơi và ăn nhẹ tại chỗ trong 15 - 20 phút" },
             ].map((step) => (
-              <div key={step.num} className="bloodprocess-step">
-                <div className="bloodprocess-step-circle">{step.num}</div>
-                <div className="bloodprocess-step-title">{step.title}</div>
-                <div className="bloodprocess-step-desc">{step.desc}</div>
+              <div key={step.num} style={{ flex: 1, textAlign: "center", position: "relative" }}>
+                <div style={{
+                  width: 48, height: 48, borderRadius: "50%",
+                  background: "#e53935", color: "#fff", fontWeight: 700,
+                  fontSize: 28, display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 8, position: "relative", zIndex: 2
+                }}>{step.num}</div>
+                <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 4 }}>{step.title}</div>
+                <div style={{ fontSize: 15 }}>{step.desc}</div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="bloodinfo-list">
-          <div className="bloodinfo-card">
-            <div className="bloodinfo-icon">❗</div>
-            <div className="bloodinfo-title">Tầm quan trọng</div>
-            <ul className="bloodinfo-desc">
+        <div style={{ display: "flex", gap: 24, flexWrap: "nowrap", justifyContent: "center", marginBottom: 40, overflowX: "auto" }}>
+          <div style={{ background: "#fff", borderRadius: 10, boxShadow: "0 2px 8px #0001", padding: 18, minWidth: 220, maxWidth: 260, textAlign: "center" }}>
+            <div style={{ fontSize: 28, color: "#e53935", marginBottom: 8 }}>❗</div>
+            <div style={{ fontWeight: 700, color: "#e53935", fontSize: 18, marginBottom: 8 }}>Tầm quan trọng</div>
+            <ul style={{ textAlign: "left", fontSize: 15, margin: 0, paddingLeft: 18 }}>
               <li>Máu chiếm 7-8% trọng lượng cơ thể</li>
               <li>Mỗi người có khoảng 5-6 lít máu</li>
               <li>Máu được tái tạo liên tục trong cơ thể</li>
             </ul>
           </div>
-          <div className="bloodinfo-card">
-            <div className="bloodinfo-icon">💧</div>
-            <div className="bloodinfo-title">Thời gian tồn tại</div>
-            <ul className="bloodinfo-desc">
+          <div style={{ background: "#fff", borderRadius: 10, boxShadow: "0 2px 8px #0001", padding: 18, minWidth: 220, maxWidth: 260, textAlign: "center" }}>
+            <div style={{ fontSize: 28, color: "#039be5", marginBottom: 8 }}>💧</div>
+            <div style={{ fontWeight: 700, color: "#039be5", fontSize: 18, marginBottom: 8 }}>Thời gian tồn tại</div>
+            <ul style={{ textAlign: "left", fontSize: 15, margin: 0, paddingLeft: 18 }}>
               <li>Hồng cầu: 120 ngày</li>
               <li>Tiểu cầu: 7 - 10 ngày</li>
               <li>Bạch cầu: 1 - 3 ngày</li>
               <li>Huyết tương: 1 - 2 ngày</li>
             </ul>
           </div>
-          <div className="bloodinfo-card">
-            <div className="bloodinfo-icon">⚠️</div>
-            <div className="bloodinfo-title">Dấu hiệu thiếu máu</div>
-            <ul className="bloodinfo-desc">
+          <div style={{ background: "#fff", borderRadius: 10, boxShadow: "0 2px 8px #0001", padding: 18, minWidth: 220, maxWidth: 260, textAlign: "center" }}>
+            <div style={{ fontSize: 28, color: "#fbc02d", marginBottom: 8 }}>⚠️</div>
+            <div style={{ fontWeight: 700, color: "#fbc02d", fontSize: 18, marginBottom: 8 }}>Dấu hiệu thiếu máu</div>
+            <ul style={{ textAlign: "left", fontSize: 15, margin: 0, paddingLeft: 18 }}>
               <li>Mệt mỏi, chóng mặt</li>
               <li>Da xanh xao</li>
               <li>Khó thở</li>
               <li>Tim đập nhanh</li>
             </ul>
           </div>
-          <div className="bloodinfo-card">
-            <div className="bloodinfo-icon">✔️</div>
-            <div className="bloodinfo-title">Lợi ích hiến máu</div>
-            <ul className="bloodinfo-desc">
+          <div style={{ background: "#fff", borderRadius: 10, boxShadow: "0 2px 8px #0001", padding: 18, minWidth: 220, maxWidth: 260, textAlign: "center" }}>
+            <div style={{ fontSize: 28, color: "#43a047", marginBottom: 8 }}>✔️</div>
+            <div style={{ fontWeight: 700, color: "#43a047", fontSize: 18, marginBottom: 8 }}>Lợi ích hiến máu</div>
+            <ul style={{ textAlign: "left", fontSize: 15, margin: 0, paddingLeft: 18 }}>
               <li>Kiểm tra sức khỏe miễn phí</li>
               <li>Giảm nguy cơ bệnh tim</li>
               <li>Kích thích tạo máu mới</li>

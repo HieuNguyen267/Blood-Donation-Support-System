@@ -147,19 +147,28 @@ public class DonorController {
             existing.setAccount(account);
         }
 
-        // Tách bloodGroup
-        String bloodGroupStr = (String) body.get("bloodGroup");
-        if (bloodGroupStr != null && !bloodGroupStr.isEmpty()) {
-            String aboType = bloodGroupStr.replaceAll("[+-]", "");
-            String rhFactor = bloodGroupStr.endsWith("+") ? "+" : "-";
-            Optional<BloodGroup> bgOpt = bloodGroupRepository.findByAboTypeAndRhFactor(aboType, rhFactor);
-            BloodGroup bloodGroup = bgOpt.orElseGet(() -> {
-                BloodGroup bg = new BloodGroup();
-                bg.setAboType(aboType);
-                bg.setRhFactor(rhFactor);
-                return bloodGroupRepository.save(bg);
-            });
-            existing.setBloodGroup(bloodGroup);
+        // Xử lý blood_group_id
+        Object bloodGroupObj = body.get("blood_group_id");
+        if (bloodGroupObj != null) {
+            Integer bloodGroupId = null;
+            if (bloodGroupObj instanceof Integer) {
+                bloodGroupId = (Integer) bloodGroupObj;
+            } else if (bloodGroupObj instanceof String) {
+                try {
+                    bloodGroupId = Integer.parseInt((String) bloodGroupObj);
+                } catch (NumberFormatException e) {
+                    logger.warn("Invalid blood_group_id format: {}", bloodGroupObj);
+                }
+            }
+            
+            if (bloodGroupId != null) {
+                Optional<BloodGroup> bgOpt = bloodGroupRepository.findById(bloodGroupId);
+                if (bgOpt.isPresent()) {
+                    existing.setBloodGroup(bgOpt.get());
+                } else {
+                    logger.warn("Blood group not found with id: {}", bloodGroupId);
+                }
+            }
         }
 
         // Cập nhật các trường khác
@@ -290,8 +299,11 @@ public class DonorController {
             .findFirst()
             .orElse(null);
 
-        // Lấy khảo sát sức khỏe mới nhất
-        PreDonationSurveyDTO latestSurvey = preDonationSurveyService.getLatestSurvey(donor.getDonorId());
+        // Lấy khảo sát sức khỏe liên quan đến đơn đăng ký mới nhất
+        PreDonationSurveyDTO latestSurvey = null;
+        if (latestRegister != null && latestRegister.getPreDonationSurvey() != null) {
+            latestSurvey = latestRegister.getPreDonationSurvey();
+        }
 
         Map<String, Object> response = new java.util.HashMap<>();
         response.put("donor", donor);
@@ -299,6 +311,36 @@ public class DonorController {
         response.put("latestSurvey", latestSurvey);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/survey/by-register/{registerId}")
+    public ResponseEntity<?> getSurveyByRegisterId(@PathVariable Integer registerId, Authentication authentication) {
+        String email = authentication.getName();
+        Donor donor = donorService.getDonorByEmail(email);
+        if (donor == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Donor not found");
+        }
+
+        // Lấy đơn đăng ký
+        DonationRegisterDTO register;
+        try {
+            register = donationRegisterService.getDonationRegister(registerId);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy đơn đăng ký");
+        }
+
+        // Kiểm tra quyền xem
+        if (!register.getDonorId().equals(donor.getDonorId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Bạn không có quyền xem đơn này");
+        }
+
+        // Lấy khảo sát sức khỏe liên quan
+        PreDonationSurveyDTO survey = null;
+        if (register.getPreDonationSurvey() != null) {
+            survey = register.getPreDonationSurvey();
+        }
+
+        return ResponseEntity.ok(survey);
     }
 
     @DeleteMapping("/survey/delete-by-register/{registerId}")

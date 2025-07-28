@@ -41,7 +41,11 @@ body, html {
 .dashboard-sidecards {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 36px;
+  align-items: stretch;
+  justify-content: center;
+  padding-top: 12px;
+  padding-bottom: 12px;
 }
 
 .dashboard-row-table {

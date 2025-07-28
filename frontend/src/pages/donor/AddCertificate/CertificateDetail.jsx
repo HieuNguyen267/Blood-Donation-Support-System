@@ -53,10 +53,10 @@ export default function CertificateDetail() {
                 alignItems: "center"
               }}
             >
-              <div style={{ color: "#e53935", fontWeight: 700, fontSize: 28, letterSpacing: 1, marginBottom: 6, textAlign: "center" }}>
+              <div style={{ color: "#222", fontWeight: 700, fontSize: 28, letterSpacing: 1, marginBottom: 6, textAlign: "center" }}>
                 CHỨNG NHẬN HIẾN MÁU TÌNH NGUYỆN
               </div>
-              <div style={{ color: "#4caf50", fontWeight: 500, fontSize: 16, marginBottom: 18, letterSpacing: 1 }}>
+              <div style={{ color: "#222", fontWeight: 500, fontSize: 16, marginBottom: 18, letterSpacing: 1 }}>
                 Chứng nhận
               </div>
               <div style={{ fontWeight: 600, fontSize: 22, marginBottom: 8, color: "#222" }}>
@@ -64,28 +64,31 @@ export default function CertificateDetail() {
               </div>
               <div style={{ width: "100%", display: "flex", justifyContent: "space-between", marginBottom: 18, flexWrap: "wrap" }}>
                 <div style={{ flex: 1, minWidth: 180 }}>
-                  <div style={{ color: "#888", fontSize: 15, marginBottom: 2 }}><b>Sinh ngày:</b> {data.dateOfBirth}</div>
-<div style={{ color: "#888", fontSize: 15, marginBottom: 2 }}><b>Địa chỉ:</b> {data.address}</div>
+                  <div style={{ color: "#222", fontSize: 15, marginBottom: 2 }}><b>Sinh ngày:</b> {data.dateOfBirth}</div>
+                  <div style={{ color: "#222", fontSize: 15, marginBottom: 2 }}><b>Địa chỉ:</b> {data.address}</div>
                 </div>
                 <div style={{ flex: 1, minWidth: 180, textAlign: "right" }}>
-                  <div style={{ color: "#888", fontSize: 15, marginBottom: 2 }}><b>Lượng máu (ml):</b> {data.bloodVolume}</div>
-                  <div style={{ color: "#888", fontSize: 15, marginBottom: 2 }}><b>Cấp bởi:</b> {data.issuedByRole} {data.issuedByName}</div>
+                  <div style={{ color: "#222", fontSize: 15, marginBottom: 2 }}><b>Lượng máu (ml):</b> {data.bloodVolume}</div>
+                  <div style={{ color: "#222", fontSize: 15, marginBottom: 2 }}><b>Cấp bởi:</b> {data.issuedByRole} {data.issuedByName}</div>
                 </div>
               </div>
-              <div style={{ fontWeight: 500, fontSize: 17, color: "#388e3c", margin: "10px 0 18px 0", letterSpacing: 0.5 }}>
+              <div style={{ fontWeight: 500, fontSize: 17, color: "#222", margin: "10px 0 18px 0", letterSpacing: 0.5 }}>
                 Đã hiến máu tình nguyện
               </div>
               <div style={{ width: "100%", display: "flex", justifyContent: "space-between", marginBottom: 10, flexWrap: "wrap" }}>
                 <div style={{ flex: 1, minWidth: 180 }}>
-                  <div style={{ color: "#444", fontSize: 15, marginBottom: 2 }}><b>Tại:</b> {data.facilityName}</div>
-                  <div style={{ color: "#444", fontSize: 15, marginBottom: 2 }}><b>Ngày cấp:</b> {data.issuedDate}</div>
-                  <div style={{ color: "#444", fontSize: 15, marginBottom: 2 }}><b>Mã số chứng nhận:</b> {data.certificateNumber}</div>
+                  <div style={{ color: "#222", fontSize: 15, marginBottom: 2 }}><b>Tại:</b> {data.facilityName}</div>
+                  <div style={{ color: "#222", fontSize: 15, marginBottom: 2 }}><b>Ngày cấp:</b> {data.issuedDate}</div>
+                  <div style={{ color: "#222", fontSize: 15, marginBottom: 2, whiteSpace: "nowrap" }}>
+                    <b>Mã số chứng nhận:</b> {String(data.certificateNumber).replace(/\r?\n|\r/g, ' ')}
+                  </div>
                 </div>
                 <div style={{ flex: 1, minWidth: 180, textAlign: "right" }}>
-                  <div style={{ color: "#444", fontSize: 15, marginBottom: 2 }}><b>Ghi chú thêm:</b> {data.notes || '-'}</div>
+                  <div style={{ color: "#222", fontSize: 15, marginBottom: 2 }}><b>Ghi chú thêm:</b> {data.notes || '-'}</div>
                 </div>
               </div>
             </div>
+            {/* Đưa nút tải giấy chứng nhận ra ngoài div chứng nhận */}
             <Button
               type="primary"
               icon={<DownloadOutlined />}
@@ -113,4 +116,4 @@ export default function CertificateDetail() {
       <Footer />
     </>
   );
-}
+} 

@@ -5,6 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './BloodStorageManagement.css';
 import { validateBloodStorage, getStatusStyle } from './utils';
 import { bloodStockAPI } from '../../services/api';
+// XÓA: import { Modal, Button, Form } from 'react-bootstrap';
 
 const bloodDataInit = [
   { code: "BP001", group: "Rh NULL", collect: "11/4/2024, 10:30", expire: "11/4/2027, 09:30", amount: 12, status: "Mới", quality: "Tốt", temp: "2 -6 °C" },
@@ -41,6 +42,11 @@ export default function BloodStorageManagement() {
   const [validationErrors, setValidationErrors] = useState({});
   const [bloodType, setBloodType] = useState("Tất cả");
   const [loading, setLoading] = useState(true);
+  const [showAmountModal, setShowAmountModal] = useState(false);
+  const [modalType, setModalType] = useState('add'); // 'add' hoặc 'subtract'
+  const [selectedRowIdx, setSelectedRowIdx] = useState(null);
+  const [amountInput, setAmountInput] = useState('');
+  const [amountError, setAmountError] = useState('');
 
   React.useEffect(() => {
     const fetchBloodStock = async () => {
@@ -50,7 +56,22 @@ export default function BloodStorageManagement() {
         
         // Group by blood group and sum volumes
         const groupedStock = stock.reduce((acc, item) => {
-          const bloodGroupKey = item.bloodGroupName || `${item.aboType}${item.rhFactor === 'positive' ? '+' : item.rhFactor === 'negative' ? '-' : item.rhFactor}`;
+          let bloodGroupKey;
+          
+          if (item.bloodGroupName) {
+            bloodGroupKey = item.bloodGroupName;
+          } else {
+            // Xử lý đặc biệt cho Rh_Null và Bombay
+            if (item.aboType === 'Rh_Null' || item.aboType === 'Bombay') {
+              bloodGroupKey = item.aboType === 'Rh_Null' ? 'Rh Null' : 'Bombay';
+            } else {
+              // Xử lý các nhóm máu thông thường
+              const rhSuffix = item.rhFactor === 'positive' ? '+' : 
+                              item.rhFactor === 'negative' ? '-' : 
+                              (item.rhFactor === 'null' || item.rhFactor === null) ? '' : item.rhFactor;
+              bloodGroupKey = `${item.aboType}${rhSuffix}`;
+            }
+          }
           
           if (!acc[bloodGroupKey]) {
             acc[bloodGroupKey] = {
@@ -187,6 +208,89 @@ export default function BloodStorageManagement() {
     setValidationErrors({});
   };
 
+  // Xử lý mở modal
+  const handleOpenAmountModal = (idx, type) => {
+    setSelectedRowIdx(idx);
+    setModalType(type);
+    setAmountInput('');
+    setAmountError('');
+    setShowAmountModal(true);
+  };
+  // Xử lý xác nhận cộng/trừ máu
+  const handleConfirmAmount = async () => {
+    const idx = selectedRowIdx;
+    const value = parseInt(amountInput, 10);
+    if (isNaN(value) || value <= 0) {
+      setAmountError('Vui lòng nhập số lượng hợp lệ!');
+      return;
+    }
+    const globalIdx = data.findIndex(d => d === paged[idx]);
+    const row = data[globalIdx];
+    const stockId = row.stockId || row.id;
+    let newVolume = row.volume;
+    try {
+      if (modalType === 'add') {
+        await bloodStockAPI.addVolume(stockId, value);
+      } else {
+        if (newVolume < value) {
+          setAmountError('Không thể trừ quá số lượng hiện có!');
+          return;
+        }
+        await bloodStockAPI.subtractVolume(stockId, value);
+      }
+      // Sau khi cập nhật thành công, reload lại danh sách kho máu
+      const stock = await bloodStockAPI.getStock();
+      const groupedStock = stock.reduce((acc, item) => {
+        let bloodGroupKey;
+        
+        if (item.bloodGroupName) {
+          bloodGroupKey = item.bloodGroupName;
+        } else {
+          // Xử lý đặc biệt cho Rh_Null và Bombay
+          if (item.aboType === 'Rh_Null' || item.aboType === 'Bombay') {
+            bloodGroupKey = item.aboType === 'Rh_Null' ? 'Rh Null' : 'Bombay';
+          } else {
+            // Xử lý các nhóm máu thông thường
+            const rhSuffix = item.rhFactor === 'positive' ? '+' : 
+                            item.rhFactor === 'negative' ? '-' : 
+                            (item.rhFactor === 'null' || item.rhFactor === null) ? '' : item.rhFactor;
+            bloodGroupKey = `${item.aboType}${rhSuffix}`;
+          }
+        }
+        
+        if (!acc[bloodGroupKey]) {
+          acc[bloodGroupKey] = {
+            id: item.stockId,
+            group: bloodGroupKey,
+            volume: 0,
+            temp: item.temperatureRange || getTemperatureRange(item.aboType, item.rhFactor)
+          };
+        }
+        acc[bloodGroupKey].volume += item.volume || 0;
+        return acc;
+      }, {});
+      const formattedData = Object.values(groupedStock).map((item, index) => ({
+        id: item.id,
+        group: item.group,
+        volume: item.volume,
+        temp: item.temp
+      }));
+      setData(formattedData);
+      setShowAmountModal(false);
+      setSelectedRowIdx(null);
+      setAmountInput('');
+      setAmountError('');
+    } catch (err) {
+      setAmountError('Có lỗi khi cập nhật kho máu!');
+    }
+  };
+  const handleCloseAmountModal = () => {
+    setShowAmountModal(false);
+    setSelectedRowIdx(null);
+    setAmountInput('');
+    setAmountError('');
+  };
+
   if (loading) {
     return (
       <div className="dashboard-root">
@@ -232,11 +336,9 @@ export default function BloodStorageManagement() {
               <option value="O-">O-</option>
               <option value="AB+">AB+</option>
               <option value="AB-">AB-</option>
-              <option value="Rh NULL">Rh NULL</option>
+              <option value="Rh Null">Rh Null</option>
               <option value="Bombay">Bombay</option>
             </select>
-            <button className="blood-filter-btn">⏷</button>
-            <button className="blood-export">⭳ Xuất tệp</button>
           </div>
           <div className="donor-table-card">
             <table className="table table-hover table-bordered align-middle mb-0">
@@ -246,6 +348,7 @@ export default function BloodStorageManagement() {
                   <th className="text-center">Nhóm máu</th>
                   <th className="text-center">Số lượng trong kho</th>
                   <th className="text-center">Phạm vi nhiệt độ</th>
+                  <th className="text-center">Hành động</th>
                 </tr>
               </thead>
               <tbody>
@@ -255,6 +358,10 @@ export default function BloodStorageManagement() {
                     <td className="text-center">{d.group}</td>
                     <td className="text-center">{d.volume + ' ml'}</td>
                     <td className="text-center">{d.temp}</td>
+                    <td className="text-center">
+                      <button style={{background:'#22c55e',color:'#fff',border:'none',borderRadius:6,padding:'6px 14px',marginRight:8,cursor:'pointer',fontWeight:600}} onClick={() => handleOpenAmountModal(i, 'add')}>Thêm máu</button>
+                      <button style={{background:'#dc2626',color:'#fff',border:'none',borderRadius:6,padding:'6px 14px',cursor:'pointer',fontWeight:600}} onClick={() => handleOpenAmountModal(i, 'subtract')}>Trừ máu</button>
+                    </td>
                   </tr>
                 ))}
                 {paged.length === 0 && (
@@ -283,6 +390,35 @@ export default function BloodStorageManagement() {
           )}
         </main>
       </div>
+      {/* Modal nhập lượng máu */}
+      {showAmountModal && (
+        <div className="modal fade show" style={{display:'block',background:'rgba(0,0,0,0.3)'}} tabIndex="-1">
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header" style={{background: modalType==='add' ? '#8fd19e' : '#fca5a5'}}>
+                <h5 className="modal-title">{modalType === 'add' ? 'Thêm máu' : 'Trừ máu'}</h5>
+                <button type="button" className="btn-close" onClick={handleCloseAmountModal}></button>
+              </div>
+              <div className="modal-body">
+                <input
+                  type="number"
+                  min={1}
+                  className={`form-control ${amountError ? 'is-invalid' : ''}`}
+                  placeholder="Nhập số lượng (ml)"
+                  value={amountInput}
+                  onChange={e => { setAmountInput(e.target.value); setAmountError(''); }}
+                  autoFocus
+                />
+                {amountError && <div className="invalid-feedback" style={{display:'block'}}>{amountError}</div>}
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-success" onClick={handleConfirmAmount}>Lưu</button>
+                <button className="btn btn-danger" onClick={handleCloseAmountModal}>Huỷ</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

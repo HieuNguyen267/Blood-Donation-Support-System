@@ -94,9 +94,8 @@ public class AccountServiceImpl implements com.blooddonation.backend.service.Acc
         // Tạo account và lưu vào database
         Account account = new Account();
         account.setEmail(signupRequest.getEmail());
-        account.setUsername(signupRequest.getEmail());
         account.setPasswordHash(passwordEncoder.encode(signupRequest.getPassword()));
-        account.setRole("DONOR");
+        account.setRole("donor");
         account.setIsActive(true);
         account.setCreatedAt(LocalDateTime.now());
         account.setUpdatedAt(LocalDateTime.now());

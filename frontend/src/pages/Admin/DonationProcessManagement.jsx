@@ -144,8 +144,6 @@ export default function DonationProcessManagement() {
               <option value="Tất cả">Nhóm máu</option>
               {bloodTypes.filter(opt => opt !== 'Tất cả').map(opt => <option key={opt} value={opt}>{opt}</option>)}
               </select>
-            <button className="donation-filter-btn" style={{ height: 40, padding: '0 12px' }}>⏷</button>
-            <button className="donation-export" style={{ height: 40 }}>⭳ Xuất tệp</button>
           </div>
           <div className="donation-table-card">
             <table className="table table-hover table-bordered align-middle mb-0">

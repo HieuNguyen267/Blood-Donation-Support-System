@@ -102,7 +102,18 @@ export default function Login() {
       }
     } catch (error) {
       console.error('Login error:', error);
-      message.error(error.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
+      
+      // Kiểm tra loại lỗi để hiển thị thông báo phù hợp
+      if (error.message && error.message.includes('401')) {
+        message.error('Bạn đã nhập sai email hoặc mật khẩu, vui lòng nhập lại');
+      } else if (error.message && error.message.includes('404')) {
+        message.error('Tài khoản không tồn tại, vui lòng kiểm tra lại email');
+      } else if (error.message && error.message.includes('403')) {
+        message.error('Tài khoản đã bị khóa, vui lòng liên hệ admin');
+      } else {
+        message.error('Bạn đã nhập sai email hoặc mật khẩu, vui lòng nhập lại');
+      }
+      
       // Xóa token nếu có lỗi
       setAuthToken(null);
     } finally {

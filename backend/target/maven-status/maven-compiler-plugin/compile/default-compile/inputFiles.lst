@@ -91,6 +91,7 @@ F:\CursorPro\project\Blood-Donation-Support-System-chuaxong\Blood-Donation-Suppo
 F:\CursorPro\project\Blood-Donation-Support-System-chuaxong\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\service\admin\BloodCheckService.java
 F:\CursorPro\project\Blood-Donation-Support-System-chuaxong\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\entity\donor\Donor.java
 F:\CursorPro\project\Blood-Donation-Support-System-chuaxong\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\controller\admin\BloodCheckController.java
+F:\CursorPro\project\Blood-Donation-Support-System-chuaxong\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\controller\NewsController.java
 F:\CursorPro\project\Blood-Donation-Support-System-chuaxong\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\security\jwt\JwtBlacklistService.java
 F:\CursorPro\project\Blood-Donation-Support-System-chuaxong\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\controller\admin\CertificateController.java
 F:\CursorPro\project\Blood-Donation-Support-System-chuaxong\Blood-Donation-Support-System\backend\src\main\java\com\blooddonation\backend\dto\auth\ForgotPasswordRequest.java

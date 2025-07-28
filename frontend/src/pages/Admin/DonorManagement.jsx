@@ -203,7 +203,6 @@ export default function DonorManagement() {
                 {orderOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
             )}
-            <button className="donor-export">⭳ Xuất tệp</button>
           </div>
           <div className="donor-table-card">
             <table className="table table-hover table-bordered align-middle mb-0">

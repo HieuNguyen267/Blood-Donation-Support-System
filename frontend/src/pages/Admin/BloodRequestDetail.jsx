@@ -58,6 +58,9 @@ export default function BloodRequestDetail() {
   const [sentBloodInfo, setSentBloodInfo] = useState(null);
   const [isBloodSent, setIsBloodSent] = useState(false);
 
+  // Thêm state để lưu thông tin user hiện tại
+  const [currentUser, setCurrentUser] = useState(null);
+
   // Hàm parse thông tin máu đã gửi từ DB
   const parseBloodFullfilled = (bloodFullfilled) => {
     if (!bloodFullfilled) return null;
@@ -124,6 +127,50 @@ export default function BloodRequestDetail() {
     setIsDeliveryUpdated(false);
   }, [id]);
 
+  // Lấy thông tin user hiện tại từ localStorage
+  useEffect(() => {
+    // Kiểm tra các key có thể chứa thông tin user
+    const userInfo = localStorage.getItem('userInfo');
+    const user = localStorage.getItem('user');
+    const adminInfo = localStorage.getItem('adminInfo');
+    
+    console.log('Available localStorage keys:', {
+      userInfo,
+      user,
+      adminInfo
+    });
+    
+    let userData = null;
+    
+    if (userInfo) {
+      try {
+        userData = JSON.parse(userInfo);
+        console.log('Parsed userInfo:', userData);
+      } catch (error) {
+        console.error('Error parsing userInfo:', error);
+      }
+    } else if (user) {
+      try {
+        userData = JSON.parse(user);
+        console.log('Parsed user:', userData);
+      } catch (error) {
+        console.error('Error parsing user:', error);
+      }
+    } else if (adminInfo) {
+      try {
+        userData = JSON.parse(adminInfo);
+        console.log('Parsed adminInfo:', userData);
+      } catch (error) {
+        console.error('Error parsing adminInfo:', error);
+      }
+    }
+    
+    if (userData) {
+      console.log('Final user data:', userData);
+      setCurrentUser(userData);
+    }
+  }, []);
+
   // Luôn kiểm tra lại khi currentRequest thay đổi
   useEffect(() => {
     if (currentRequest?.bloodFullfilled && currentRequest?.deliveryPerson) {
@@ -137,6 +184,13 @@ export default function BloodRequestDetail() {
 
   // Xử lý chọn trạng thái
   const handleStatusChange = (status) => {
+    // Kiểm tra quyền - chỉ admin mới được cập nhật trạng thái
+    const userRole = currentUser?.role || currentUser?.roleName || currentUser?.userRole || currentUser?.type || currentUser?.accountType;
+    if (!(userRole === 'admin' || userRole === 'ADMIN')) {
+      setToast({ show: true, type: 'error', message: 'Bạn không có quyền cập nhật trạng thái yêu cầu!' });
+      return;
+    }
+    
     // Kiểm tra nếu đã hoàn thành thì không cho cập nhật
     if (isCompleted) {
       setToast({ show: true, type: 'info', message: 'Yêu cầu đã hoàn thành!' });
@@ -149,6 +203,13 @@ export default function BloodRequestDetail() {
 
   // Hàm cập nhật trạng thái
   const handleStatusUpdate = async () => {
+    // Kiểm tra quyền - chỉ admin mới được cập nhật trạng thái
+    const userRole = currentUser?.role || currentUser?.roleName || currentUser?.userRole || currentUser?.type || currentUser?.accountType;
+    if (!(userRole === 'admin' || userRole === 'ADMIN')) {
+      setToast({ show: true, type: 'error', message: 'Bạn không có quyền cập nhật trạng thái yêu cầu!' });
+      return;
+    }
+    
     if (!selectedStatus) {
       setToast({ show: true, type: 'error', message: 'Vui lòng chọn trạng thái!' });
       return;
@@ -205,6 +266,11 @@ export default function BloodRequestDetail() {
       setToast({ show: true, type: 'error', message: 'Tổng lượng máu gửi đi không được vượt quá số lượng cần!' });
       return;
     }
+    // Thêm kiểm tra tổng lượng máu phải đủ
+    if (totalAmount < (currentRequest?.quantityRequested || 0)) {
+      setToast({ show: true, type: 'error', message: 'Chưa đủ lượng máu yêu cầu!' });
+      return;
+    }
     // Validate từng dòng
     for (const row of sendBloodRows) {
       if (!row.group || !row.amount || isNaN(row.amount) || Number(row.amount) <= 0) {
@@ -250,8 +316,21 @@ export default function BloodRequestDetail() {
   // Thêm hàm hoàn tất yêu cầu
   const handleCompleteRequest = async () => {
     try {
+      // Cập nhật processing_status thành completed
       await bloodRequestAPI.updateProcessingStatus(currentRequest.requestId, 'completed');
+      
+      // Nếu có emergency_status, cập nhật thành completed
+      if (currentRequest.emergencyStatus) {
+        await bloodRequestAPI.updateEmergencyStatus(currentRequest.requestId, 'completed');
+        setCurrentRequest({ 
+          ...currentRequest, 
+          processingStatus: 'Hoàn thành',
+          emergencyStatus: 'completed'
+        });
+      } else {
       setCurrentRequest({ ...currentRequest, processingStatus: 'Hoàn thành' });
+      }
+      
       setToast({ show: true, type: 'success', message: 'Yêu cầu đã được hoàn tất!' });
     } catch (e) {
       setToast({ show: true, type: 'error', message: 'Cập nhật trạng thái hoàn tất thất bại!' });
@@ -320,6 +399,7 @@ export default function BloodRequestDetail() {
     if (s === 'đang liên hệ') return { color: '#3b82f6', fontWeight: '600' }; // xanh dương
     if (s === 'liên hệ thành công' || s === 'hoàn thành') return { color: '#059669', fontWeight: '600' }; // xanh lá
     // request_status
+    if (s === 'hủy đơn yêu cầu') return { color: '#dc2626', fontWeight: '600' }; // đỏ
     
     return { color: '#6b7280', fontWeight: '600' };
   };
@@ -334,10 +414,18 @@ export default function BloodRequestDetail() {
     if (s === 'chờ xác nhận') return 'status-orange';
     if (s === 'từ chối') return 'status-red';
     if (s === 'xác nhận') return 'status-green';
+    if (s === 'hủy đơn yêu cầu') return 'status-red';
     // processing_status
     if (s === 'chờ xử lí') return 'status-orange';
     if (s === 'đang vận chuyển') return 'status-blue';
     return 'status-gray';
+  };
+
+  // Thêm helper để lấy số từ chuỗi như '100 ml'
+  const getAmountNumber = (amount) => {
+    if (!amount) return 0;
+    const match = amount.toString().match(/\d+/);
+    return match ? parseInt(match[0], 10) : 0;
   };
 
   // Xác định trạng thái để đổi nút
@@ -348,15 +436,26 @@ export default function BloodRequestDetail() {
     'Hoàn thành'
   ].includes(emergencyVN);
 
-  // Chỉ hiển thị nút yêu cầu khẩn cấp khi mức độ là "Khẩn cấp"
-  const showEmergencyRequestBtn = currentRequest?.isEmergency === true;
+  // Chỉ hiển thị nút yêu cầu khẩn cấp khi tổng lượng máu phù hợp trong kho bị thiếu so với số lượng cần
+  // VÀ không phải trạng thái đã hủy
+  const showEmergencyRequestBtn =
+    currentRequest?.isEmergency === true &&
+    currentRequest?.requestStatus !== 'cancelled' &&
+    (() => {
+      // Tính tổng lượng máu sẵn có cho các nhóm phù hợp
+      const totalAvailable = getCompatibleBloodGroups().reduce((sum, group) => {
+        const stock = bloodStock.find(
+          (s) => (s.bloodGroupName || s.group) === group
+        );
+        // Tách số từ chuỗi như "100 ml"
+        const available = stock ? getAmountNumber(stock.volume || stock.amount || 0) : 0;
+        return sum + available;
+      }, 0);
+      return totalAvailable < (currentRequest?.quantityRequested || 0);
+    })();
 
-  // Thêm helper để lấy số từ chuỗi như '100 ml'
-  const getAmountNumber = (amount) => {
-    if (!amount) return 0;
-    const match = amount.toString().match(/\d+/);
-    return match ? parseInt(match[0], 10) : 0;
-  };
+  // Kiểm tra xem yêu cầu đã bị hủy chưa
+  const isCancelled = currentRequest?.requestStatus === 'cancelled';
 
   return (
     <div className="dashboard-root">
@@ -410,14 +509,14 @@ export default function BloodRequestDetail() {
                             ? getEmergencyStatusVN(currentRequest?.emergencyStatus)
                             : (currentRequest?.requestStatus === 'Xác nhận' && currentRequest?.processingStatus)
                               ? currentRequest?.processingStatus
-                              : currentRequest?.requestStatus
+                              : (currentRequest?.requestStatus === 'cancelled' ? 'Hủy đơn yêu cầu' : currentRequest?.requestStatus)
                         )}>
                           {
                             currentRequest?.emergencyStatus
                               ? getEmergencyStatusVN(currentRequest?.emergencyStatus)
                               : (currentRequest?.requestStatus === 'Xác nhận' && currentRequest?.processingStatus)
                                 ? currentRequest?.processingStatus
-                                : currentRequest?.requestStatus
+                                : (currentRequest?.requestStatus === 'cancelled' ? 'Hủy đơn yêu cầu' : currentRequest?.requestStatus)
                           }
                         </span>
                       </td>
@@ -429,7 +528,34 @@ export default function BloodRequestDetail() {
             {/* Cột phải: bảng cập nhật trạng thái/gửi máu + bảng lượng máu sẵn có */}
             <div style={{ flex: 1, minWidth: 400, display: 'flex', flexDirection: 'column', gap: 24 }}>
               {/* Nếu trạng thái là Xác nhận, render form gửi máu, ngược lại render bảng cập nhật trạng thái */}
-              {currentRequest?.requestStatus === 'Xác nhận' ? (
+              {/* Không hiển thị form cập nhật nếu đã hủy */}
+              {isCancelled ? (
+                <div className="donation-detail-table" style={{ maxWidth: 480, margin: '0 auto', width: '100%' }}>
+                  <div className="donation-detail-section-title">Trạng thái yêu cầu</div>
+                  <div style={{
+                    padding: '24px',
+                    textAlign: 'center',
+                    backgroundColor: '#fef2f2',
+                    borderRadius: '8px',
+                    border: '1px solid #fecaca'
+                  }}>
+                    <div style={{
+                      color: '#dc2626',
+                      fontWeight: '600',
+                      fontSize: '16px',
+                      marginBottom: '8px'
+                    }}>
+                      ❌ Yêu cầu đã bị hủy
+                    </div>
+                    <div style={{
+                      color: '#6b7280',
+                      fontSize: '14px'
+                    }}>
+                      Yêu cầu này đã được hủy và không thể cập nhật trạng thái
+                    </div>
+                  </div>
+                </div>
+              ) : currentRequest?.requestStatus === 'Xác nhận' ? (
                 <div className="donation-detail-table" style={{ maxWidth: 480, margin: '0 auto', width: '100%' }}>
                   <div className="donation-detail-section-title">Gửi máu</div>
                   <form onSubmit={e => { e.preventDefault(); if (canSendBlood) handleSendBlood(); }}>
@@ -566,10 +692,8 @@ export default function BloodRequestDetail() {
                   {(!canSendBlood) && (
                 <button 
                       onClick={e => {
-                        if (currentRequest?.emergencyStatus) {
-                          e.preventDefault();
-                          setToast({ show: true, type: 'info', message: 'Đang yêu cầu máu khẩn cấp, hãy sang trang quá trình yêu cầu khẩn cấp để biết chi tiết.' });
-                        } else if (isCompleted) {
+                        // BỎ kiểm tra emergencyStatus, chỉ kiểm tra isCompleted
+                        if (isCompleted) {
                           e.preventDefault(); showCompletedToast();
                         } else {
                           handleCompleteRequest();
@@ -644,6 +768,46 @@ export default function BloodRequestDetail() {
               ) : (
                 <div className="donation-detail-table" style={{ maxWidth: 480, margin: '0 auto', width: '100%' }}>
               <div className="donation-detail-section-title">Cập nhật trạng thái yêu cầu</div>
+                  
+                  {/* Kiểm tra quyền - chỉ admin mới được cập nhật trạng thái */}
+                  {(() => {
+                    console.log('Checking permissions - currentUser:', currentUser);
+                    console.log('User role:', currentUser?.role);
+                    console.log('User roleName:', currentUser?.roleName);
+                    console.log('User userRole:', currentUser?.userRole);
+                    console.log('User type:', currentUser?.type);
+                    console.log('User accountType:', currentUser?.accountType);
+                    
+                    // Kiểm tra các trường có thể chứa role
+                    const userRole = currentUser?.role || currentUser?.roleName || currentUser?.userRole || currentUser?.type || currentUser?.accountType;
+                    console.log('Final userRole:', userRole);
+                    console.log('Is admin?', userRole === 'admin' || userRole === 'ADMIN');
+                    
+                    return !(userRole === 'admin' || userRole === 'ADMIN');
+                  })() ? (
+                    <div style={{
+                      padding: '24px',
+                      textAlign: 'center',
+                      backgroundColor: '#fef3c7',
+                      borderRadius: '8px',
+                      border: '1px solid #fbbf24'
+                    }}>
+                      <div style={{
+                        color: '#d97706',
+                        fontWeight: '600',
+                        fontSize: '16px',
+                        marginBottom: '8px'
+                      }}>
+                        🔒 Không có quyền cập nhật
+                      </div>
+                      <div style={{
+                        color: '#6b7280',
+                        fontSize: '14px'
+                      }}>
+                        Chỉ Admin mới có quyền cập nhật trạng thái yêu cầu (Xác nhận/Từ chối)
+                      </div>
+                    </div>
+                  ) : (
               <div style={{padding: '24px'}}>
                 <label className="form-label" style={{
                   fontWeight: '500', 
@@ -807,9 +971,12 @@ export default function BloodRequestDetail() {
                     </div>
                   )}
                 </div>
+                    )}
               </div>
               )}
               {/* Bảng lượng máu sẵn có luôn nằm dưới cùng cột phải */}
+              {/* Không hiển thị bảng lượng máu và nút khẩn cấp nếu đã hủy */}
+              {!isCancelled && (
               <div className="donation-detail-table" style={{ maxWidth: 480, margin: '0 auto', width: '100%' }}>
                 <div className="donation-detail-section-title">Lượng máu sẵn có trong kho cho nhóm máu phù hợp</div>
                 <table>
@@ -876,6 +1043,7 @@ export default function BloodRequestDetail() {
                   ) : null}
                 </div>
               </div>
+              )}
             </div>
           </div>
         </main>

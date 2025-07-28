@@ -49,7 +49,8 @@ export default function AccountManagement() {
   const [page, setPage] = useState(1);
   const [editIdx, setEditIdx] = useState(null);
   const [editData, setEditData] = useState(null);
-  const [deleteIdx, setDeleteIdx] = useState(null);
+  // Thay đổi state lưu id tài khoản cần xóa
+  const [deleteId, setDeleteId] = React.useState(null);
   const [addMode, setAddMode] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const [sortBy, setSortBy] = useState('');
@@ -78,10 +79,10 @@ export default function AccountManagement() {
   // Validation
   const validateAccount = (data) => {
     const errors = {};
-    if (!data.username?.trim()) errors.username = "Tên đăng nhập là bắt buộc";
     if (!data.email?.trim()) errors.email = "Email là bắt buộc";
     if (!data.role?.trim()) errors.role = "Vai trò là bắt buộc";
-    if (!data.password_hash?.trim()) errors.password_hash = "Mật khẩu là bắt buộc";
+    if (!data.passwordHash?.trim()) errors.passwordHash = "Mật khẩu là bắt buộc";
+    // KHÔNG kiểm tra username
     return errors;
   };
 
@@ -95,7 +96,7 @@ export default function AccountManagement() {
     try {
       // Chỉ cập nhật trạng thái
       await accountAPI.updateAccount(editData.account_id, {
-        is_active: editData.is_active
+        is_active: editData.is_active === 1 ? 1 : 0
       });
       // Reload lại danh sách tài khoản
       const data = await accountAPI.getAccounts();
@@ -123,13 +124,19 @@ export default function AccountManagement() {
     setValidationErrors({});
   };
   // Delete logic
-  const handleDelete = (idx) => { setDeleteIdx(idx); };
-  const handleConfirmDelete = () => {
-    const globalIdx = accounts.findIndex(a => a === filtered[deleteIdx]);
-    setAccounts(accounts.filter((_, i) => i !== globalIdx));
-    setDeleteIdx(null);
+  // Khi bấm nút xóa, truyền account_id
+  const handleDelete = (accountId) => { setDeleteId(accountId); };
+  // Khi xác nhận xóa, xóa theo account_id
+  const handleConfirmDelete = async () => {
+    try {
+      await accountAPI.deleteAccount(deleteId);
+      setAccounts(accounts.filter(a => a.account_id !== deleteId));
+      setDeleteId(null);
+    } catch (error) {
+      alert('Xóa tài khoản thất bại!');
+    }
   };
-  const handleCancelDelete = () => { setDeleteIdx(null); };
+  const handleCancelDelete = () => { setDeleteId(null); };
 
   // Add logic
   const handleAdd = () => {
@@ -137,27 +144,49 @@ export default function AccountManagement() {
     setEditIdx(null);
     setEditData({
       account_id: Date.now(),
-      username: '',
-      password_hash: '',
+      passwordHash: '',
       email: '',
       phone: '',
       role: '',
-      is_active: true,
+      is_active: 1, // LUÔN mặc định là 1 (Kích hoạt)
       created_at: new Date().toISOString().slice(0,16).replace('T',' '),
       updated_at: new Date().toISOString().slice(0,16).replace('T',' '),
     });
     setValidationErrors({});
   };
-  const handleSaveAdd = () => {
+  const handleSaveAdd = async () => {
     const errors = validateAccount(editData);
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
-    setAccounts([{ ...editData, account_id: Date.now() }, ...accounts]);
-    setAddMode(false);
-    setEditData(null);
-    setValidationErrors({});
+    try {
+      await accountAPI.createAccount({
+        email: editData.email,
+        passwordHash: editData.passwordHash,
+        role: editData.role,
+        is_active: editData.is_active === 1 ? 1 : 0
+      });
+      const data = await accountAPI.getAccounts();
+      setAccounts(data.map(a => ({
+        account_id: a.accountId || a.account_id || '',
+        password_hash: '********',
+        email: a.email || '',
+        phone: a.phone || '',
+        role: a.role || '',
+        is_active: a.isActive !== undefined ? a.isActive : (a.is_active !== undefined ? a.is_active : true),
+        created_at: a.createdAt || a.created_at || '',
+        updated_at: a.updatedAt || a.updated_at || '',
+      })));
+      setAddMode(false);
+      setEditData(null);
+      setValidationErrors({});
+      
+      // Refresh trang sau khi thêm tài khoản thành công
+      window.location.reload();
+    } catch (error) {
+      alert('Thêm tài khoản thất bại!');
+    }
   };
   const handleCancelAdd = () => {
     setAddMode(false);
@@ -221,8 +250,6 @@ export default function AccountManagement() {
               </select>
             )}
             <button className="donor-add" onClick={handleAdd}>+ Thêm tài khoản</button>
-            <button className="donor-filter-btn">⏷</button>
-            <button className="donor-export">⭳ Xuất tệp</button>
           </div>
           <div className="donor-table-card">
             <table className="table table-hover table-bordered align-middle mb-0">
@@ -289,7 +316,7 @@ export default function AccountManagement() {
                           </button>
                           
                           <button 
-                            onClick={() => handleDelete(i)}
+                            onClick={() => handleDelete(a.account_id)}
                             title="Xóa"
                             style={{
                               display: 'flex',
@@ -347,26 +374,41 @@ export default function AccountManagement() {
                   </div>
                   <div className="modal-body">
                     <div className="row g-3">
-                      {/* Email chỉ hiển thị, không cho sửa */}
+                      {/* Email chỉ hiển thị, không cho sửa khi edit, cho nhập khi add */}
                       <div className="col-md-6">
-                        <input className="form-control" placeholder="Email" value={editData.email} disabled />
+                        <input className="form-control" placeholder="Email" value={editData.email} 
+                          disabled={!addMode} onChange={e=>setEditData({...editData,email:e.target.value})} />
                       </div>
-                      {/* Vai trò chỉ hiển thị, không cho sửa */}
+                      {/* Vai trò chỉ hiển thị, không cho sửa khi edit, cho nhập khi add */}
                       <div className="col-md-6">
-                        <select className="form-control" value={editData.role} disabled>
+                        <select className="form-control" value={editData.role} 
+                          disabled={!addMode} onChange={e=>setEditData({...editData,role:e.target.value})}>
                           <option value="">Chọn vai trò*</option>
                           {roles.map(r=><option key={r.value} value={r.value}>{r.label}</option>)}
                         </select>
                       </div>
-                      {/* Mật khẩu chỉ hiển thị, không cho sửa */}
+                      {/* Mật khẩu chỉ hiển thị, không cho sửa khi edit, cho nhập khi add */}
                       <div className="col-md-6">
-                        <input className="form-control" placeholder="Mật khẩu" type="password" value={editData.password_hash} disabled />
+                        <input className="form-control" placeholder="Mật khẩu" type="password" value={editData.passwordHash}
+                          disabled={!addMode} onChange={e=>setEditData({...editData,passwordHash:e.target.value})} />
+                        {validationErrors.passwordHash && <div className="text-danger small">{validationErrors.passwordHash}</div>}
                       </div>
+                      {/* Chỉ hiện ô tên đăng nhập khi chỉnh sửa */}
+                      {!addMode && (
+                        <div className="col-md-6">
+                          <input className="form-control" placeholder="Tên đăng nhập" value={editData.username} disabled />
+                        </div>
+                      )}
                       {/* Chỉ cho phép chỉnh sửa trạng thái */}
                       <div className="col-md-6">
-                        <select className="form-control" value={editData.is_active ? 'true' : 'false'} onChange={e=>setEditData({...editData,is_active:e.target.value==='true'})}>
-                          <option value="true">Kích hoạt</option>
-                          <option value="false">Khóa</option>
+                        <select
+                          className="form-control"
+                          value={editData.is_active === 1 ? '1' : '0'}
+                          onChange={e => setEditData({ ...editData, is_active: e.target.value === '1' ? 1 : 0 })}
+                          disabled={editIdx === null} // chỉ cho chỉnh khi đang edit
+                        >
+                          <option value="1">Kích hoạt</option>
+                          <option value="0">Khóa</option>
                         </select>
                       </div>
                     </div>
@@ -380,7 +422,7 @@ export default function AccountManagement() {
             </div>
           )}
           {/* Modal xác nhận xóa */}
-          {deleteIdx !== null && (
+          {deleteId !== null && (
             <div className="modal fade show" style={{display:'block',background:'rgba(0,0,0,0.3)'}} tabIndex="-1">
               <div className="modal-dialog modal-dialog-centered">
                 <div className="modal-content">

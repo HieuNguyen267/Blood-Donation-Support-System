@@ -15,4 +15,6 @@ public interface MF_BloodRequestService {
     BloodRequestSummaryDTO getBloodRequestSummary(Integer requestId);
     // Thêm hàm hoàn thành quá trình khẩn cấp
     void completeEmergencyProcess(Integer requestId);
+    // Thêm hàm hủy yêu cầu máu
+    boolean cancelBloodRequest(Integer id);
 } 

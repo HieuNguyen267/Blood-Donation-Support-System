@@ -26,12 +26,29 @@ export const AdminProvider = ({ children }) => {
           console.log('AdminContext: Calling adminStaffAPI.getByAccountId with accountId:', accountId);
           const data = await adminStaffAPI.getByAccountId(accountId);
           console.log('AdminContext: API response data:', data);
-          setAdminInfo(data);
+          if (data && data.role) {
+            setAdminInfo(data);
+          } else {
+            // Nếu không có data từ API, lấy từ localStorage
+            setAdminInfo({
+              email: localStorage.getItem('email'),
+              role: localStorage.getItem('role'),
+              fullName: localStorage.getItem('fullName') || '',
+            });
+          }
         } else {
-          console.log('AdminContext: No accountId found in localStorage');
+          setAdminInfo({
+            email: localStorage.getItem('email'),
+            role: localStorage.getItem('role'),
+            fullName: localStorage.getItem('fullName') || '',
+          });
         }
       } catch (error) {
-        console.error('AdminContext: Error fetching admin info:', error);
+        setAdminInfo({
+          email: localStorage.getItem('email'),
+          role: localStorage.getItem('role'),
+          fullName: localStorage.getItem('fullName') || '',
+        });
       } finally {
         setLoading(false);
       }

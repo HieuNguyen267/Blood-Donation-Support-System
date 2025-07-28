@@ -16,9 +16,6 @@ public class Account {
     @Column(name = "account_id")
     private Integer accountId;
 
-    @Column(name = "username", nullable = false)
-    private String username;
-
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
@@ -68,8 +65,6 @@ public class Account {
 
     public Integer getAccountId() { return accountId; }
     public void setAccountId(Integer accountId) { this.accountId = accountId; }
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
     public String getPasswordHash() { return passwordHash; }
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
     public String getEmail() { return email; }

@@ -4,6 +4,7 @@ import { Edit, User, Trash2 } from 'lucide-react';
 import Header from '../../../components/user/Header';
 import Footer from '../../../components/user/Footer';
 import { donorAPI } from '../../../services/api';
+import { bloodGroupAPI } from '../../../services/api';
 import dayjs from 'dayjs';
 import './index.css';
 import DonorNotificationBell from '../../../components/user/DonorNotificationBell';
@@ -38,10 +39,34 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [form] = Form.useForm();
+  const [bloodGroups, setBloodGroups] = useState([]);
 
+  // useEffect đầu tiên chỉ fetch bloodGroups
   useEffect(() => {
-    loadProfile();
+    fetchBloodGroups();
   }, []);
+
+  // Khi bloodGroups đã có dữ liệu, mới load profile
+  useEffect(() => {
+    if (bloodGroups.length > 0) {
+      loadProfile();
+    }
+    // eslint-disable-next-line
+  }, [bloodGroups]);
+
+  // Debug effect để kiểm tra userInfo khi thay đổi
+  useEffect(() => {
+    console.log('UserInfo changed:', userInfo);
+  }, [userInfo]);
+
+  const fetchBloodGroups = async () => {
+    try {
+      const res = await bloodGroupAPI.getBloodGroups();
+      setBloodGroups(res);
+    } catch {
+      setBloodGroups([]);
+    }
+  };
 
   const loadProfile = async () => {
     setLoading(true);
@@ -53,21 +78,84 @@ const ProfilePage = () => {
           profile = JSON.parse(localProfile);
         }
       }
+      // Map lại cho form, đặc biệt nhóm máu: tìm id từ bloodGroups dựa trên aboType và rhFactor
+      let bloodGroupId = undefined;
+      if (profile.aboType && profile.rhFactor && bloodGroups.length > 0) {
+        const found = bloodGroups.find(bg => bg.aboType === profile.aboType && bg.rhFactor === profile.rhFactor);
+        bloodGroupId = found ? found.bloodGroupId : undefined;
+      }
+      // Debug log để kiểm tra dữ liệu từ backend
+      console.log('Profile from backend:', profile);
+      console.log('Gender from backend:', profile.gender);
+      
+      // Map gender từ database sang hiển thị
+      let genderDisplay = 'Khác';
+      if (profile.gender === 'male') {
+        genderDisplay = 'Nam';
+      } else if (profile.gender === 'female') {
+        genderDisplay = 'Nữ';
+      }
+      
       const fixedProfile = {
-        ...profile,
+        fullName: profile.fullName || '',
+        email: profile.email || '',
         dateOfBirth: profile.dateOfBirth ? dayjs(profile.dateOfBirth) : null,
+        gender: genderDisplay,
+        phone: profile.phone || '',
+        job: profile.job || '',
+        bloodGroup: bloodGroupId,
+        address: profile.address || '',
+        // Lưu thêm thông tin nhóm máu để hiển thị
+        aboType: profile.aboType,
+        rhFactor: profile.rhFactor,
+        bloodGroupDisplay: profile.bloodGroup,
+        // Lưu gender gốc từ database để debug
+        originalGender: profile.gender,
       };
+      
+      console.log('Mapped gender:', fixedProfile.gender);
       setUserInfo(fixedProfile);
+      form.setFieldsValue(fixedProfile);
+      // Debug log sau khi set form
+      console.log('Form gender after loadProfile:', form.getFieldValue('gender'));
     } catch {
-      // Nếu lỗi, thử lấy từ localStorage
+      // fallback như cũ
       const localProfile = localStorage.getItem('userInfo');
       if (localProfile) {
         const profile = JSON.parse(localProfile);
+        let bloodGroupId = undefined;
+        if (profile.aboType && profile.rhFactor && bloodGroups.length > 0) {
+          const found = bloodGroups.find(bg => bg.aboType === profile.aboType && bg.rhFactor === profile.rhFactor);
+          bloodGroupId = found ? found.bloodGroupId : undefined;
+        }
+        // Map gender từ database sang hiển thị (fallback)
+        let genderDisplay = 'Khác';
+        if (profile.gender === 'male') {
+          genderDisplay = 'Nam';
+        } else if (profile.gender === 'female') {
+          genderDisplay = 'Nữ';
+        }
+        
         const fixedProfile = {
-          ...profile,
+          fullName: profile.fullName || '',
+          email: profile.email || '',
           dateOfBirth: profile.dateOfBirth ? dayjs(profile.dateOfBirth) : null,
+          gender: genderDisplay,
+          phone: profile.phone || '',
+          job: profile.job || '',
+          bloodGroup: bloodGroupId,
+          address: profile.address || '',
+          // Lưu thêm thông tin nhóm máu để hiển thị
+          aboType: profile.aboType,
+          rhFactor: profile.rhFactor,
+          bloodGroupDisplay: profile.bloodGroup,
+          // Lưu gender gốc từ database để debug
+          originalGender: profile.gender,
         };
         setUserInfo(fixedProfile);
+        form.setFieldsValue(fixedProfile);
+        // Debug log sau khi set form (fallback)
+        console.log('Form gender after loadProfile (fallback):', form.getFieldValue('gender'));
       } else {
         message.error('Không thể tải thông tin hồ sơ. Vui lòng thử lại.');
       }
@@ -79,33 +167,49 @@ const ProfilePage = () => {
   const handleEdit = () => {
     setIsEditMode(true);
     setTimeout(() => {
+      // Debug log để kiểm tra dữ liệu được set vào form
+      console.log('Setting form values:', userInfo);
+      console.log('Gender for form:', userInfo.gender);
       form.setFieldsValue(userInfo);
+      // Debug log sau khi set
+      console.log('Form gender after set:', form.getFieldValue('gender'));
     }, 0);
   };
 
   const handleSave = async (values) => {
     setSaving(true);
     try {
+      // Debug log để kiểm tra dữ liệu form
+      console.log('Form values:', values);
+      console.log('Gender from form:', values.gender);
+      
+      // Map gender từ form sang database
+      let mappedGender = 'other';
+      if (values.gender === 'Nam') {
+        mappedGender = 'male';
+      } else if (values.gender === 'Nữ') {
+        mappedGender = 'female';
+      }
+      console.log('Mapped gender for backend:', mappedGender);
+      
       await donorAPI.updateProfile({
         fullName: values.fullName,
         dateOfBirth: values.dateOfBirth ? values.dateOfBirth.format('YYYY-MM-DD') : undefined,
-        gender: values.gender,
+        gender: mappedGender,
         address: values.address,
-        bloodGroup: values.bloodGroup,
+        blood_group_id: values.bloodGroup,
         job: values.job,
         phone: values.phone,
         email: values.email,
       });
-      const newProfile = {
-        ...values,
-        dateOfBirth: values.dateOfBirth ? values.dateOfBirth : undefined,
-        bloodGroup: values.bloodGroup,
-        job: values.job,
-      };
-      setUserInfo(newProfile);
-      setIsEditMode(false);
+      
       message.success('Cập nhật thông tin thành công!');
-      localStorage.setItem('userInfo', JSON.stringify(newProfile));
+      setIsEditMode(false);
+      
+      // Refresh lại trang bằng cách reload dữ liệu
+      setLoading(true);
+      await loadProfile();
+      setLoading(false);
     } catch (error) {
       console.error('Update profile error:', error);
       message.error(error.message || 'Cập nhật thông tin thất bại. Vui lòng thử lại.');
@@ -115,7 +219,11 @@ const ProfilePage = () => {
   };
 
   const handleCancel = () => {
+    // Debug log để kiểm tra dữ liệu được reset
+    console.log('Resetting form to:', userInfo);
     form.setFieldsValue(userInfo);
+    // Debug log sau khi reset
+    console.log('Form gender after reset:', form.getFieldValue('gender'));
     setIsEditMode(false);
   };
 
@@ -138,58 +246,76 @@ const ProfilePage = () => {
   }
 
   // --- VIEW MODE ---
-  const renderViewMode = () => (
-    <Row gutter={32} className="profile-modern-grid">
-      {/* Left column */}
-      <Col xs={24} md={14}>
-        <Card className="profile-card profile-main-card">
-          <DonorNotificationBell />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-            <Avatar size={96} icon={<User size={48} />} style={{ background: '#222' }} />
-            <div>
-              <Title level={3} style={{ marginBottom: 0 }}>{renderItem(userInfo.fullName)}</Title>
-              <Text type="secondary">@{userInfo.email || 'user'}</Text>
-              <div style={{ marginTop: 8 }}>
-                <Button icon={<Edit size={16} />} onClick={handleEdit} type="primary" size="small" style={{ background: '#52c41a', borderColor: '#52c41a' }}>Chỉnh sửa hồ sơ</Button>
+  const renderViewMode = () => {
+    // Render nhóm máu từ aboType + rhFactor trả về từ backend
+    let bloodGroupLabel = '-';
+    if (userInfo.aboType && userInfo.rhFactor) {
+      const rh = userInfo.rhFactor === 'positive' ? '+' : (userInfo.rhFactor === 'negative' ? '-' : '');
+      bloodGroupLabel = `${userInfo.aboType}${rh}`;
+    }
+    // Sử dụng gender đã được map từ loadProfile
+    const genderLabel = userInfo.gender || '-';
+    // Debug log để kiểm tra
+    console.log('UserInfo gender:', userInfo.gender);
+    console.log('Original gender from DB:', userInfo.originalGender);
+    console.log('Gender display label:', genderLabel);
+    return (
+      <Row gutter={32} className="profile-modern-grid">
+        {/* Left column */}
+        <Col xs={24} md={14}>
+          <Card className="profile-card profile-main-card">
+            <DonorNotificationBell />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+              <Avatar size={96} icon={<User size={48} />} style={{ background: '#222' }} />
+              <div>
+                <Title level={3} style={{ marginBottom: 0 }}>{renderItem(userInfo.fullName)}</Title>
+                <Text type="secondary">@{userInfo.email || 'user'}</Text>
+                <div style={{ marginTop: 8 }}>
+                  <Button icon={<Edit size={16} />} onClick={handleEdit} type="primary" size="small" style={{ background: '#52c41a', borderColor: '#52c41a' }}>Chỉnh sửa hồ sơ</Button>
+                </div>
               </div>
             </div>
-          </div>
-          <Divider />
-          <Title level={5}>Kinh nghiệm</Title>
-          <List
-            itemLayout="vertical"
-            dataSource={mockExperience}
-            renderItem={item => (
-              <List.Item>
-                <List.Item.Meta
-                  title={<b>{item.title}</b>}
-                  description={<span>{item.org} <span style={{ float: 'right' }}>{item.time}</span></span>}
-                />
-                <div>{item.desc}</div>
-              </List.Item>
-            )}
-          />
-        </Card>
-      </Col>
-      {/* Right column */}
-      <Col xs={24} md={10}>
-        <Card className="profile-card" title="Thông tin liên hệ" style={{ marginBottom: 24 }}>
-          <Descriptions layout="vertical" column={1} variant="outlined" size="small">
-            <Descriptions.Item label="Ngày sinh">{userInfo.dateOfBirth ? userInfo.dateOfBirth.format('DD/MM/YYYY') : '-'}</Descriptions.Item>
-            <Descriptions.Item label="Giới tính">{renderItem(userInfo.gender)}</Descriptions.Item>
-            <Descriptions.Item label="Nhóm máu">{renderItem(userInfo.bloodGroup)}</Descriptions.Item>
-            <Descriptions.Item label="Điện thoại">{renderItem(userInfo.phone)}</Descriptions.Item>
-            <Descriptions.Item label="Email">{renderItem(userInfo.email)}</Descriptions.Item>
-            <Descriptions.Item label="Địa chỉ liên hệ">{renderItem(userInfo.address)}</Descriptions.Item>
-            <Descriptions.Item label="Nghề nghiệp">{renderItem(userInfo.job)}</Descriptions.Item>
-          </Descriptions>
-        </Card>
-      </Col>
-    </Row>
-  );
+            <Divider />
+            <Title level={5}>Kinh nghiệm</Title>
+            <List
+              itemLayout="vertical"
+              dataSource={mockExperience}
+              renderItem={item => (
+                <List.Item>
+                  <List.Item.Meta
+                    title={<b>{item.title}</b>}
+                    description={<span>{item.org} <span style={{ float: 'right' }}>{item.time}</span></span>}
+                  />
+                  <div>{item.desc}</div>
+                </List.Item>
+              )}
+            />
+          </Card>
+        </Col>
+        {/* Right column */}
+        <Col xs={24} md={10}>
+          <Card className="profile-card" title="Thông tin liên hệ" style={{ marginBottom: 24 }}>
+            <Descriptions layout="vertical" column={1} variant="outlined" size="small">
+              <Descriptions.Item label="Ngày sinh">{userInfo.dateOfBirth ? userInfo.dateOfBirth.format('DD/MM/YYYY') : '-'}</Descriptions.Item>
+              <Descriptions.Item label="Giới tính">{genderLabel}</Descriptions.Item>
+              <Descriptions.Item label="Nhóm máu">{bloodGroupLabel}</Descriptions.Item>
+              <Descriptions.Item label="Điện thoại">{renderItem(userInfo.phone)}</Descriptions.Item>
+              <Descriptions.Item label="Email">{renderItem(userInfo.email)}</Descriptions.Item>
+              <Descriptions.Item label="Địa chỉ liên hệ">{renderItem(userInfo.address)}</Descriptions.Item>
+              <Descriptions.Item label="Nghề nghiệp">{renderItem(userInfo.job)}</Descriptions.Item>
+            </Descriptions>
+          </Card>
+        </Col>
+      </Row>
+    );
+  };
 
   // --- EDIT MODE ---
-  const renderEditMode = () => (
+  const renderEditMode = () => {
+    // Debug log để kiểm tra dữ liệu form
+    console.log('Rendering edit mode with userInfo:', userInfo);
+    console.log('Form gender value:', form.getFieldValue('gender'));
+    return (
     <Card className="profile-edit-card">
       <Title level={4} style={{ textAlign: 'center', marginBottom: '32px' }}>Chỉnh sửa thông tin cá nhân</Title>
       <Form
@@ -197,6 +323,8 @@ const ProfilePage = () => {
         layout="vertical"
         onFinish={handleSave}
         className="profile-antd-form"
+        initialValues={userInfo}
+        key={JSON.stringify(userInfo)} // Force re-render when userInfo changes
       >
         <Row gutter={32}>
           {/* Cột trái */}
@@ -237,20 +365,24 @@ const ProfilePage = () => {
                 <Radio value="Khác">Khác</Radio>
               </Radio.Group>
             </Form.Item>
+            {/* Debug info - có thể xóa sau */}
+            <div style={{ fontSize: '12px', color: '#999', marginTop: '5px' }}>
+              Debug: Form gender value = {form.getFieldValue('gender')}, UserInfo gender = {userInfo.gender}
+            </div>
             <Form.Item
               label="Nhóm máu"
               name="bloodGroup"
               rules={[{ required: true, message: 'Vui lòng chọn nhóm máu!' }]}
             >
               <Select>
-                <Option value="A+">A+</Option>
-                <Option value="A-">A-</Option>
-                <Option value="B+">B+</Option>
-                <Option value="B-">B-</Option>
-                <Option value="AB+">AB+</Option>
-                <Option value="AB-">AB-</Option>
-                <Option value="O+">O+</Option>
-                <Option value="O-">O-</Option>
+                {bloodGroups.map(bg => {
+                  let rh = bg.rhFactor === 'positive' ? '+' : (bg.rhFactor === 'negative' ? '-' : '');
+                  return (
+                    <Option key={bg.bloodGroupId} value={bg.bloodGroupId}>
+                      {bg.aboType}{rh}
+                    </Option>
+                  );
+                })}
               </Select>
             </Form.Item>
           </Col>
@@ -294,7 +426,8 @@ const ProfilePage = () => {
         </Row>
       </Form>
     </Card>
-  );
+    );
+  };
 
   return (
     <div className="profile-page">

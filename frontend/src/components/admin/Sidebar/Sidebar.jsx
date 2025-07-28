@@ -52,49 +52,57 @@ const Sidebar = () => {
         </div>
       </div>
       <ul className="sidebar-menu">
-        {menuItems.map((item) => {
-          const isParentActive = (
-            (item.path && location.pathname.startsWith(item.path)) ||
-            (item.children && item.children.some(child => location.pathname.startsWith(child.path)))
-          );
+        {menuItems
+          .filter(item => {
+            // Ẩn menu tài khoản và cơ sở y tế nếu là STAFF
+            if ((item.path === '/admin/accounts' || item.path === '/admin/medical-facilities') && adminInfo?.role?.toUpperCase() === 'STAFF') {
+              return false;
+            }
+            return true;
+          })
+          .map((item) => {
+            const isParentActive = (
+              (item.path && location.pathname.startsWith(item.path)) ||
+              (item.children && item.children.some(child => location.pathname.startsWith(child.path)))
+            );
 
-          if (!item.children) {
+            if (!item.children) {
+              return (
+                <li key={item.path}>
+                  <Link to={item.path} className={`sidebar-item ${location.pathname === item.path ? 'active' : ''}`}>
+                    <div className="sidebar-icon-container">{item.icon}</div>
+                    <span className="sidebar-label">{item.label}</span>
+                  </Link>
+                </li>
+              );
+            }
+
             return (
-              <li key={item.path}>
-                <Link to={item.path} className={`sidebar-item ${location.pathname === item.path ? 'active' : ''}`}>
-                  <div className="sidebar-icon-container">{item.icon}</div>
-                  <span className="sidebar-label">{item.label}</span>
-                </Link>
+              <li key={item.label} className={isParentActive ? 'active' : ''}>
+                <div className="sidebar-item">
+                  <Link to={item.path} className="sidebar-item-link">
+                    <div className="sidebar-icon-container">{item.icon}</div>
+                    <span className="sidebar-label">{item.label}</span>
+                  </Link>
+                  <span className="dropdown-arrow" onClick={() => handleDropdownToggle(item.label)}>
+                    {openDropdown === item.label ? <FaChevronDown /> : <FaChevronRight />}
+                  </span>
+                </div>
+                {openDropdown === item.label && (
+                  <ul className="sidebar-submenu">
+                    {item.children.map((child) => (
+                      <li key={child.path}>
+                        <Link to={child.path} className={`sidebar-item sub-item ${location.pathname === child.path ? 'active' : ''}`}>
+                          <div className="sidebar-icon-container">{child.icon}</div>
+                          <span className="sidebar-label">{child.label}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </li>
             );
-          }
-
-          return (
-            <li key={item.label} className={isParentActive ? 'active' : ''}>
-              <div className="sidebar-item">
-                <Link to={item.path} className="sidebar-item-link">
-                  <div className="sidebar-icon-container">{item.icon}</div>
-                  <span className="sidebar-label">{item.label}</span>
-                </Link>
-                <span className="dropdown-arrow" onClick={() => handleDropdownToggle(item.label)}>
-                  {openDropdown === item.label ? <FaChevronDown /> : <FaChevronRight />}
-                </span>
-              </div>
-              {openDropdown === item.label && (
-                <ul className="sidebar-submenu">
-                  {item.children.map((child) => (
-                    <li key={child.path}>
-                      <Link to={child.path} className={`sidebar-item sub-item ${location.pathname === child.path ? 'active' : ''}`}>
-                        <div className="sidebar-icon-container">{child.icon}</div>
-                        <span className="sidebar-label">{child.label}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </li>
-          );
-        })}
+          })}
       </ul>
     </aside>
   );

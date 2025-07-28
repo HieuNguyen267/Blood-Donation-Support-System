@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Form, Input, Button, DatePicker, Radio, Card, Typography, Select, Row, Col } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../../components/user/Header';
@@ -6,6 +6,7 @@ import Footer from '../../../components/user/Footer';
 import './index.css';
 import { donorAPI } from '../../../services/api';
 import dayjs from 'dayjs';
+import { bloodGroupAPI } from '../../../services/api';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -13,6 +14,7 @@ const { Option } = Select;
 const UserInfoForm = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
+  const [bloodGroups, setBloodGroups] = useState([]);
 
   useEffect(() => {
     // Nếu chưa đăng nhập thì chuyển hướng về trang đăng nhập
@@ -25,22 +27,44 @@ const UserInfoForm = () => {
     if (userEmail) {
       form.setFieldsValue({ email: userEmail });
     }
+    // Lấy danh sách nhóm máu từ DB
+    async function fetchBloodGroups() {
+      try {
+        const res = await bloodGroupAPI.getBloodGroups();
+        setBloodGroups(res);
+      } catch {
+        setBloodGroups([]);
+      }
+    }
+    fetchBloodGroups();
   }, [form, navigate]);
 
   const onFinish = async (values) => {
     try {
-      await donorAPI.updateProfile({
+      // Lấy account_id từ localStorage hoặc userInfo
+      let userInfo = null;
+      try {
+        userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      } catch {}
+      let accountId = userInfo?.accountId || localStorage.getItem('accountId');
+      // Map giới tính
+      let gender = values.gender === 'Nam' ? 'male' : (values.gender === 'Nữ' ? 'female' : 'other');
+      if (!values.bloodType) {
+        alert('Vui lòng chọn nhóm máu!');
+        return;
+      }
+      await donorAPI.createDonor({
+        account: { accountId: Number(accountId) }, // Truyền object đúng entity backend
         fullName: values.fullName,
         dateOfBirth: values.dateOfBirth ? values.dateOfBirth.format('YYYY-MM-DD') : undefined,
-        gender: values.gender,
+        lastDonationDate: values.lastDonationDate ? values.lastDonationDate.format('YYYY-MM-DD') : undefined,
+        gender: gender,
+        bloodGroup: { bloodGroupId: Number(values.bloodType) },
         address: values.address,
-        bloodGroup: values.bloodType,
-        job: values.occupation,
         phone: values.phone,
         email: values.email,
+        job: values.occupation,
       });
-      // Có thể lưu local nếu muốn
-      // localStorage.setItem('userInfo', JSON.stringify(values));
       navigate('/profile');
     } catch (error) {
       alert('Lưu thông tin thất bại! ' + (error?.message || ''));
@@ -113,18 +137,16 @@ const UserInfoForm = () => {
                 </Form.Item>
               </Col>
               <Col span={12}>
-                 <Form.Item label="Nhóm máu" name="bloodType">
+                 <Form.Item label="Nhóm máu" name="bloodType" rules={[{ required: true, message: 'Vui lòng chọn nhóm máu!' }]}> 
                     <Select placeholder="Chọn nhóm máu">
-                        <Option value="A+">A+</Option>
-                        <Option value="A-">A-</Option>
-                        <Option value="B+">B+</Option>
-                        <Option value="B-">B-</Option>
-                        <Option value="AB+">AB+</Option>
-                        <Option value="AB-">AB-</Option>
-                        <Option value="O+">O+</Option>
-                        <Option value="O-">O-</Option>
-                        <Option value="Bombay (hh)">Bombay (hh) (hiếm)</Option>
-                        <Option value="Rh-null">Rh-null (hiếm)</Option>
+                      {bloodGroups.map(bg => {
+                        let rh = bg.rhFactor === 'positive' ? '+' : (bg.rhFactor === 'negative' ? '-' : '');
+                        return (
+                          <Option key={bg.bloodGroupId} value={bg.bloodGroupId}>
+                            {bg.aboType}{rh}
+                          </Option>
+                        );
+                      })}
                     </Select>
                  </Form.Item>
               </Col>

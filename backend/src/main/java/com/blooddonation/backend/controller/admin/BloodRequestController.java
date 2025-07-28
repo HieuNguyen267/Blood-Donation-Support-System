@@ -185,6 +185,7 @@ public class BloodRequestController {
                 donor.getFullName(),
                 detailUrl,
                 bloodRequest.getFacilityName(),
+                bloodRequest.getFacilityAddress(),
                 bloodRequest.getBloodGroup(),
                 bloodRequest.getQuantityRequested().toString(),
                 bloodRequest.getRequiredBy()
@@ -224,6 +225,7 @@ public class BloodRequestController {
                 "Test User",
                 "http://localhost:3000/donor/emergency-request-detail/1",
                 "BV Test",
+                "123 Đường Test, Quận 1, TP.HCM",
                 "A+",
                 "500",
                 "2024-07-15 10:00"

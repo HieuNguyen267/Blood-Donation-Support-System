@@ -9,6 +9,8 @@ import { donorAPI } from '../../../services/api';
 export default function CertificatePage() {
   const [certificates, setCertificates] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(3); // Hiển thị 3 chứng nhận mỗi trang
 
   useEffect(() => {
     donorAPI.getCertificates()
@@ -28,7 +30,9 @@ export default function CertificatePage() {
           <div style={{ textAlign: 'center', padding: 40 }}><Spin /> Đang tải chứng nhận...</div>
         ) : certificates.length > 0 ? (
           <div className="certificate-list-modern">
-            {certificates.map(cert => (
+            {certificates
+              .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+              .map(cert => (
               <div className="certificate-card-modern" key={cert.certificateId}>
                 <div className="certificate-card-left">
                   <div className="blood-drop-icon">🩸</div>
@@ -55,6 +59,29 @@ export default function CertificatePage() {
                 </div>
               </div>
             ))}
+            
+            {/* Phân trang */}
+            {certificates.length > pageSize && (
+              <div className="pagination-container">
+                <Button 
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  style={{ marginRight: 8 }}
+                >
+                  Trước
+                </Button>
+                <span className="pagination-info">
+                  Trang {currentPage} / {Math.ceil(certificates.length / pageSize)}
+                </span>
+                <Button 
+                  disabled={currentPage === Math.ceil(certificates.length / pageSize)}
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  style={{ marginLeft: 8 }}
+                >
+                  Sau
+                </Button>
+              </div>
+            )}
           </div>
       ) : (
         <div className="certificate-empty">
@@ -127,6 +154,21 @@ export default function CertificatePage() {
         }
         .details-link:hover {
           text-decoration: underline;
+        }
+        .pagination-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-top: 24px;
+          padding: 16px;
+          background: #fff;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .pagination-info {
+          font-size: 14px;
+          color: #666;
+          margin: 0 16px;
         }
       `}</style>
     </>

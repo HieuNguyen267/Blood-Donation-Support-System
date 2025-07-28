@@ -23,7 +23,7 @@ import ContactPage from './pages/donor/Contact/ContactPage';
 import EmergencyButton from './components/user/EmergencyButton';
 
 // Thêm lại các import cho các trang mới
-import Signup from './pages/donor/Signup';
+import Signup from './pages/donor/SignUp';
 import LoginPage from './pages/donor/Login';
 import EmergencyRequest from './pages/medicalfacility/EmergencyRequest/index';
 

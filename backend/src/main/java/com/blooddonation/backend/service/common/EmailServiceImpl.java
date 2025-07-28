@@ -136,7 +136,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendEmergencyBloodRequestEmail(String to, String donorName, String detailUrl, String facilityName, String bloodGroup, String quantity, String requiredBy) {
+    public void sendEmergencyBloodRequestEmail(String to, String donorName, String detailUrl, String facilityName, String facilityAddress, String bloodGroup, String quantity, String requiredBy) {
         try {
             logger.info("Sending emergency blood request email to: {} for donor: {}", to, donorName);
             
@@ -145,6 +145,7 @@ public class EmailServiceImpl implements EmailService {
             logger.info("To: {}", to);
             logger.info("Donor: {}", donorName);
             logger.info("Facility: {}", facilityName);
+            logger.info("Facility Address: {}", facilityAddress);
             logger.info("Blood Group: {}", bloodGroup);
             logger.info("Quantity: {}", quantity);
             logger.info("Required By: {}", requiredBy);
@@ -161,6 +162,7 @@ public class EmailServiceImpl implements EmailService {
                 "Có một yêu cầu hiến máu khẩn cấp cần sự hỗ trợ của bạn:\n\n" +
                 "Thông tin yêu cầu:\n" +
                 "- Cơ sở y tế: %s\n" +
+                "- Địa chỉ: %s\n" +
                 "- Nhóm máu cần: %s\n" +
                 "- Số lượng cần: %s ml\n" +
                 "- Ngày cần: %s\n\n" +
@@ -168,7 +170,7 @@ public class EmailServiceImpl implements EmailService {
                 "%s\n\n" +
                 "Cảm ơn bạn đã tham gia chương trình hiến máu!\n" +
                 "Hệ thống Hỗ trợ Hiến máu",
-                donorName, facilityName, bloodGroup, quantity, requiredBy, detailUrl
+                donorName, facilityName, facilityAddress != null ? facilityAddress : "Chưa có thông tin", bloodGroup, quantity, requiredBy, detailUrl
             );
             
             message.setText(emailContent);
@@ -183,6 +185,55 @@ public class EmailServiceImpl implements EmailService {
                 throw new RuntimeException("Lỗi xác thực email: Vui lòng kiểm tra cấu hình SMTP. Chi tiết: " + e.getMessage());
             } else {
                 throw new RuntimeException("Không thể gửi email yêu cầu hiến máu khẩn cấp: " + e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public void sendEmergencyRequestCancellationEmail(String to, String donorName, String facilityName, String bloodGroup, String quantity, String requiredBy) {
+        try {
+            logger.info("Sending emergency request cancellation email to: {} for donor: {}", to, donorName);
+            
+            // Log email details for debugging
+            logger.info("=== EMERGENCY CANCELLATION EMAIL DETAILS ===");
+            logger.info("To: {}", to);
+            logger.info("Donor: {}", donorName);
+            logger.info("Facility: {}", facilityName);
+            logger.info("Blood Group: {}", bloodGroup);
+            logger.info("Quantity: {}", quantity);
+            logger.info("Required By: {}", requiredBy);
+            logger.info("=== END EMAIL DETAILS ===");
+            
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom("swp391.donateblood@gmail.com");
+            message.setTo(to);
+            message.setSubject("Yêu cầu hiến máu khẩn cấp đã được hủy - Hệ thống Hiến máu");
+            
+            String emailContent = String.format(
+                "Xin chào %s,\n\n" +
+                "Yêu cầu hiến máu khẩn cấp mà bạn đã được liên hệ đã được hủy:\n\n" +
+                "Thông tin yêu cầu đã hủy:\n" +
+                "- Cơ sở y tế: %s\n" +
+                "- Nhóm máu cần: %s\n" +
+                "- Số lượng cần: %s ml\n" +
+                "- Ngày cần: %s\n\n" +
+                "Cảm ơn bạn đã quan tâm và sẵn sàng hỗ trợ!\n" +
+                "Hệ thống Hỗ trợ Hiến máu",
+                donorName, facilityName, bloodGroup, quantity, requiredBy
+            );
+            
+            message.setText(emailContent);
+            mailSender.send(message);
+            
+            logger.info("Emergency request cancellation email sent successfully to: {}", to);
+        } catch (Exception e) {
+            logger.error("Error sending emergency request cancellation email to {}: {}", to, e.getMessage(), e);
+            
+            // Check if it's an authentication error
+            if (e.getMessage().contains("Authentication failed") || e.getMessage().contains("BadCredentials")) {
+                throw new RuntimeException("Lỗi xác thực email: Vui lòng kiểm tra cấu hình SMTP. Chi tiết: " + e.getMessage());
+            } else {
+                throw new RuntimeException("Không thể gửi email thông báo hủy yêu cầu khẩn cấp: " + e.getMessage());
             }
         }
     }

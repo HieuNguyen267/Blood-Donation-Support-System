@@ -326,44 +326,6 @@ export default function DonationManagement() {
               <option value="Tất cả">Nhóm máu</option>
               {bloodTypes.filter(opt => opt !== 'Tất cả').map(opt => <option key={opt} value={opt}>{opt}</option>)}
               </select>
-            <button className="donation-filter-btn" style={{ height: 40, padding: '0 12px' }}>⏷</button>
-            <button 
-              className="modern-export-btn"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '10px 16px',
-                backgroundColor: '#2563eb',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '8px',
-                fontWeight: '500',
-                fontSize: '14px',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease-in-out',
-                boxShadow: '0 2px 4px rgba(37, 99, 235, 0.2)',
-                marginLeft: '8px',
-                height: 40
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.backgroundColor = '#1d4ed8';
-                e.target.style.transform = 'translateY(-1px)';
-                e.target.style.boxShadow = '0 4px 8px rgba(37, 99, 235, 0.3)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = '#2563eb';
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 2px 4px rgba(37, 99, 235, 0.2)';
-              }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7,10 12,15 17,10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-              <span>Xuất tệp</span>
-            </button>
             {selectedItems.length > 0 ? (
               <button 
                 className="modern-delete-btn"

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Form, Button, Typography, Card, Checkbox, message } from "antd";
+import { Form, Button, Typography, Card, Radio, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import Header from "../../../components/user/Header";
 import Footer from "../../../components/user/Footer";
@@ -123,7 +123,7 @@ export default function BloodDonationEligibility() {
       // Kiểm tra điều kiện đủ điều kiện hiến máu
       const isEligible = questions.every(q => {
         const answer = values[q.name];
-        const selectedOption = q.options.find(opt => opt.value === answer[0]);
+        const selectedOption = q.options.find(opt => opt.value === answer);
         return selectedOption && selectedOption.safe;
       });
 
@@ -131,32 +131,27 @@ export default function BloodDonationEligibility() {
       const surveyData = {
         donorId: donorId,
         ...values,
-        // Chuyển đổi từ array sang string vì backend expect string
-        hasFluFeverCough: values.hasFluFeverCough[0],
-        hasSoreThroat: values.hasSoreThroat[0],
-        hasDiarrheaDigestiveIssues: values.hasDiarrheaDigestiveIssues[0],
-        hasHeadacheDizzinessFatigue: values.hasHeadacheDizzinessFatigue[0],
-        hasAllergicReactions: values.hasAllergicReactions[0],
-        hasInfectionOpenWounds: values.hasInfectionOpenWounds[0],
-        usesAntibioticsMedication: values.usesAntibioticsMedication[0],
-        hasInfectiousDiseaseHistory: values.hasInfectiousDiseaseHistory[0],
-        hasHypertensionHeartDisease: values.hasHypertensionHeartDisease[0],
-        hasDiabetesChronicDiseases: values.hasDiabetesChronicDiseases[0],
-        overallEligibility: isEligible ? 'du_dieu_kien' : 'khong_du_dieu_kien',
-        deferralReason: isEligible ? null : 'Không đủ điều kiện sức khỏe để hiến máu'
+        // Giá trị đã là string vì sử dụng Radio.Group
+        hasFluFeverCough: values.hasFluFeverCough,
+        hasSoreThroat: values.hasSoreThroat,
+        hasDiarrheaDigestiveIssues: values.hasDiarrheaDigestiveIssues,
+        hasHeadacheDizzinessFatigue: values.hasHeadacheDizzinessFatigue,
+        hasAllergicReactions: values.hasAllergicReactions,
+        hasInfectionOpenWounds: values.hasInfectionOpenWounds,
+        usesAntibioticsMedication: values.usesAntibioticsMedication,
+        hasInfectiousDiseaseHistory: values.hasInfectiousDiseaseHistory,
+        hasHypertensionHeartDisease: values.hasHypertensionHeartDisease,
+        hasDiabetesChronicDiseases: values.hasDiabetesChronicDiseases,
+      
       };
 
       // Gửi dữ liệu khảo sát lên server
       const surveyRes = await donorAPI.createSurvey(surveyData);
       // Lưu kết quả vào localStorage để hiển thị ở trang đăng ký
       localStorage.setItem('healthCheckAnswers', JSON.stringify(values));
-      localStorage.setItem('isEligible', isEligible);
+   
 
-      if (!isEligible) {
-        message.error('Rất tiếc, bạn không đủ điều kiện hiến máu vào lúc này.');
-        navigate('/');
-        return;
-      }
+   
 
       // Nếu đủ điều kiện, tiếp tục tạo đơn đăng ký hiến máu
       // Lấy dữ liệu từ localStorage
@@ -239,7 +234,13 @@ export default function BloodDonationEligibility() {
                     rules={[{ required: true, message: "Vui lòng chọn đáp án!" }]}
                     style={{ marginBottom: 0 }}
                   >
-                    <Checkbox.Group options={q.options.map(opt => ({ label: opt.label, value: opt.value }))} />
+                    <Radio.Group>
+                      {q.options.map((opt, index) => (
+                        <Radio key={opt.value} value={opt.value} style={{ display: 'block', marginBottom: 8 }}>
+                          {opt.label}
+                        </Radio>
+                      ))}
+                    </Radio.Group>
                   </Form.Item>
                 </div>
               </div>

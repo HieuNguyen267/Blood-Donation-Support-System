@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.Map;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @RestController
 @RequestMapping("/accounts")
@@ -16,6 +17,9 @@ import java.util.Map;
 public class AccountController {
     @Autowired
     private AccountRepository accountRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     // Lấy danh sách tất cả tài khoản
     @GetMapping
@@ -33,7 +37,14 @@ public class AccountController {
     // Thêm tài khoản mới
     @PostMapping
     public ResponseEntity<Account> createAccount(@RequestBody Account account) {
-        // Có thể cần kiểm tra trùng email/username ở đây
+        // Mã hóa mật khẩu nếu có
+        if (account.getPasswordHash() != null && !account.getPasswordHash().isEmpty()) {
+            account.setPasswordHash(passwordEncoder.encode(account.getPasswordHash()));
+        }
+        // Nếu is_active null thì mặc định là true
+        if (account.getIsActive() == null) {
+            account.setIsActive(true);
+        }
         Account saved = accountRepository.save(account);
         return ResponseEntity.ok(saved);
     }
@@ -52,6 +63,10 @@ public class AccountController {
                 account.setIsActive((Boolean) value);
             } else if (value instanceof String) {
                 account.setIsActive(Boolean.parseBoolean((String) value));
+            } else if (value instanceof Integer) {
+                account.setIsActive((Integer) value == 1);
+            } else if (value instanceof Number) {
+                account.setIsActive(((Number) value).intValue() == 1);
             }
         }
         Account updated = accountRepository.save(account);

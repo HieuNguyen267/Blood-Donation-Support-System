@@ -142,6 +142,24 @@ export default function VerifyPassword() {
         // Tự động đăng nhập
         const loginResponse = await authAPI.login({ email, password });
         setAuthToken(loginResponse.token, loginResponse.email, loginResponse.role);
+        if (loginResponse.accountId) {
+          localStorage.setItem('accountId', loginResponse.accountId);
+          // Cập nhật userInfo nếu có
+          let userInfo = {};
+          try {
+            userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
+          } catch {}
+          userInfo.accountId = loginResponse.accountId;
+          localStorage.setItem('userInfo', JSON.stringify(userInfo));
+        } else if (loginResponse.id) {
+          localStorage.setItem('accountId', loginResponse.id);
+          let userInfo = {};
+          try {
+            userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
+          } catch {}
+          userInfo.accountId = loginResponse.id;
+          localStorage.setItem('userInfo', JSON.stringify(userInfo));
+        }
         
         // Chuyển đến trang cập nhật thông tin sau khi đăng nhập thành công
         navigate('/user-info-form'); 

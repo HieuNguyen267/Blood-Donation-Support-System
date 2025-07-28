@@ -209,7 +209,6 @@ export default function NewsManagement() {
               </select>
             )}
             <button className="donor-add" onClick={handleAdd}>+ Thêm tin tức</button>
-            <button className="donor-filter-btn">⏷</button>
           </div>
           <div className="donor-table-card">
             <table className="table table-hover table-bordered align-middle mb-0">

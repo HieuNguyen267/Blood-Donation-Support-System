@@ -8,8 +8,9 @@ import { validateRequest } from './utils';
 import { bloodRequestAPI } from '../../services/api';
 
 
-const statuses = ["Chờ duyệt", "Đang xử lý", "Đang yêu cầu máu khẩn cấp", "Hoàn thành"];
-const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Rh NULL"];
+const statuses = ["Chờ liên hệ", "Đang liên hệ", "Chờ xác nhận", "Đang xử lý", "Hủy đơn yêu cầu", "Đang vận chuyển", "Hoàn thành"];
+const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Rh NULL", "Bombay"];
+const urgencyLevels = ["Khẩn cấp", "Bình thường"];
 
 
 
@@ -45,6 +46,9 @@ const getDisplayStatus = (request) => {
   }
   
   // Ưu tiên thấp nhất: request_status
+  if (request.request_status === 'cancelled') {
+    return 'Hủy đơn yêu cầu';
+  }
   return request.request_status || 'Chờ duyệt';
 };
 
@@ -58,6 +62,7 @@ const getStatusClass = (status) => {
   if (s === 'chờ xác nhận') return 'status-orange';
   if (s === 'từ chối') return 'status-red';
   if (s === 'xác nhận') return 'status-green';
+  if (s === 'hủy đơn yêu cầu') return 'status-red';
   if (s === 'chờ xử lý') return 'status-orange';
   if (s === 'đang vận chuyển') return 'status-blue';
   return 'status-gray';
@@ -67,6 +72,9 @@ export default function BloodRequestManagement() {
   const [requests, setRequests] = useState([]);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("Tất cả");
+  const [bloodGroup, setBloodGroup] = useState("Tất cả");
+  const [urgency, setUrgency] = useState("Tất cả");
+  const [dateSort, setDateSort] = useState("");
   const [page, setPage] = useState(1);
   const [editIdx, setEditIdx] = useState(null);
   const [editData, setEditData] = useState(null);
@@ -109,11 +117,28 @@ export default function BloodRequestManagement() {
   }, [requests]);
 
   // Filter và sort data
-  const filtered = requests.filter(r => 
+  let filtered = requests.filter(r => 
     r.facility_name.toLowerCase().includes(search.toLowerCase()) &&
-    (status === "Tất cả" || r.request_status === status)
-  ).sort((a, b) => {
-    // Ưu tiên sắp xếp theo mức độ khẩn cấp từ cao đến thấp
+    (status === "Tất cả" || getDisplayStatus(r) === status) &&
+    (bloodGroup === "Tất cả" || r.blood_group === bloodGroup) &&
+    (urgency === "Tất cả" || (urgency === "Khẩn cấp" ? r.is_emergency : !r.is_emergency))
+  );
+
+  // Sắp xếp theo ngày cần nếu được chọn
+  if (dateSort) {
+    filtered = filtered.sort((a, b) => {
+      const dateA = new Date(a.required_by || '');
+      const dateB = new Date(b.required_by || '');
+      
+      if (dateSort === 'asc') {
+        return dateA - dateB; // Tăng dần (sớm nhất lên đầu)
+      } else {
+        return dateB - dateA; // Giảm dần (muộn nhất lên đầu)
+      }
+    });
+  } else {
+    // Sắp xếp mặc định theo mức độ khẩn cấp từ cao đến thấp
+    filtered = filtered.sort((a, b) => {
     const urgencyOrder = { critical: 4, emergency: 3, urgent: 2, routine: 1 };
     const urgencyDiff = urgencyOrder[b.urgency_level] - urgencyOrder[a.urgency_level];
     
@@ -124,9 +149,10 @@ export default function BloodRequestManagement() {
     
     return urgencyDiff;
   });
+  }
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paged = filtered.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
-  React.useEffect(() => { setPage(1); }, [search, status]);
+  React.useEffect(() => { setPage(1); }, [search, status, bloodGroup, urgency, dateSort]);
 
   // Validation
   const validateRequestData = (data) => {
@@ -197,15 +223,26 @@ export default function BloodRequestManagement() {
         <Sidebar />
         <main className="donor-page-root">
           <h2 className="donor-title">Quản lý đơn yêu cầu máu</h2>
-          <div className="donor-toolbar">
+          <div className="donor-toolbar" style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
             <input className="donor-search" placeholder="🔍 Tìm kiếm cơ sở y tế ..."
-              value={search} onChange={e => setSearch(e.target.value)} />
-            <select className="donor-filter" value={status} onChange={e => setStatus(e.target.value)}>
-              <option value="Tất cả">Tất cả</option>
-              {statuses.map(s => <option key={s}>{s}</option>)}
+              value={search} onChange={e => setSearch(e.target.value)} style={{ height: 40, minWidth: 220 }} />
+            <select className="donor-filter" value={urgency} onChange={e => setUrgency(e.target.value)} style={{ height: 40 }}>
+              <option value="Tất cả">Mức độ</option>
+              {urgencyLevels.map(opt => <option key={opt} value={opt}>{opt}</option>)}
             </select>
-            <button className="donor-filter-btn">⏷</button>
-            <button className="donor-export">⭳ Xuất tệp</button>
+            <select className="donor-filter" value={status} onChange={e => setStatus(e.target.value)} style={{ height: 40 }}>
+              <option value="Tất cả">Trạng thái</option>
+              {statuses.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+            </select>
+            <select className="donor-filter" value={bloodGroup} onChange={e => setBloodGroup(e.target.value)} style={{ height: 40 }}>
+              <option value="Tất cả">Nhóm máu</option>
+              {bloodGroups.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+            </select>
+            <select className="donor-filter" value={dateSort} onChange={e => setDateSort(e.target.value)} style={{ height: 40 }}>
+              <option value="">Ngày cần</option>
+              <option value="asc">Tăng dần</option>
+              <option value="desc">Giảm dần</option>
+            </select>
           </div>
           <div className="donor-table-card">
             <table className="table table-hover table-bordered align-middle mb-0">

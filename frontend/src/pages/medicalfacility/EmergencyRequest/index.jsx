@@ -60,7 +60,7 @@ export default function EmergencyRequest() {
         requestStatus: 'pending',
         isEmergency: true, // Đánh dấu là yêu cầu khẩn cấp
         patientInfo: values.desc || null, // Mô tả tình trạng khẩn cấp
-        isCompatible: true, // Mặc định là tương hợp
+        isCompatible: values.requireMatching === "yes",
         requiredBy: new Date().toISOString(), // Ngày hiện tại
         contactPerson: values.contact,
         contactPhone: values.phone,
@@ -125,6 +125,19 @@ export default function EmergencyRequest() {
                 <InputNumber min={100} max={10000} step={50} style={{ width: '100%' }} placeholder="Số lượng (ml)" />
               </Form.Item>
             </div>
+            {/* Thêm trường chọn Yêu cầu tương hợp */}
+            <Form.Item
+              name="requireMatching"
+              label={<b>Yêu cầu tương hợp</b>}
+              initialValue="yes"
+              rules={[{ required: true, message: "Chọn yêu cầu tương hợp" }]}
+              className="emergency-item"
+            >
+              <Select>
+                <Select.Option value="yes">Có</Select.Option>
+                <Select.Option value="no">Không</Select.Option>
+              </Select>
+            </Form.Item>
             <Form.Item name="desc" label={<b>Mô tả tình trạng khẩn cấp (tùy chọn)</b>} className="emergency-item">
               <Input.TextArea rows={4} placeholder="Mô tả tình trạng khẩn cấp (nếu có)" />
             </Form.Item>

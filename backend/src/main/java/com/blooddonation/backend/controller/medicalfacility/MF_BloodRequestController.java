@@ -57,6 +57,16 @@ public class MF_BloodRequestController {
         return ResponseEntity.ok().build();
     }
 
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<Void> cancelBloodRequest(@PathVariable Integer id) {
+        boolean cancelled = bloodRequestService.cancelBloodRequest(id);
+        if (cancelled) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBloodRequest(@PathVariable Integer id) {
         boolean deleted = bloodRequestService.deleteBloodRequest(id);

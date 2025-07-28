@@ -39,11 +39,21 @@ export default function RegisterDonatePage () {
 
         if (registrationInfo.latestRegister) {
           setLatestAppointment(registrationInfo.latestRegister);
-        }
-
-        if (registrationInfo.latestSurvey) {
-          setHealthAnswers(registrationInfo.latestSurvey);
-          localStorage.setItem('healthCheckAnswers', JSON.stringify(registrationInfo.latestSurvey));
+          
+          // Lấy khảo sát sức khỏe liên quan đến đơn đăng ký này
+          if (registrationInfo.latestSurvey) {
+            setHealthAnswers(registrationInfo.latestSurvey);
+          } else {
+            // Nếu không có survey trong registrationInfo, thử lấy từ API riêng
+            try {
+              const survey = await donorAPI.getSurveyByRegisterId(registrationInfo.latestRegister.registerId);
+              if (survey) {
+                setHealthAnswers(survey);
+              }
+            } catch (error) {
+              console.log('Không tìm thấy khảo sát sức khỏe cho đơn đăng ký này');
+            }
+          }
         }
 
       } catch (error) {
@@ -190,6 +200,7 @@ export default function RegisterDonatePage () {
   // Hàm hiển thị trạng thái khảo sát sức khỏe
   const getHealthCheckStatus = () => {
     if (!healthAnswers) return null;
+    
     // Kiểm tra các điều kiện để xác định trạng thái
     const hasSymptoms = 
       healthAnswers.hasFluFeverCough !== 'khong_co_trieu_chung' ||
@@ -252,6 +263,87 @@ export default function RegisterDonatePage () {
     if (gender.toLowerCase() === 'male') return 'Nam';
     if (gender.toLowerCase() === 'female') return 'Nữ';
     return gender;
+  };
+
+  // Hàm hiển thị giá trị khảo sát sức khỏe
+  const renderHealthValue = (value, type) => {
+    if (!value) return 'Không có';
+    
+    switch (type) {
+      case 'flu':
+        switch (value) {
+          case 'khong_co_trieu_chung': return 'Không có triệu chứng';
+          case 'sot_nhe': return 'Sốt nhẹ';
+          case 'ho_khan': return 'Ho khan';
+          case 'sot_cao_ho_nhieu': return 'Sốt cao, ho nhiều';
+          default: return value;
+        }
+      case 'sore_throat':
+        switch (value) {
+          case 'khong_co': return 'Không có';
+          case 'dau_nhe': return 'Đau nhẹ';
+          case 'viem_hong_nang': return 'Viêm họng nặng';
+          default: return value;
+        }
+      case 'digestive':
+        switch (value) {
+          case 'khong_co': return 'Không có';
+          case 'tieu_chay_nhe': return 'Tiêu chảy nhẹ';
+          case 'roi_loan_tieu_hoa_keo_dai': return 'Rối loạn tiêu hóa kéo dài';
+          default: return value;
+        }
+      case 'headache':
+        switch (value) {
+          case 'khong_co': return 'Không có';
+          case 'dau_dau_nhe': return 'Đau đầu nhẹ';
+          case 'chong_mat_met_moi_nhieu': return 'Chóng mặt, mệt mỏi nhiều';
+          default: return value;
+        }
+      case 'allergic':
+        switch (value) {
+          case 'khong_co': return 'Không có';
+          case 'di_ung_nhe': return 'Dị ứng nhẹ';
+          case 'di_ung_nang_phat_ban': return 'Dị ứng nặng/phát ban';
+          default: return value;
+        }
+      case 'infection':
+        switch (value) {
+          case 'khong_co': return 'Không có';
+          case 'vet_thuong_nho_da_lanh': return 'Vết thương nhỏ đã lành';
+          case 'nhiem_trung_vet_thuong_ho': return 'Nhiễm trùng/vết thương hở';
+          default: return value;
+        }
+      case 'medication':
+        switch (value) {
+          case 'khong_su_dung_thuoc': return 'Không sử dụng thuốc';
+          case 'thuoc_cam_cum_thong_thuong': return 'Thuốc cảm cúm thông thường';
+          case 'khang_sinh_dieu_tri_benh_man_tinh': return 'Kháng sinh/điều trị bệnh mãn tính';
+          default: return value;
+        }
+      case 'infectious':
+        switch (value) {
+          case 'khong_co': return 'Không có';
+          case 'da_dieu_tri_on_dinh': return 'Đã điều trị ổn định';
+          case 'dang_dieu_tri': return 'Đang điều trị';
+          default: return value;
+        }
+      case 'hypertension':
+        switch (value) {
+          case 'khong_co': return 'Không có';
+          case 'huyet_ap_cao_kiem_soat_tot': return 'Huyết áp cao đã kiểm soát';
+          case 'huyet_ap_cao_chua_kiem_soat_benh_tim_mach': return 'Huyết áp cao chưa kiểm soát/bệnh tim';
+          default: return value;
+        }
+      case 'diabetes':
+        switch (value) {
+          case 'khong_co': return 'Không có';
+          case 'tieu_duong_kiem_soat_tot': return 'Tiểu đường kiểm soát tốt';
+          case 'tieu_duong_khong_kiem_soat_benh_man_tinh_khac': return 'Tiểu đường không kiểm soát/bệnh mãn tính khác';
+          default: return value;
+        }
+      default:
+        return value;
+    }
   };
 
   // Hàm hiển thị nhóm máu đúng chuẩn ABO+/-
@@ -454,16 +546,16 @@ export default function RegisterDonatePage () {
               <div className="donate-phieutitle">Chi tiết khảo sát sức khỏe</div>
               <div className="donate-phieucontent" style={{ textAlign: 'left' }}>
                 <ul style={{ paddingLeft: 16, listStyleType: 'none', textAlign: 'left' }}>
-                  <li style={{ marginBottom: 8 }}><b>Cảm cúm, sốt, ho:</b> {healthAnswers.hasFluFeverCough === 'khong_co_trieu_chung' ? 'Không có triệu chứng' : 'Có triệu chứng'}</li>
-                  <li style={{ marginBottom: 8 }}><b>Đau họng:</b> {healthAnswers.hasSoreThroat === 'khong_co' ? 'Không' : 'Có'}</li>
-                  <li style={{ marginBottom: 8 }}><b>Vấn đề tiêu hóa:</b> {healthAnswers.hasDiarrheaDigestiveIssues === 'khong_co' ? 'Không' : 'Có'}</li>
-                  <li style={{ marginBottom: 8 }}><b>Đau đầu, chóng mặt:</b> {healthAnswers.hasHeadacheDizzinessFatigue === 'khong_co' ? 'Không' : 'Có'}</li>
-                  <li style={{ marginBottom: 8 }}><b>Dị ứng:</b> {healthAnswers.hasAllergicReactions === 'khong_co' ? 'Không' : 'Có'}</li>
-                  <li style={{ marginBottom: 8 }}><b>Vết thương hở:</b> {healthAnswers.hasInfectionOpenWounds === 'khong_co' ? 'Không' : 'Có'}</li>
-                  <li style={{ marginBottom: 8 }}><b>Đang dùng kháng sinh:</b> {healthAnswers.usesAntibioticsMedication === 'khong_su_dung_thuoc' ? 'Không sử dụng thuốc' : 'Có sử dụng thuốc'}</li>
-                  <li style={{ marginBottom: 8 }}><b>Tiền sử bệnh truyền nhiễm:</b> {healthAnswers.hasInfectiousDiseaseHistory === 'khong_co' ? 'Không' : 'Có'}</li>
-                  <li style={{ marginBottom: 8 }}><b>Huyết áp cao/Tim mạch:</b> {healthAnswers.hasHypertensionHeartDisease === 'khong_co' ? 'Không' : 'Có'}</li>
-                  <li style={{ marginBottom: 8 }}><b>Tiểu đường/Bệnh mãn tính:</b> {healthAnswers.hasDiabetesChronicDiseases === 'khong_co' ? 'Không' : 'Có'}</li>
+                  <li style={{ marginBottom: 8 }}><b>Cảm cúm, sốt, ho:</b> {renderHealthValue(healthAnswers.hasFluFeverCough, 'flu')}</li>
+                  <li style={{ marginBottom: 8 }}><b>Đau họng:</b> {renderHealthValue(healthAnswers.hasSoreThroat, 'sore_throat')}</li>
+                  <li style={{ marginBottom: 8 }}><b>Vấn đề tiêu hóa:</b> {renderHealthValue(healthAnswers.hasDiarrheaDigestiveIssues, 'digestive')}</li>
+                  <li style={{ marginBottom: 8 }}><b>Đau đầu, chóng mặt:</b> {renderHealthValue(healthAnswers.hasHeadacheDizzinessFatigue, 'headache')}</li>
+                  <li style={{ marginBottom: 8 }}><b>Dị ứng:</b> {renderHealthValue(healthAnswers.hasAllergicReactions, 'allergic')}</li>
+                  <li style={{ marginBottom: 8 }}><b>Vết thương hở:</b> {renderHealthValue(healthAnswers.hasInfectionOpenWounds, 'infection')}</li>
+                  <li style={{ marginBottom: 8 }}><b>Đang dùng kháng sinh:</b> {renderHealthValue(healthAnswers.usesAntibioticsMedication, 'medication')}</li>
+                  <li style={{ marginBottom: 8 }}><b>Tiền sử bệnh truyền nhiễm:</b> {renderHealthValue(healthAnswers.hasInfectiousDiseaseHistory, 'infectious')}</li>
+                  <li style={{ marginBottom: 8 }}><b>Huyết áp cao/Tim mạch:</b> {renderHealthValue(healthAnswers.hasHypertensionHeartDisease, 'hypertension')}</li>
+                  <li style={{ marginBottom: 8 }}><b>Tiểu đường/Bệnh mãn tính:</b> {renderHealthValue(healthAnswers.hasDiabetesChronicDiseases, 'diabetes')}</li>
                   {healthAnswers.additionalNotes && (
                     <li style={{ marginBottom: 8 }}><b>Ghi chú thêm:</b> {healthAnswers.additionalNotes}</li>
                   )}

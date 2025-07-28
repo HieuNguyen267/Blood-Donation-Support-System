@@ -60,8 +60,10 @@ function ReceiveBloodPage() {
         bloodGroupId: Number(formData.bloodGroupId),
         quantityRequested: Number(formData.quantity),
         requestStatus: 'pending', // lowercase
-        compatibilityRequirement: formData.notes,
         requiredBy: new Date().toISOString(), // Set ngày hiện tại
+        contactPerson: formData.contactPerson,
+        contactPhone: formData.contactPhone,
+        specialRequirements: formData.notes,
         // Các trường khác nếu cần: notes, requiredBy, ...
       };
 

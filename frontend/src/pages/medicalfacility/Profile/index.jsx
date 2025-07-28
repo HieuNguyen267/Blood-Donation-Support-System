@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Descriptions, Typography, Spin, Row, Col } from 'antd';
 import MedicalFacilityHeader from '../../../components/user/MedicalFacilityHeader';
 import Footer from '../../../components/user/Footer';
+import { medicalFacilityAPI } from '../../../services/api';
 
 const { Title } = Typography;
 
@@ -10,16 +11,25 @@ const MedicalFacilityProfile = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Giả lập API lấy thông tin cơ sở y tế, bạn thay bằng API thật nếu có
-    setTimeout(() => {
-      setFacilityInfo({
-        name: 'Bệnh viện Truyền máu Huyết học',
-        address: '466 Nguyễn Thị Minh Khai Phường 02, Quận 3, Tp Hồ Chí Minh',
-        phone: '028 3927 3552',
-        email: 'info@benhvienhuyethoc.vn',
-      });
+    async function fetchFacilityInfo() {
+      let userInfo = null;
+      try {
+        userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      } catch {}
+      let facilityId = userInfo?.facilityId || localStorage.getItem('facilityId');
+      if (!facilityId) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const res = await medicalFacilityAPI.getFacilityById(facilityId);
+        setFacilityInfo(res);
+      } catch (err) {
+        setFacilityInfo({});
+      }
       setLoading(false);
-    }, 500);
+    }
+    fetchFacilityInfo();
   }, []);
 
   if (loading) {
@@ -43,7 +53,7 @@ const MedicalFacilityProfile = () => {
       <div className="profile-container">
         <Row justify="center">
           <Col xs={24} md={16} lg={12}>
-            <Card className="profile-card" title={<Title level={3} style={{ margin: 0 }}>{facilityInfo.name}</Title>}>
+            <Card className="profile-card" title={<Title level={3} style={{ margin: 0 }}>{facilityInfo.facilityName || ''}</Title>}>
               <Descriptions layout="vertical" column={1} size="middle" bordered>
                 <Descriptions.Item label="Địa chỉ">{facilityInfo.address}</Descriptions.Item>
                 <Descriptions.Item label="Số điện thoại">{facilityInfo.phone}</Descriptions.Item>

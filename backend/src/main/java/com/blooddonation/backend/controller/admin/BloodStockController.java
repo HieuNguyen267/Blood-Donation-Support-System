@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/blood-stocks")
@@ -64,5 +65,27 @@ public class BloodStockController {
     public ResponseEntity<Integer> getTotalVolumeByBloodGroup(@PathVariable Long bloodGroupId) {
         Integer volume = bloodStockService.getTotalVolumeByBloodGroup(bloodGroupId);
         return ResponseEntity.ok(volume);
+    }
+
+    @PatchMapping("/{id}/add")
+    public ResponseEntity<?> addVolume(@PathVariable Long id, @RequestBody Map<String, Integer> body) {
+        int amount = body.getOrDefault("amount", 0);
+        try {
+            BloodStockDTO updated = bloodStockService.addVolume(id, amount);
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PatchMapping("/{id}/subtract")
+    public ResponseEntity<?> subtractVolume(@PathVariable Long id, @RequestBody Map<String, Integer> body) {
+        int amount = body.getOrDefault("amount", 0);
+        try {
+            BloodStockDTO updated = bloodStockService.subtractVolume(id, amount);
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 } 

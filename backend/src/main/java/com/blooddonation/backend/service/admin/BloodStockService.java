@@ -75,6 +75,23 @@ public class BloodStockService {
     public Integer getTotalVolumeByBloodGroup(Long bloodGroupId) {
         return bloodStockRepository.getTotalVolumeByBloodGroupId(bloodGroupId);
     }
+
+    public BloodStockDTO addVolume(Long id, int amount) {
+        BloodStock stock = bloodStockRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Blood stock not found"));
+        stock.setVolume(stock.getVolume() + amount);
+        BloodStock updated = bloodStockRepository.save(stock);
+        return convertToDTO(updated);
+    }
+
+    public BloodStockDTO subtractVolume(Long id, int amount) {
+        BloodStock stock = bloodStockRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Blood stock not found"));
+        if (stock.getVolume() < amount) throw new RuntimeException("Not enough blood in stock");
+        stock.setVolume(stock.getVolume() - amount);
+        BloodStock updated = bloodStockRepository.save(stock);
+        return convertToDTO(updated);
+    }
     
     private String getTemperatureRange(String aboType, String rhFactor) {
         String bloodGroup = aboType + (rhFactor.equals("positive") ? "+" : 
@@ -99,8 +116,20 @@ public class BloodStockService {
     }
     
     private String formatBloodGroupName(String aboType, String rhFactor) {
-        if (aboType == null || rhFactor == null) {
+        if (aboType == null) {
             return "";
+        }
+        
+        // Xử lý đặc biệt cho Rh_Null và Bombay
+        if (aboType.equals("Rh_Null")) {
+            return "Rh NULL";
+        } else if (aboType.equals("Bombay")) {
+            return "Bombay";
+        }
+        
+        // Xử lý các nhóm máu thông thường
+        if (rhFactor == null || rhFactor.equals("null")) {
+            return aboType;
         }
         
         String rhSymbol;

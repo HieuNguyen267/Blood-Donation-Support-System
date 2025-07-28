@@ -62,21 +62,69 @@ export default function RegisterDonate() {
   const handleFormChange = (changedValues, allValues) => {
     console.log('onValuesChange:', changedValues, allValues);
   };
-// Hàm chuyển đổi moment hoặc string hoặc Date sang YYYY-MM-DD
-const toDateString = (val) => {
-  if (!val) return '';
-  if (typeof val === 'string') return val;
-  if (val._isAMomentObject) return val.format('YYYY-MM-DD');
-  if (val instanceof Date) return moment(val).format('YYYY-MM-DD');
-  if (val.$d) return moment(val.$d).format('YYYY-MM-DD'); // Trường hợp dayjs hoặc moment clone
-  return '';
-};
+
+  // Hàm chuyển đổi moment hoặc string hoặc Date sang YYYY-MM-DD
+  const toDateString = (val) => {
+    if (!val) return '';
+    if (typeof val === 'string') return val;
+    if (val._isAMomentObject) return val.format('YYYY-MM-DD');
+    if (val instanceof Date) return moment(val).format('YYYY-MM-DD');
+    if (val.$d) return moment(val.$d).format('YYYY-MM-DD'); // Trường hợp dayjs hoặc moment clone
+    return '';
+  };
+
+  // Kiểm tra đủ 84 ngày kể từ lần hiến máu gần nhất
+  const check84Days = (lastDonationDate) => {
+    if (!lastDonationDate) return true;
+    const lastDonation = moment(lastDonationDate);
+    const today = moment();
+    const daysDiff = today.diff(lastDonation, 'days');
+    return daysDiff >= 84;
+  };
 
   const handleSubmit = async (values) => {
     try {
       // Lấy profile mới nhất
       const profile = await donorAPI.getProfile();
-      // 1. Kiểm tra đơn hiến máu chưa hoàn thành
+      // 1. Kiểm tra 84 ngày kể từ lần hiến máu gần nhất
+      if (!check84Days(profile.lastDonationDate)) {
+        message.error('Bạn đang trong thời gian phục hồi sức khỏe sau hiến máu (cần ít nhất 84 ngày). Vui lòng quay lại sau.');
+        return;
+      }
+      // 2. Kiểm tra trạng thái sẵn sàng hiến máu (logic chuẩn)
+      if (profile.isEligible) {
+        const now = moment();
+        const availableFrom = profile.availableFrom ? moment(profile.availableFrom) : null;
+        const availableUntil = profile.availableUntil ? moment(profile.availableUntil) : null;
+        const lastDonation = profile.lastDonationDate ? moment(profile.lastDonationDate) : null;
+        // Trước available_from và chưa đủ 84 ngày từ lần hiến máu gần nhất
+        if (availableFrom && now.isBefore(availableFrom, 'day') && lastDonation && now.diff(lastDonation, 'days') < 84) {
+          message.error('Bạn đã đăng ký sẵn sàng hiến máu, không thể đăng ký hiến máu ngay bây giờ.');
+          return;
+        }
+        // Trong khoảng available_from - available_until
+        if (availableFrom && availableUntil && now.isBetween(availableFrom, availableUntil, 'day', '[]')) {
+          message.error('Bạn đã đăng ký sẵn sàng hiến máu, không thể đăng ký hiến máu ngay bây giờ.');
+          return;
+        }
+        // Sau available_until nhưng chưa đủ 84 ngày từ available_until
+        if (availableUntil && now.isAfter(availableUntil, 'day') && now.diff(availableUntil, 'days') < 84) {
+          message.error('Bạn đã đăng ký sẵn sàng hiến máu, không thể đăng ký hiến máu ngay bây giờ.');
+          return;
+        }
+      }
+      // 3. Kiểm tra cân nặng nếu có trường này
+      if (profile.gender && values.weight) {
+        if (profile.gender.toLowerCase() === 'male' && values.weight < 45) {
+          message.error('Nam phải từ 45kg trở lên!');
+          return;
+        }
+        if (profile.gender.toLowerCase() === 'female' && values.weight < 42) {
+          message.error('Nữ phải từ 42kg trở lên!');
+          return;
+        }
+      }
+      // 4. Kiểm tra đơn hiến máu chưa hoàn thành
       const donationHistory = await donorAPI.getDonationHistory();
       const hasActiveDonation = donationHistory && donationHistory.some(d =>
         d.donationStatus !== 'deferred' &&
@@ -87,21 +135,7 @@ const toDateString = (val) => {
         message.error('Bạn đã đăng ký hiến máu rồi. Vui lòng hoàn thành hoặc hủy đơn trước khi đăng ký mới.');
         return;
       }
-      // 2. Kiểm tra trạng thái sẵn sàng hiến máu
-      if (profile.isEligible) {
-        const now = moment();
-        const availableFrom = profile.availableFrom ? moment(profile.availableFrom) : null;
-        const availableUntil = profile.availableUntil ? moment(profile.availableUntil) : null;
-        if (
-          (availableFrom && now.isBefore(availableFrom, 'day')) ||
-          (availableFrom && availableUntil && now.isBetween(availableFrom, availableUntil, 'day', '[]')) ||
-          (availableUntil && now.diff(availableUntil, 'days') < 84)
-        ) {
-          message.error('Bạn đã đăng ký sẵn sàng hiến máu, không thể đăng ký hiến máu ngay bây giờ.');
-          return;
-        }
-      }
-      // 3. Nếu hợp lệ, cập nhật profile
+      // 5. Nếu hợp lệ, cập nhật profile
       const [from, until] = values.readyTimeRange || [];
       console.log('readyTimeRange:', values.readyTimeRange, 'from:', from, 'until:', until, 'from type:', typeof from, 'until type:', typeof until);
       const availableFrom = toDateString(from);
